@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="windows-1252"?>
+<GenericConnectorDescriptor
+	browsingType="any" requireConnectionForBrowse="true">
+	<description>Pravega Connector</description>
+	<field type="string" id="controllerURI" label="URL">
+		<helpText>Enter the URL of the Pravega server</helpText>
+	</field>
+	<field type="string" id="scope" label="Stream Scope">
+		<helpText>Enter the scope name</helpText>
+	</field>
+	<field type="string" id="streamName" label="Stream Name">
+		<helpText>Enter the Stream name</helpText>
+	</field>
+	<field type="string" id="message" label="Message">
+		<helpText>Enter the message</helpText>
+	</field>
+	<testConnection method="CUSTOM" />
+	<operation types="GET">
+		<!-- <field type="integer" id="maxRetryCount" label="Max Retry Count"> 
+			<helpText>The connector will retry the operation on failure.</helpText> </field> -->
+	</operation>
+	<operation types="CREATE">
+		<field type="integer" id="maxRetryCount" label="Max Retry Count">
+			<helpText>The connector will retry the operation for this number of times on failure</helpText>
+		</field>
+		<field type="integer" id="batchSize" label="Batch Size">
+			<helpText>The number of documents to be returned in each batch(default 1)</helpText>
+		</field>
+	</operation>
+</GenericConnectorDescriptor>
