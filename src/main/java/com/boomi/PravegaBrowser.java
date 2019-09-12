@@ -2,11 +2,6 @@ package com.boomi;
 
 import java.util.Collection;
 import java.util.logging.Logger;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-
 import com.boomi.connector.api.ConnectionTester;
 import com.boomi.connector.api.ConnectorException;
 import com.boomi.connector.api.ContentType;
@@ -21,7 +16,7 @@ public class PravegaBrowser extends BaseBrowser implements ConnectionTester{
 	
 	
 	private Logger logger = Logger.getLogger(PravegaBrowser.class.getName());	 
-	 public String streamName;
+	public String streamName;
     protected PravegaBrowser(PravegaConnection conn) {
         super(conn);
     }

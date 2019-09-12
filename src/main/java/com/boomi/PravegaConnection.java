@@ -11,7 +11,7 @@ import java.net.URI;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Logger;
 
-import org.w3c.dom.Document;
+
 
 import com.boomi.connector.api.BrowseContext;
 import com.boomi.connector.api.PropertyMap;
