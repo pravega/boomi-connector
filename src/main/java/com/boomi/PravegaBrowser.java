@@ -20,12 +20,28 @@ import com.boomi.connector.api.ObjectType;
 import com.boomi.connector.api.ObjectTypes;
 import com.boomi.connector.util.BaseBrowser;
 
-/**
- * 
- * @author kritika.b.verma
- *
- */
-public class PravegaBrowser extends BaseBrowser implements ConnectionTester {
+public class PravegaBrowser extends BaseBrowser implements ConnectionTester{
+	
+	
+	private Logger logger = Logger.getLogger(PravegaBrowser.class.getName());	 
+	public String streamName;
+    protected PravegaBrowser(PravegaConnection conn) {
+        super(conn);
+    }
+    //
+
+	@Override
+	public ObjectDefinitions getObjectDefinitions(String objectTypeId,
+			Collection<ObjectDefinitionRole> roles) {
+        ObjectDefinition objectDefinition = new ObjectDefinition();
+        objectDefinition.setElementName("");
+        objectDefinition.setInputType(ContentType.NONE);
+        objectDefinition.setOutputType(ContentType.NONE);
+
+        ObjectDefinitions definitions = new ObjectDefinitions();
+
+        definitions.getDefinitions().add(objectDefinition);
+        return definitions;
 
 	private Logger logger = Logger.getLogger(PravegaBrowser.class.getName());
 	public String streamName;
