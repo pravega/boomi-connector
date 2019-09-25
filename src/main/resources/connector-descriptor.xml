@@ -5,21 +5,21 @@
 	<field type="string" id="controllerURI" label="URL">
 		<helpText>Enter the URL of the Pravega server</helpText>
 	</field>
-	<field type="string" id="scope" label="Stream Scope">
+	<field type="string" id="scope" label="Scope">
 		<helpText>Enter the scope name</helpText>
 	</field>
 	<field type="string" id="streamName" label="Stream Name">
 		<helpText>Enter the Stream name</helpText>
 	</field>
-	<field type="string" id="message" label="Message">
+	<!-- <field type="string" id="message" label="Message">
 		<helpText>Enter the message</helpText>
-	</field>
+	</field> -->
 	<testConnection method="CUSTOM" />
-	<operation types="GET">
+	<operation types="GET" >
 		<!-- <field type="integer" id="maxRetryCount" label="Max Retry Count"> 
 			<helpText>The connector will retry the operation on failure.</helpText> </field> -->
 	</operation>
-	<operation types="CREATE">
+	<operation types="CREATE" supportsBrowse="false">
 		<field type="integer" id="maxRetryCount" label="Max Retry Count">
 			<helpText>The connector will retry the operation for this number of times on failure</helpText>
 		</field>
