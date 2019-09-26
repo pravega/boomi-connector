@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="windows-1252"?>
+<GenericConnectorDescriptor>
+	<field id="uri" label="URI" type="string">
+<!--       <defaultValue>tcp://localhost:port</defaultValue>   	-->
+       <helpText>The URI to the controller in the form tcp://host:port</helpText>
+	</field>
+   	<field id="name" label="Stream Name" type="string">
+       <helpText>The name of the stream to read from.</helpText>
+	</field>
+   	<field id="scope" label="Scope" type="string">
+       <helpText>The scope name of the stream to read from.</helpText>
+	</field>
+	<testConnection method="CUSTOM"/>
+ 	<operation types="GET" supportsBrowse="false">
+    	<field id="readTimeout" label="Read Timeout (ms)" type="integer">
+        	<helpText>The maximum amount of time the consumer will wait for a message</helpText>
+    		<defaultValue>2000</defaultValue>
+		</field>
+  	</operation>
+ 	<operation types="CREATE" supportsBrowse="false">
+    	<field id="routingKey" label="Routing Key" type="string">
+        	<helpText>The routing key of the message to write.</helpText>
+		</field>
+  	</operation>
+</GenericConnectorDescriptor>
