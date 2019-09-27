@@ -16,6 +16,7 @@ import com.boomi.connector.api.OperationStatus;
 import com.boomi.connector.api.ResponseUtil;
 import com.boomi.connector.api.UpdateRequest;
 import com.boomi.connector.util.BaseUpdateOperation;
+import com.boomi.util.IOUtil;
 import java.net.URI;
 
 import io.pravega.client.ClientFactory;

@@ -15,6 +15,7 @@ import com.boomi.connector.api.OperationResponse;
 import com.boomi.connector.api.OperationStatus;
 import com.boomi.connector.api.ResponseUtil;
 import com.boomi.connector.util.BaseGetOperation;
+//import com.boomi.util.IOUtil;
 
 import io.pravega.client.ClientFactory;
 import io.pravega.client.admin.ReaderGroupManager;
@@ -37,7 +38,7 @@ public class PravegaGetOperation extends BaseGetOperation {
 
 	@Override
 	protected void executeGet(GetRequest request, OperationResponse response) {
-    	Logger logger = response.getLogger();
+    	/*Logger logger = response.getLogger();
         ObjectIdData input = request.getObjectId();
 
         Map<String, Object> connProps = this.getContext().getConnectionProperties();
@@ -90,7 +91,7 @@ public class PravegaGetOperation extends BaseGetOperation {
         catch (Exception e) {
             ResponseUtil.addExceptionFailure(response, input, e);
         }
-        response.finishPartialResult(input);
+        response.finishPartialResult(input);*/
 	}
 
 	@Override
