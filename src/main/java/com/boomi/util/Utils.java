@@ -1,19 +1,20 @@
 /*
-*  Copyright 2019 Accenture. All Rights Reserved.
-*  The trademarks used in these materials are the properties of their respective owners.
-*  This work is protected by copyright law and contains valuable trade secrets and
-*  confidential information.
-*/
+ * Copyright (c) 2017 Dell Inc. and Accenture, or its subsidiaries. All Rights Reserved.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *   
+ */
 package com.boomi.util;
-
-import io.pravega.client.ClientConfig;
-import io.pravega.client.admin.StreamManager;
-import io.pravega.client.stream.Stream;
-import io.pravega.client.stream.StreamConfiguration;
 
 import java.net.URI;
 
-import com.boomi.model.ConnectionModel;
+import io.pravega.client.ClientConfig;
+import io.pravega.client.admin.StreamManager;
+import io.pravega.client.stream.StreamConfiguration;
 /**
  * 
  * @author kritika.b.verma

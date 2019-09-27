@@ -15,7 +15,7 @@
 		<helpText>Enter the message</helpText>
 	</field> -->
 	<testConnection method="CUSTOM" />
-	<operation types="GET" >
+	<operation types="GET" supportsBrowse="false">
 		<!-- <field type="integer" id="maxRetryCount" label="Max Retry Count"> 
 			<helpText>The connector will retry the operation on failure.</helpText> </field> -->
 	</operation>

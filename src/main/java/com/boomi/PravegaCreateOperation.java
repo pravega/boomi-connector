@@ -1,10 +1,13 @@
 /*
-*  Copyright 2019 Accenture. All Rights Reserved.
-*  The trademarks used in these materials are the properties of their respective owners.
-*  This work is protected by copyright law and contains valuable trade secrets and
-*  confidential information.
-*/
-
+ * Copyright (c) 2017 Dell Inc. and Accenture, or its subsidiaries. All Rights Reserved.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *   
+ */
 package com.boomi;
 
 import java.io.BufferedReader;
@@ -12,8 +15,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.Logger;
@@ -29,6 +30,7 @@ import com.boomi.connector.api.UpdateRequest;
 import com.boomi.connector.util.BaseUpdateOperation;
 import com.boomi.constants.PravegaConstants;
 import com.google.common.base.Charsets;
+
 import io.pravega.client.ClientFactory;
 import io.pravega.client.stream.EventStreamWriter;
 import io.pravega.client.stream.EventWriterConfig;
@@ -53,7 +55,7 @@ public class PravegaCreateOperation extends BaseUpdateOperation {
 	@Override
 	protected void executeUpdate(UpdateRequest request, OperationResponse response) {
 		InputStream input = null;
-
+		Payload payload = null;
 		for (ObjectData data : request) {
 			input = data.getData();
 			PravegaConnection pravegaConnection = getConnection();
@@ -66,15 +68,25 @@ public class PravegaCreateOperation extends BaseUpdateOperation {
 				String message = convert(input, Charsets.UTF_8);
 				if (message != null) {
 					final CompletableFuture writeFuture = writer.writeEvent(pravegaConnection.getRoutingKey(), message);
-					writeFuture.get();
-					LOG.info("Writing message: '%s' with routing-key: '%s' to stream '%s / %s'%n", message,
-							pravegaConnection.getRoutingKey(), pravegaConnection.getScope(),
-							pravegaConnection.getStreamName());
-					// Thread.sleep(2000);
 
-					response.addResult(data, OperationStatus.SUCCESS, PravegaConstants.STATUS_CODE_SUCCESS, message,
-							null);
-					//break;
+					if (writeFuture != null) {
+						writeFuture.get();
+						LOG.info("Writing message: '%s' with routing-key: '%s' to stream '%s / %s'%n", message,
+								pravegaConnection.getRoutingKey(), pravegaConnection.getScope(),
+								pravegaConnection.getStreamName());
+
+//						response.addResult(data, OperationStatus.SUCCESS, PravegaConstants.STATUS_CODE_SUCCESS, message,
+//								null);
+						
+						payload = PayloadUtil
+								.toPayload(new StringBuilder("Writing ").append(" message to pravega stream successfully-")
+										.append(pravegaConnection.getStreamName()).append(message).toString());
+						ResponseUtil.addSuccess(response, data, payload.toString());
+					} else {
+						String errMsg = new StringBuilder("Error ").append(" while writing message to pravega stream ")
+								.toString();
+						ResponseUtil.addFailure(response, data, PayloadUtil.toPayload(errMsg).toString());
+					}
 				}
 			} catch (Exception e) {
 				e.printStackTrace();

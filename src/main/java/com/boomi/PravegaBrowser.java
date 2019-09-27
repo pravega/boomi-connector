@@ -1,10 +1,13 @@
 /*
-*  Copyright 2019 Accenture. All Rights Reserved.
-*  The trademarks used in these materials are the properties of their respective owners.
-*  This work is protected by copyright law and contains valuable trade secrets and
-*  confidential information.
-*/
-
+ * Copyright (c) 2017 Dell Inc. and Accenture, or its subsidiaries. All Rights Reserved.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *   
+ */
 package com.boomi;
 
 import java.util.Collection;
@@ -20,28 +23,12 @@ import com.boomi.connector.api.ObjectType;
 import com.boomi.connector.api.ObjectTypes;
 import com.boomi.connector.util.BaseBrowser;
 
-public class PravegaBrowser extends BaseBrowser implements ConnectionTester{
-	
-	
-	private Logger logger = Logger.getLogger(PravegaBrowser.class.getName());	 
-	public String streamName;
-    protected PravegaBrowser(PravegaConnection conn) {
-        super(conn);
-    }
-    //
-
-	@Override
-	public ObjectDefinitions getObjectDefinitions(String objectTypeId,
-			Collection<ObjectDefinitionRole> roles) {
-        ObjectDefinition objectDefinition = new ObjectDefinition();
-        objectDefinition.setElementName("");
-        objectDefinition.setInputType(ContentType.NONE);
-        objectDefinition.setOutputType(ContentType.NONE);
-
-        ObjectDefinitions definitions = new ObjectDefinitions();
-
-        definitions.getDefinitions().add(objectDefinition);
-        return definitions;
+/**
+ * 
+ * @author kritika.b.verma
+ *
+ */
+public class PravegaBrowser extends BaseBrowser implements ConnectionTester {
 
 	private Logger logger = Logger.getLogger(PravegaBrowser.class.getName());
 	public String streamName;
@@ -51,20 +38,17 @@ public class PravegaBrowser extends BaseBrowser implements ConnectionTester{
 	}
 
 	/**
-	 * 
+	 * r
 	 */
 	
 	  @Override 
 	  public ObjectDefinitions getObjectDefinitions(String objectTypeId, Collection<ObjectDefinitionRole> roles) { 
 		  ObjectDefinition objectDefinition =  new ObjectDefinition(); objectDefinition.setElementName("");
 			  objectDefinition.setInputType(ContentType.NONE);
-			  objectDefinition.setOutputType(ContentType.NONE);
-			  
-			  ObjectDefinitions definitions = new ObjectDefinitions();
-			  
+			  objectDefinition.setOutputType(ContentType.NONE);			  
+			  ObjectDefinitions definitions = new ObjectDefinitions();			  
 			  definitions.getDefinitions().add(objectDefinition); 
-			  return definitions;
-	  
+			  return definitions;	  
 	  }
 	
 	/**
@@ -94,7 +78,7 @@ public class PravegaBrowser extends BaseBrowser implements ConnectionTester{
 	@Override
 	public void testConnection() {
 		PravegaConnection connection = null;
-		logger.info("Trying to connect to the MongoDB");
+		logger.info("Trying to connect to the Pravega");
 
 		try {
 			connection = getConnection();

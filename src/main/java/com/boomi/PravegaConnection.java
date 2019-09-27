@@ -1,10 +1,13 @@
 /*
-*  Copyright 2019 Accenture. All Rights Reserved.
-*  The trademarks used in these materials are the properties of their respective owners.
-*  This work is protected by copyright law and contains valuable trade secrets and
-*  confidential information.
-*/
-
+ * Copyright (c) 2017 Dell Inc. and Accenture, or its subsidiaries. All Rights Reserved.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *   
+ */
 package com.boomi;
 
 
@@ -56,7 +59,9 @@ public class PravegaConnection extends BaseConnection {
 		if(streamcreater == null) {
 			streamcreater = new StreamCreator();
 		}
+		
 		runPravega(scope, streamName, controllerURI);
+		
 	}
 	
 
@@ -65,11 +70,12 @@ public class PravegaConnection extends BaseConnection {
  * @param scope
  * @param streamName
  * @param controllerURI
+ * @throws PravegaConnectException 
  */
 	
-	public void runPravega(String scope, String streamName ,URI controllerURI ) {
-		scopecreater.createScope(scope , controllerURI);
-		streamcreater.createStream(scope , streamName, controllerURI);
+	public void runPravega(String scope, String streamName ,URI controllerURI ){
+			scopecreater.createScope(scope , controllerURI);
+			streamcreater.createStream(scope , streamName, controllerURI);
 	}
 	
 	public String getHost() {

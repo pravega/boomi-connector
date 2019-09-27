@@ -1,9 +1,13 @@
 /*
-*  Copyright 2019 Accenture. All Rights Reserved.
-*  The trademarks used in these materials are the properties of their respective owners.
-*  This work is protected by copyright law and contains valuable trade secrets and
-*  confidential information.
-*/
+ * Copyright (c) 2017 Dell Inc. and Accenture, or its subsidiaries. All Rights Reserved.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *   
+ */
 
 package com.boomi;
 
