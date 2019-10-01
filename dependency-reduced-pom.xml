@@ -128,7 +128,7 @@
               </filters>
               <transformers>
                 <transformer>
-                  <mainClass>com.boomi.connector.pravega.HelloWorldReader</mainClass>
+                  <mainClass>com.boomi.connector.pravega.HelloWorldWriter</mainClass>
                 </transformer>
               </transformers>
             </configuration>
