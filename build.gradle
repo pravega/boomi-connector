@@ -12,11 +12,14 @@ repositories {
     maven {
         url = 'http://repo.maven.apache.org/maven2'
     }
+    maven {
+        url = 'http://oss.jfrog.org/artifactory/jfrog-dependencies'
+    }
 }
 
 dependencies {
     compile 'org.json:json:20190722'
-    compile 'io.pravega:pravega-client:0.6.0-2345.298015f-SNAPSHOT'
+    compile "io.pravega:pravega-client:${pravegaVersion}"
     compile 'org.slf4j:slf4j-simple:1.6.1'
     testCompile 'org.junit.jupiter:junit-jupiter-api:5.4.2'
     testCompile 'org.junit.jupiter:junit-jupiter-engine:5.4.2'
