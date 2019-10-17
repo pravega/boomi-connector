@@ -24,11 +24,10 @@
             <outputDirectory>lib</outputDirectory>
             <excludes>
                 <exclude>${project.groupId}:${project.artifactId}:jar:*</exclude>
-                <exclude>com.google.code.findbugs:jsr305</exclude>
+                <!-- <exclude>com.google.code.findbugs:jsr305</exclude> -->
                 <exclude>io.netty:netty-all:*</exclude>
                 <exclude>org.projectlombok:lombok:jar:*</exclude>
-                <exclude>io.netty:netty-tcnative-boringssl-static:jar:*</exclude>
-                <exclude>org.projectlombok:lombok:jar:*</exclude>
+                <!-- <exclude>io.netty:netty-tcnative-boringssl-static:jar:*</exclude> -->
                 <exclude>org.codehaus.mojo:animal-sniffer-annotations:jar:*</exclude>
                 <exclude>com.google.errorprone:error_prone_annotations:jar:*</exclude>
                 <exclude>com.google.guava:failureaccess:jar:*</exclude>
@@ -39,6 +38,8 @@
                 <exclude>org.codehaus.mojo:animal-sniffer-annotations:jar:*</exclude>
                 <!-- <exclude>com.google.guava:guava:jar:*</exclude> -->
                 <exclude>connector.sdk:connector.sdk.api:jar:*</exclude>
+                <exclude>connector.sdk:connector.sdk.util:jar:*</exclude>
+                <exclude>boomi.util:boomi.util:jar:*</exclude>
             </excludes>
         </dependencySet>
     </dependencySets>
