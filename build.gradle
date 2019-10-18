@@ -26,23 +26,6 @@ configurations.all {
     resolutionStrategy.cacheChangingModulesFor 0, "seconds"
 }
 
-/*allprojects {
-    repositories {
-        mavenLocal()
-        mavenCentral()
-        maven {
-            url "https://repository.apache.org/snapshots"
-        }
-        maven {
-            url "https://oss.sonatype.org/content/repositories/snapshots"
-        }
-        maven {
-            url "file://C:/Users/chennv4/.m2"
-        }
-        jcenter()
-    }
-}
-*/
 repositories {
     mavenLocal()
     mavenCentral()
@@ -77,7 +60,6 @@ dependencies {
     compile "connector.sdk:connector.sdk.api:1.3.2"
     compile "connector.sdk:connector.sdk.util:1.3.2"
     compile "boomi.util:boomi.util:1.3.2"
-    
  }
 
  shadowJar {
@@ -86,7 +68,7 @@ dependencies {
     manifest {
         attributes 'Implementation-Version': project.version                
     }
-    configurations = [project.configurations.compile]
+    //configurations = [project.configurations.compile]
     mergeServiceFiles()
     dependencies {
     //from(project.configurations.runtime)
@@ -120,9 +102,9 @@ distributions {
             }*/
             into('lib') {
                 //from(jar)
-                from(project.configurations.runtime)
+                //from(project.configurations.runtime)
                 from shadowJar
-                from(project.configurations.shadow)
+                //from(project.configurations.shadow)
             }
             into('conf') {
                 from(project.file('src/main/resources/logback.xml'))
@@ -139,6 +121,39 @@ task buildZip(type: Zip) {
     from shadowJar
     include 'META-INF/**'
     include 'connector-descriptor'
+}
+
+//create a single Jar with all dependencies
+task fatJar(type: Jar) {
+    manifest {
+        attributes 'Implementation-Version': project.version 
+    }
+    baseName = project.name + '-all'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
+
+jar {
+    manifest {
+        attributes "Main-Class": mainClassName
+    }
+ 
+    from {
+        configurations.runtime.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+//jar.dependsOn copyJarsToLib
+
+task copyJarsToLib (type: Copy) {
+    def toDir = "build/libs/dependency-jars"
+
+    // create directories, if not already done:
+    file(toDir).mkdirs()
+
+    // copy jars to lib folder:
+    from configurations.runtime
+    into toDir
 }
 
 /*task uberJar(type: Jar) {
