@@ -14,6 +14,7 @@ import com.boomi.connector.api.OperationStatus;
 import com.boomi.connector.api.ResponseUtil;
 import com.boomi.connector.api.UpdateRequest;
 import com.boomi.connector.util.BaseUpdateOperation;
+import org.json.JSONObject;
 
 
 public class PravegaCreateOperation extends BaseUpdateOperation {
@@ -33,10 +34,17 @@ public class PravegaCreateOperation extends BaseUpdateOperation {
 
             try {
             	String message = inputStreamToString(input.getData());
-               	logger.log(Level.INFO, String.format("Writing message: '%s' with routing-key: '%s' to stream '%s / %s'%n",
-                        message, pravegaWriter.getRoutingKey(), pravegaWriter.getScope(), pravegaWriter.getStreamName()));
 
-                CompletableFuture writeFuture = pravegaWriter.getWriter().writeEvent(pravegaWriter.getRoutingKey(), message);
+                String routingKey = getRoutingKey(message);
+
+                if(routingKey.length() > 0){
+                    CompletableFuture writeFuture = pravegaWriter.getWriter().writeEvent(routingKey, message);
+                }else{
+                    CompletableFuture writeFuture = pravegaWriter.getWriter().writeEvent(message);
+                }
+
+                logger.log(Level.INFO, String.format("Writing message: '%s' with routing-key: '%s' to stream '%s / %s'%n",
+                        message, routingKey, pravegaWriter.getScope(), pravegaWriter.getStreamName()));
 
                 // dump the results into the response
                 response.addResult(input, OperationStatus.SUCCESS, "OK",
@@ -59,5 +67,24 @@ public class PravegaCreateOperation extends BaseUpdateOperation {
     	try (Scanner scanner = new Scanner(is, "UTF-8")) {
     		return scanner.useDelimiter("\\A").next();
     	}
+    }
+
+    private String getRoutingKey(String message){
+        try {
+
+            String routingKey = "";
+            if(pravegaWriter.getIsRoutingKeyNeeded()){
+                JSONObject jsonObject = new JSONObject(message);
+                routingKey = jsonObject.optString(pravegaWriter.getRoutingKeyConfigValue(),"");
+            }else {
+                routingKey = pravegaWriter.getFixedRoutingKey();
+            }
+            return routingKey;
+        }
+        catch (Exception e) {
+            // Warning Message
+
+           return "";
+        }
     }
 }

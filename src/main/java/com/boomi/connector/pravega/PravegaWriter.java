@@ -16,7 +16,9 @@ final public class PravegaWriter {
     private static OperationContext context = null;
     private String scope;
     private String streamName;
-    private String routingKey;
+    private String fixedRoutingKey;
+    private boolean isRoutingKeyNeeded;
+    private  String routingKeyConfigValue;
 
     private PravegaWriter(){
 
@@ -26,7 +28,10 @@ final public class PravegaWriter {
         streamName = (String)connProps.get(Constants.NAME_PROPERTY);
 
         Map<String, Object> opProps = this.context.getOperationProperties();
-        routingKey = (String)opProps.get(Constants.ROUTINGKEY_PROPERTY);
+        isRoutingKeyNeeded = (boolean)opProps.get(Constants.ROUTINGKEY_NEEDED_PROPERTY);
+        fixedRoutingKey = (String)opProps.get(Constants.FIXED_ROUTINGKEY_PROPERTY);
+        if(isRoutingKeyNeeded)
+            routingKeyConfigValue = (String)opProps.get(Constants.ROUTINGKEY_CONFIG_VALUE_PROPERTY);
 
         ClientFactory clientFactory = ClientFactory.withScope(scope, controllerURI);
 
@@ -44,12 +49,20 @@ final public class PravegaWriter {
         return streamName;
     }
 
-    public String getRoutingKey() {
-        return routingKey;
+    public String getFixedRoutingKey() {
+        return fixedRoutingKey;
     }
 
     public EventStreamWriter<String> getWriter() {
         return writer;
+    }
+
+    public boolean getIsRoutingKeyNeeded() {
+        return isRoutingKeyNeeded;
+    }
+
+    public String getRoutingKeyConfigValue() {
+        return routingKeyConfigValue;
     }
 
     public static PravegaWriter getInstance(OperationContext context){

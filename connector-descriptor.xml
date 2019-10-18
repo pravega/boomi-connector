@@ -18,8 +18,14 @@
 		</field>
   	</operation>
  	<operation types="CREATE" supportsBrowse="false">
-    	<field id="routingKey" label="Routing Key" type="string">
+    	<field id="fixedRoutingKey" label=" Fixed Routing Key" type="string">
         	<helpText>The routing key of the message to write.</helpText>
+		</field>
+		<field id="routingKeyNeeded" label="Routing Key Needed" type="boolean">
+			<helpText>The routing key is needed or not.</helpText>
+		</field>
+		<field id="routingKeyConfigValue" label="Routing Key Config Value" type="string">
+			<helpText>The configuration value of routing key.</helpText>
 		</field>
   	</operation>
 </GenericConnectorDescriptor>

@@ -42,7 +42,7 @@ import com.boomi.connector.testutil.QueryFilterBuilder;
 import com.boomi.connector.testutil.QueryGroupingBuilder;
 import com.boomi.connector.testutil.QuerySimpleBuilder;
 import com.boomi.connector.testutil.SimpleOperationResult;
-import com.boomi.util.StringUtil;
+//import com.boomi.util.StringUtil;
 
 /**
  * @author Dave Hock
@@ -90,8 +90,8 @@ public class PravegaOperationTest
         connProps.put(Constants.NAME_PROPERTY, Constants.DEFAULT_STREAM_NAME);
         
         Map<String, Object> opProps = new HashMap<String,Object>();
-        opProps.put(Constants.ROUTINGKEY_PROPERTY, Constants.DEFAULT_ROUTING_KEY);
-        
+        opProps.put(Constants.FIXED_ROUTINGKEY_PROPERTY, Constants.DEFAULT_ROUTING_KEY);
+        opProps.put(Constants.ROUTINGKEY_NEEDED_PROPERTY, Constants.DEFAULT_IS_ROUTING_KEY_NEEDED);
         tester.setOperationContext(OperationType.CREATE, connProps, opProps, null, null);
         
         List<InputStream> inputs = new ArrayList<InputStream>();
