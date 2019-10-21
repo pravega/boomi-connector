@@ -21,6 +21,7 @@ apply plugin: "maven-publish"
 apply plugin: 'com.github.johnrengelman.shadow'
 
 
+
 configurations.all {
     // Check for updates every build
     resolutionStrategy.cacheChangingModulesFor 0, "seconds"
@@ -47,7 +48,7 @@ group = "com.boomi.connector.pravega"
 version = samplesVersion
 
 description = "boomi-connector"
-mainClassName = "com.boomi.connector.pravega.HelloWorldWriter"
+mainClassName = "com.boomi.connector.pravega.HelloWorldReader"
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
@@ -60,9 +61,14 @@ dependencies {
     compile "connector.sdk:connector.sdk.api:1.3.2"
     compile "connector.sdk:connector.sdk.util:1.3.2"
     compile "boomi.util:boomi.util:1.3.2"
+    // https://mvnrepository.com/artifact/net.sf.proguard/proguard-gradle
+    compileOnly group: 'net.sf.proguard', name: 'proguard-gradle', version: '6.2.0'
+
  }
 
  shadowJar {
+    //zip64 true
+    //entryCompression = org.gradle.api.tasks.bundling.ZipEntryCompression.STORED
     classifier = 'SNAPSHOT'
     append('META-INF/connector-config')
     manifest {
@@ -71,10 +77,8 @@ dependencies {
     //configurations = [project.configurations.compile]
     mergeServiceFiles()
     dependencies {
-    //from(project.configurations.runtime)
-    /*
     exclude(dependency('io.netty:netty-all:.*'))
-    exclude(dependency('org.projectlombok:lombok'))
+    exclude(dependency('org.projectlombok:lombok:.*'))
     exclude(dependency('com.google.guava:guava:26.0-android'))
     exclude(dependency('com.google.errorprone:error_prone_annotations:.*'))
     exclude(dependency('com.google.guava:failureaccess:.*'))
@@ -83,13 +87,40 @@ dependencies {
     exclude(dependency('com.google.errorprone:error_prone_annotations:.*'))
     exclude(dependency('com.google.j2objc:j2objc-annotations:.*'))
     exclude(dependency('org.codehaus.mojo:animal-sniffer-annotations:.*'))
-    */
+
+    exclude(dependency('com.fasterxml.jackson.core:jackson-core:.*'))
+    exclude(dependency('io.netty:netty-handler-proxy:.*'))
+    exclude(dependency('com.fasterxml.jackson.core:jackson-databind:.*')) 
+    exclude(dependency('ch.qos.logback:logback-classic:.*'))
+    exclude(dependency('io.netty:netty-tcnative-boringssl-static:.*'))
+    exclude(dependency('commons-io:commons-io:.*'))
+    exclude(dependency('com.google.api.grpc:proto-google-common-protos:.*'))
+    exclude(dependency('io.netty:netty-codec-socks:.*'))
+    exclude(dependency('com.google.code.gson:gson:.*'))
+    exclude(dependency('com.google.errorprone:error_prone_annotations:.*'))
+    exclude(dependency('com.google.code.findbugs:jsr305:.*'))
+    exclude(dependency('org.codehaus.mojo:animal-sniffer-annotations:.*'))
+    exclude(dependency('com.google.guava:failureaccess:.*'))
+    exclude(dependency('com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava'))
+    exclude(dependency('org.checkerframework:checker-qual:.*'))
+    exclude(dependency('com.google.j2objc:j2objc-annotations:.*'))
+    exclude(dependency('org.codehaus.mojo:animal-sniffer-annotations:.*'))
+    exclude(dependency('io.netty:netty-transport-native-unix-common:.*'))
+    exclude(dependency('io.grpc:grpc-auth:.*'))
+    exclude(dependency('com.fasterxml.jackson.core:jackson-annotations:.*'))
+    exclude(dependency('io.netty:netty-handler-proxy:.*'))
+    exclude(dependency('io.netty:netty-transport-native-unix-common:.*'))
+
+    
     exclude(dependency('connector.sdk:connector.sdk.api:.*'))
     exclude(dependency('connector.sdk:connector.sdk.util:.*'))
     exclude(dependency('boomi.util:boomi.util:.*'))     
     }
     
 }
+
+task listAllDependencies(type: DependencyReportTask) {}
+
 
 distributions {
     main {
@@ -124,16 +155,16 @@ task buildZip(type: Zip) {
 }
 
 //create a single Jar with all dependencies
-task fatJar(type: Jar) {
+/*task fatJar(type: Jar) {
     manifest {
         attributes 'Implementation-Version': project.version 
     }
     baseName = project.name + '-all'
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
     with jar
-}
+}*/
 
-jar {
+/*jar {
     manifest {
         attributes "Main-Class": mainClassName
     }
@@ -141,7 +172,9 @@ jar {
     from {
         configurations.runtime.collect { it.isDirectory() ? it : zipTree(it) }
     }
-}
+
+
+}*/
 
 //jar.dependsOn copyJarsToLib
 
