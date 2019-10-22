@@ -21,11 +21,19 @@ public class Constants {
     
     protected static final String DEFAULT_ROUTING_KEY = "helloRoutingKey";
     protected static final String DEFAULT_MESSAGE = "hello world";
+    protected static final boolean DEFAULT_IS_ROUTING_KEY_NEEDED = false;
     
     protected static final String URI_PROPERTY = "uri";
     protected static final String SCOPE_PROPERTY = "scope";
     protected static final String NAME_PROPERTY = "name";
 
+    protected static final String IS_PRAVEGA_STANDALONE_PROPERTY = "isPravegaStandalone";
+    protected static final String ENABLE_AUTH_PROPERTY = "enableAuth";
+    protected static final String USER_NAME_PROPERTY = "userName";
+    protected static final String PASSWORD_PROPERTY = "password";
+
     protected static final String READTIMEOUT_PROPERTY = "readTimeout";
-    protected static final String ROUTINGKEY_PROPERTY = "routingKey";
+    protected static final String FIXED_ROUTINGKEY_PROPERTY = "fixedRoutingKey";
+    protected static final String ROUTINGKEY_NEEDED_PROPERTY = "routingKeyNeeded";
+    protected static final String ROUTINGKEY_CONFIG_VALUE_PROPERTY = "routingKeyConfigValue";
 }
