@@ -3,6 +3,7 @@ package com.boomi.connector.pravega;
 import com.boomi.connector.api.OperationContext;
 import io.pravega.client.ClientFactory;
 import io.pravega.client.admin.ReaderGroupManager;
+import io.pravega.client.admin.StreamManager;
 import io.pravega.client.stream.*;
 import io.pravega.client.stream.impl.JavaSerializer;
 
@@ -19,6 +20,7 @@ final public class PravegaReader {
     private String streamName;
     private String routingKey;
     private Long readTimeout;
+    private boolean isRoutingKeyNeeded;
 
     private PravegaReader(){
 
@@ -29,21 +31,38 @@ final public class PravegaReader {
 
         Map<String, Object> opProps = context.getOperationProperties();
         readTimeout = (Long)opProps.get(Constants.READTIMEOUT_PROPERTY);
+        isRoutingKeyNeeded = (boolean)opProps.get(Constants.ROUTINGKEY_NEEDED_PROPERTY);
 
-        final String readerGroup = UUID.randomUUID().toString().replace("-", "");
-        final ReaderGroupConfig readerGroupConfig = ReaderGroupConfig.builder()
-                .stream(Stream.of(scope, streamName))
-                .build();
-        try (ReaderGroupManager readerGroupManager = ReaderGroupManager.withScope(scope, controllerURI)) {
-            readerGroupManager.createReaderGroup(readerGroup, readerGroupConfig);
+        StreamManager streamManager = StreamManager.create(controllerURI);
+        try {
+            final boolean scopeIsNew = streamManager.createScope(scope);
+            StreamConfiguration streamConfig;
+
+            if(isRoutingKeyNeeded){
+                streamConfig = StreamConfiguration.builder().scalingPolicy(ScalingPolicy.byEventRate(20, 2, 2)).build();
+            }else{
+                streamConfig = StreamConfiguration.builder().scalingPolicy(ScalingPolicy.fixed(1)).build();
+            }
+            final boolean streamIsNew = streamManager.createStream(scope, streamName, streamConfig);
+
+            final String readerGroup = UUID.randomUUID().toString().replace("-", "");
+            final ReaderGroupConfig readerGroupConfig = ReaderGroupConfig.builder()
+                    .stream(Stream.of(scope, streamName))
+                    .build();
+            try (ReaderGroupManager readerGroupManager = ReaderGroupManager.withScope(scope, controllerURI)) {
+                readerGroupManager.createReaderGroup(readerGroup, readerGroupConfig);
+            }
+
+            ClientFactory clientFactory = ClientFactory.withScope(scope, controllerURI);
+
+            reader = clientFactory.createReader("reader",
+                    readerGroup,
+                    new JavaSerializer<String>(),
+                    ReaderConfig.builder().build());
+        } catch(Exception e){
+
         }
 
-        ClientFactory clientFactory = ClientFactory.withScope(scope, controllerURI);
-
-        reader = clientFactory.createReader("reader",
-                readerGroup,
-                new JavaSerializer<String>(),
-                ReaderConfig.builder().build());
 
     }
 

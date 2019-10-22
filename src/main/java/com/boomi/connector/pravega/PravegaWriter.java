@@ -2,8 +2,11 @@ package com.boomi.connector.pravega;
 
 import com.boomi.connector.api.OperationContext;
 import io.pravega.client.ClientFactory;
+import io.pravega.client.admin.StreamManager;
 import io.pravega.client.stream.EventStreamWriter;
 import io.pravega.client.stream.EventWriterConfig;
+import io.pravega.client.stream.ScalingPolicy;
+import io.pravega.client.stream.StreamConfiguration;
 import io.pravega.client.stream.impl.JavaSerializer;
 
 import java.net.URI;
@@ -33,11 +36,28 @@ final public class PravegaWriter {
         if(isRoutingKeyNeeded)
             routingKeyConfigValue = (String)opProps.get(Constants.ROUTINGKEY_CONFIG_VALUE_PROPERTY);
 
-        ClientFactory clientFactory = ClientFactory.withScope(scope, controllerURI);
+        try {
+            StreamManager streamManager = StreamManager.create(controllerURI);
+            final boolean scopeIsNew = streamManager.createScope(scope);
 
-        writer = clientFactory.createEventWriter(streamName,
-                new JavaSerializer<String>(),
-                EventWriterConfig.builder().build());
+            StreamConfiguration streamConfig;
+
+            if (isRoutingKeyNeeded) {
+                streamConfig = StreamConfiguration.builder().scalingPolicy(ScalingPolicy.byEventRate(20, 2, 2)).build();
+            } else {
+                streamConfig = StreamConfiguration.builder().scalingPolicy(ScalingPolicy.fixed(1)).build();
+            }
+
+            final boolean streamIsNew = streamManager.createStream(scope, streamName, streamConfig);
+
+            ClientFactory clientFactory = ClientFactory.withScope(scope, controllerURI);
+
+            writer = clientFactory.createEventWriter(streamName,
+                    new JavaSerializer<String>(),
+                    EventWriterConfig.builder().build());
+        }catch (Exception e){
+
+        }
 
     }
 
