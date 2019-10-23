@@ -1,30 +1,47 @@
 <?xml version="1.0" encoding="windows-1252"?>
-<GenericConnectorDescriptor
-	browsingType="any" requireConnectionForBrowse="true">
-	<description>Pravega Connector</description>
-	<field type="string" id="controllerURI" label="URL">
-		<helpText>Enter the URL of the Pravega server</helpText>
+<GenericConnectorDescriptor>
+	<field id="uri" label="URI" type="string">
+       <!-- <defaultValue>tcp://localhost:9090</defaultValue>   --> 	
+       <helpText>The URI to the controller in the form tcp://host:port</helpText>
 	</field>
-	<field type="string" id="scope" label="Stream Scope">
-		<helpText>Enter the scope name</helpText>
+   	<field id="name" label="Stream Name" type="string">
+       <helpText>The name of the stream to read from.</helpText>
 	</field>
-	<field type="string" id="streamName" label="Stream Name">
-		<helpText>Enter the Stream name</helpText>
+   	<field id="scope" label="Scope" type="string">
+       <helpText>The scope name of the stream to read from.</helpText>
 	</field>
-	<field type="string" id="message" label="Message">
-		<helpText>Enter the message</helpText>
+	<field id="isPravegaStandalone" label="Pravega Standalone" type="boolean">
+		<helpText>Indicates The Pravega Running Standalone or not.</helpText>
+		<defaultValue>true</defaultValue>
 	</field>
-	<testConnection method="CUSTOM" />
-	<operation types="GET">
-		<!-- <field type="integer" id="maxRetryCount" label="Max Retry Count"> 
-			<helpText>The connector will retry the operation on failure.</helpText> </field> -->
-	</operation>
-	<operation types="CREATE">
-		<field type="integer" id="maxRetryCount" label="Max Retry Count">
-			<helpText>The connector will retry the operation for this number of times on failure</helpText>
+	<field id="enableAuth" label="Pravega Authentication Enabled" type="boolean">
+		<helpText>Indicates The Authentication Enabled for Pravega or Not.</helpText>
+		<defaultValue>false</defaultValue>
+	</field>
+	<field id="userName" label="Pravega User Name" type="string">
+		<helpText>The configuration value of Pravega User Name.</helpText>
+		<defaultValue>admin</defaultValue>
+	</field>
+	<field id="password" label="Pravega Password" type="string">
+		<helpText>The configuration value of Pravega Password.</helpText>
+		<defaultValue>1111_aaaa</defaultValue>
+	</field>
+	<testConnection method="CUSTOM"/>
+ 	<operation types="GET" supportsBrowse="false">
+    	<field id="readTimeout" label="Read Timeout (ms)" type="integer">
+        	<helpText>The maximum amount of time the consumer will wait for a message</helpText>
+    		<defaultValue>2000</defaultValue>
 		</field>
-		<field type="integer" id="batchSize" label="Batch Size">
-			<helpText>The number of documents to be returned in each batch(default 1)</helpText>
+  	</operation>
+ 	<operation types="CREATE" supportsBrowse="false">
+    	<field id="fixedRoutingKey" label=" Fixed Routing Key" type="string">
+        	<helpText>The routing key of the message to write.</helpText>
 		</field>
-	</operation>
+		<field id="routingKeyNeeded" label="Routing Key Needed" type="boolean">
+			<helpText>The routing key is needed or not.</helpText>
+		</field>
+		<field id="routingKeyConfigValue" label="Routing Key Config Value" type="string">
+			<helpText>The configuration value of routing key.</helpText>
+		</field>
+  	</operation>
 </GenericConnectorDescriptor>
