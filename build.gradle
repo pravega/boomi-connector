@@ -29,7 +29,9 @@ dependencies {
 }
 
 shadowJar {
-    minimize()
+    minimize() {
+        // exclude dependencies here to re-add them if they are mistakenly removed
+    }
     append('META-INF/connector-config')
     manifest {
         attributes 'Implementation-Version': project.version
@@ -37,37 +39,6 @@ shadowJar {
     mergeServiceFiles()
     dependencies {
         exclude(dependency('io.netty:netty-tcnative-boringssl-static'))
-//        exclude(dependency('io.netty:netty-all:.*'))
-//        exclude(dependency('com.google.guava:guava:26.0-android'))
-//        exclude(dependency('com.google.errorprone:error_prone_annotations:.*'))
-//        exclude(dependency('com.google.guava:failureaccess:.*'))
-//        exclude(dependency('org.checkerframework:checker-qual:.*'))
-//        exclude(dependency('com.google.guava:listenablefuture:.*'))
-//        exclude(dependency('com.google.errorprone:error_prone_annotations:.*'))
-//        exclude(dependency('com.google.j2objc:j2objc-annotations:.*'))
-//        exclude(dependency('org.codehaus.mojo:animal-sniffer-annotations:.*'))
-//        exclude(dependency('com.fasterxml.jackson.core:jackson-core:.*'))
-//        exclude(dependency('io.netty:netty-handler-proxy:.*'))
-//        exclude(dependency('com.fasterxml.jackson.core:jackson-databind:.*'))
-//        exclude(dependency('ch.qos.logback:logback-classic:.*'))
-//        exclude(dependency('io.netty:netty-tcnative-boringssl-static:.*'))
-//        exclude(dependency('commons-io:commons-io:.*'))
-//        exclude(dependency('com.google.api.grpc:proto-google-common-protos:.*'))
-//        exclude(dependency('io.netty:netty-codec-socks:.*'))
-//        exclude(dependency('com.google.code.gson:gson:.*'))
-//        exclude(dependency('com.google.errorprone:error_prone_annotations:.*'))
-//        exclude(dependency('com.google.code.findbugs:jsr305:.*'))
-//        exclude(dependency('org.codehaus.mojo:animal-sniffer-annotations:.*'))
-//        exclude(dependency('com.google.guava:failureaccess:.*'))
-//        exclude(dependency('com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava'))
-//        exclude(dependency('org.checkerframework:checker-qual:.*'))
-//        exclude(dependency('com.google.j2objc:j2objc-annotations:.*'))
-//        exclude(dependency('org.codehaus.mojo:animal-sniffer-annotations:.*'))
-//        exclude(dependency('io.netty:netty-transport-native-unix-common:.*'))
-//        exclude(dependency('io.grpc:grpc-auth:.*'))
-//        exclude(dependency('com.fasterxml.jackson.core:jackson-annotations:.*'))
-//        exclude(dependency('io.netty:netty-handler-proxy:.*'))
-//        exclude(dependency('io.netty:netty-transport-native-unix-common:.*'))
     }
 }
 
