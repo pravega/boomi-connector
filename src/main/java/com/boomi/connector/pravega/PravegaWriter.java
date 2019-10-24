@@ -29,9 +29,9 @@ final public class PravegaWriter {
         URI controllerURI = URI.create((String)connProps.get(Constants.URI_PROPERTY));
         scope = (String)connProps.get(Constants.SCOPE_PROPERTY);
         streamName = (String)connProps.get(Constants.NAME_PROPERTY);
+        isRoutingKeyNeeded = (boolean)connProps.get(Constants.ROUTINGKEY_NEEDED_PROPERTY);
 
         Map<String, Object> opProps = this.context.getOperationProperties();
-        isRoutingKeyNeeded = (boolean)opProps.get(Constants.ROUTINGKEY_NEEDED_PROPERTY);
         fixedRoutingKey = (String)opProps.get(Constants.FIXED_ROUTINGKEY_PROPERTY);
         if(isRoutingKeyNeeded)
             routingKeyConfigValue = (String)opProps.get(Constants.ROUTINGKEY_CONFIG_VALUE_PROPERTY);
@@ -83,6 +83,10 @@ final public class PravegaWriter {
 
     public String getRoutingKeyConfigValue() {
         return routingKeyConfigValue;
+    }
+
+    public void close(){
+        writer.close();
     }
 
     public static PravegaWriter getInstance(OperationContext context){

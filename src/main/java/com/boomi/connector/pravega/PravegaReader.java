@@ -28,10 +28,11 @@ final public class PravegaReader {
         URI controllerURI = URI.create((String)connProps.get(Constants.URI_PROPERTY));
         scope = (String)connProps.get(Constants.SCOPE_PROPERTY);
         streamName = (String)connProps.get(Constants.NAME_PROPERTY);
+        isRoutingKeyNeeded = (boolean)connProps.get(Constants.ROUTINGKEY_NEEDED_PROPERTY);
 
         Map<String, Object> opProps = context.getOperationProperties();
         readTimeout = (Long)opProps.get(Constants.READTIMEOUT_PROPERTY);
-        isRoutingKeyNeeded = (boolean)opProps.get(Constants.ROUTINGKEY_NEEDED_PROPERTY);
+
 
         StreamManager streamManager = StreamManager.create(controllerURI);
         try {

@@ -10,6 +10,9 @@
    	<field id="scope" label="Scope" type="string">
        <helpText>The scope name of the stream to read from.</helpText>
 	</field>
+	<field id="routingKeyNeeded" label="Routing Key Needed" type="boolean">
+		<helpText>The routing key is needed or not.</helpText>
+	</field>
 	<testConnection method="CUSTOM"/>
  	<operation types="GET" supportsBrowse="false">
     	<field id="readTimeout" label="Read Timeout (ms)" type="integer">
@@ -21,9 +24,7 @@
     	<field id="fixedRoutingKey" label=" Fixed Routing Key" type="string">
         	<helpText>The routing key of the message to write.</helpText>
 		</field>
-		<field id="routingKeyNeeded" label="Routing Key Needed" type="boolean">
-			<helpText>The routing key is needed or not.</helpText>
-		</field>
+
 		<field id="routingKeyConfigValue" label="Routing Key Config Value" type="string">
 			<helpText>The configuration value of routing key.</helpText>
 		</field>

@@ -36,11 +36,11 @@ public class PravegaOperationTest
         connProps.put(Constants.URI_PROPERTY, Constants.DEFAULT_CONTROLLER_URI);
         connProps.put(Constants.SCOPE_PROPERTY, Constants.DEFAULT_SCOPE);
         connProps.put(Constants.NAME_PROPERTY, Constants.DEFAULT_STREAM_NAME);
+        connProps.put(Constants.ROUTINGKEY_NEEDED_PROPERTY, true);
 
         Map<String, Object> opProps = new HashMap<String,Object>();
         opProps.put(Constants.FIXED_ROUTINGKEY_PROPERTY, Constants.DEFAULT_ROUTING_KEY);
         opProps.put(Constants.ROUTINGKEY_CONFIG_VALUE_PROPERTY, Constants.DEFAULT_ROUTING_CONFIG_VALUE);
-        opProps.put(Constants.ROUTINGKEY_NEEDED_PROPERTY, true);
         tester.setOperationContext(OperationType.CREATE, connProps, opProps, null, null);
 
         List<InputStream> inputs = new ArrayList<InputStream>();
@@ -63,11 +63,11 @@ public class PravegaOperationTest
         connProps.put(Constants.URI_PROPERTY, Constants.DEFAULT_CONTROLLER_URI);
         connProps.put(Constants.SCOPE_PROPERTY, Constants.DEFAULT_SCOPE);
         connProps.put(Constants.NAME_PROPERTY, Constants.DEFAULT_STREAM_NAME);
+        connProps.put(Constants.ROUTINGKEY_NEEDED_PROPERTY, true);
 
         Map<String, Object> opProps = new HashMap<String,Object>();
         opProps.put(Constants.READTIMEOUT_PROPERTY, 5000L);
         opProps.put(Constants.ROUTINGKEY_CONFIG_VALUE_PROPERTY, Constants.DEFAULT_ROUTING_CONFIG_VALUE);
-        opProps.put(Constants.ROUTINGKEY_NEEDED_PROPERTY, true);
 
         tester.setOperationContext(OperationType.GET, connProps, opProps, null, null);
         List <SimpleOperationResult> results = tester.executeGetOperation("");
