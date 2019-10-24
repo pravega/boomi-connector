@@ -1,4 +1,0 @@
-<?xml version="1.0"?>
-<GenericConnector>
-  <connectorClassName>com.boomi.connector.pravega.PravegaConnector</connectorClassName>
-</GenericConnector>

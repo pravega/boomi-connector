@@ -15,11 +15,11 @@ package com.boomi.connector.pravega;
  *
  */
 public class Constants {
-    protected static final String DEFAULT_SCOPE = "examplesBoomi";
-    protected static final String DEFAULT_STREAM_NAME = "helloBoomiStream";
+    protected static final String DEFAULT_SCOPE = "examples";
+    protected static final String DEFAULT_STREAM_NAME = "helloStream";
     protected static final String DEFAULT_CONTROLLER_URI = "tcp://127.0.0.1:9090";
     
-    protected static final String DEFAULT_ROUTING_KEY = "helloBoomiRoutingKey";
+    protected static final String DEFAULT_ROUTING_KEY = "helloRoutingKey";
     protected static final String DEFAULT_ROUTING_CONFIG_VALUE = "salary";
     protected static final String DEFAULT_MESSAGE = "hello boomi world 19";
     protected static final String DEFAULT_JSON_MESSAGE = "{\"name\":\"sonoo\",\"salary\":600000.0,\"age\":27}";
@@ -28,6 +28,11 @@ public class Constants {
     protected static final String URI_PROPERTY = "uri";
     protected static final String SCOPE_PROPERTY = "scope";
     protected static final String NAME_PROPERTY = "name";
+
+    protected static final String IS_PRAVEGA_STANDALONE_PROPERTY = "isPravegaStandalone";
+    protected static final String ENABLE_AUTH_PROPERTY = "enableAuth";
+    protected static final String USER_NAME_PROPERTY = "userName";
+    protected static final String PASSWORD_PROPERTY = "password";
 
     protected static final String READTIMEOUT_PROPERTY = "readTimeout";
     protected static final String FIXED_ROUTINGKEY_PROPERTY = "fixedRoutingKey";

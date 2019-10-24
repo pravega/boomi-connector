@@ -1,12 +1,14 @@
 package com.boomi.connector.pravega;
 
 import com.boomi.connector.api.OperationContext;
-import io.pravega.client.ClientFactory;
+import io.pravega.client.ClientConfig;
+import io.pravega.client.EventStreamClientFactory;
 import io.pravega.client.admin.StreamManager;
 import io.pravega.client.stream.EventStreamWriter;
 import io.pravega.client.stream.EventWriterConfig;
 import io.pravega.client.stream.ScalingPolicy;
 import io.pravega.client.stream.StreamConfiguration;
+import io.pravega.client.stream.impl.DefaultCredentials;
 import io.pravega.client.stream.impl.JavaSerializer;
 
 import java.net.URI;
@@ -22,6 +24,10 @@ final public class PravegaWriter {
     private String fixedRoutingKey;
     private boolean isRoutingKeyNeeded;
     private  String routingKeyConfigValue;
+    private boolean enableAuth;
+    private String userName;
+    private String password;
+    private boolean isPravegaStandalone;
 
     private PravegaWriter(){
 
@@ -31,34 +37,39 @@ final public class PravegaWriter {
         streamName = (String)connProps.get(Constants.NAME_PROPERTY);
         isRoutingKeyNeeded = (boolean)connProps.get(Constants.ROUTINGKEY_NEEDED_PROPERTY);
 
+        isPravegaStandalone = (boolean) connProps.get(Constants.IS_PRAVEGA_STANDALONE_PROPERTY);
+        enableAuth = (boolean) connProps.get(Constants.ENABLE_AUTH_PROPERTY);
+        userName = (String) connProps.get(Constants.USER_NAME_PROPERTY);
+        password = (String) connProps.get(Constants.PASSWORD_PROPERTY);
+
         Map<String, Object> opProps = this.context.getOperationProperties();
+        isRoutingKeyNeeded = (boolean) opProps.get(Constants.ROUTINGKEY_NEEDED_PROPERTY);
         fixedRoutingKey = (String)opProps.get(Constants.FIXED_ROUTINGKEY_PROPERTY);
         if(isRoutingKeyNeeded)
             routingKeyConfigValue = (String)opProps.get(Constants.ROUTINGKEY_CONFIG_VALUE_PROPERTY);
 
-        try {
-            StreamManager streamManager = StreamManager.create(controllerURI);
-            final boolean scopeIsNew = streamManager.createScope(scope);
+        // configure client
+        ClientConfig.ClientConfigBuilder clientBuilder = ClientConfig.builder().controllerURI(URI.create(controllerURI.toString()));
+        if (enableAuth) clientBuilder.credentials(new DefaultCredentials(password, userName));
+        ClientConfig clientConfig = clientBuilder.build();
 
-            StreamConfiguration streamConfig;
+        // create stream manager
+        StreamManager streamManager = StreamManager.create(clientConfig);
 
-            if (isRoutingKeyNeeded) {
-                streamConfig = StreamConfiguration.builder().scalingPolicy(ScalingPolicy.byEventRate(20, 2, 2)).build();
-            } else {
-                streamConfig = StreamConfiguration.builder().scalingPolicy(ScalingPolicy.fixed(1)).build();
-            }
+        // create scope
+        if (isPravegaStandalone) streamManager.createScope(scope);
 
-            final boolean streamIsNew = streamManager.createStream(scope, streamName, streamConfig);
+        // configure stream
+        StreamConfiguration.StreamConfigurationBuilder streamBuilder = StreamConfiguration.builder();
+        if (isRoutingKeyNeeded) streamBuilder.scalingPolicy(ScalingPolicy.byEventRate(20, 2, 1));
+        else streamBuilder.scalingPolicy(ScalingPolicy.fixed(1));
 
-            ClientFactory clientFactory = ClientFactory.withScope(scope, controllerURI);
+        //  create stream
+        streamManager.createStream(scope, streamName, streamBuilder.build());
 
-            writer = clientFactory.createEventWriter(streamName,
-                    new JavaSerializer<String>(),
-                    EventWriterConfig.builder().build());
-        }catch (Exception e){
-
-        }
-
+        // create event writer
+        writer = EventStreamClientFactory.withScope(scope, clientConfig).createEventWriter(
+                streamName, new JavaSerializer(), EventWriterConfig.builder().build());
     }
 
     public String getScope() {
