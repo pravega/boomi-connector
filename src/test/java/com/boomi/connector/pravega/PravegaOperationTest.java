@@ -1,90 +1,136 @@
-// Copyright (c) 2018 Boomi, Inc.
 package com.boomi.connector.pravega;
 
-
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-
-import org.junit.jupiter.api.Test;
 import com.boomi.connector.api.OperationType;
 import com.boomi.connector.testutil.ConnectorTester;
 import com.boomi.connector.testutil.SimpleOperationResult;
+import io.pravega.local.InProcPravegaCluster;
+import io.pravega.local.LocalPravegaEmulator;
+import io.pravega.local.SingleNodeConfig;
+import io.pravega.segmentstore.server.store.ServiceBuilderConfig;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.util.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author Dave Hock
  * @author Mohammad Omar Faruk
+ * @author Stu Arnett
  */
-public class PravegaOperationTest 
-{
+public class PravegaOperationTest {
+    private static final Logger log = LoggerFactory.getLogger(PravegaOperationTest.class);
 
-    @Test
-    public void testCreateOperationPravegaWriter() throws Exception
-    {
-        PravegaConnector connector = new PravegaConnector();
-        ConnectorTester tester = new ConnectorTester(connector);
+    private static InProcPravegaCluster localPravega;
 
-        Map<String, Object> connProps = new HashMap<String,Object>();
-        connProps.put(Constants.URI_PROPERTY, Constants.DEFAULT_CONTROLLER_URI);
-        connProps.put(Constants.SCOPE_PROPERTY, Constants.DEFAULT_SCOPE);
-        connProps.put(Constants.NAME_PROPERTY, Constants.DEFAULT_STREAM_NAME);
-        connProps.put(Constants.ROUTINGKEY_NEEDED_PROPERTY, true);
+    @BeforeAll
+    public static void startPravegaStandalone() throws Exception {
+        Properties standaloneProperties = new Properties();
+        standaloneProperties.load(PravegaOperationTest.class.getResourceAsStream("/standalone-config.properties"));
+        ServiceBuilderConfig config = ServiceBuilderConfig
+                .builder()
+                .include(standaloneProperties)
+                .include(System.getProperties())
+                .build();
+        SingleNodeConfig conf = config.getConfig(SingleNodeConfig::builder);
 
-        Map<String, Object> opProps = new HashMap<String,Object>();
-        opProps.put(Constants.FIXED_ROUTINGKEY_PROPERTY, Constants.DEFAULT_ROUTING_KEY);
-        opProps.put(Constants.ROUTINGKEY_CONFIG_VALUE_PROPERTY, Constants.DEFAULT_ROUTING_CONFIG_VALUE);
-        tester.setOperationContext(OperationType.CREATE, connProps, opProps, null, null);
+        localPravega = LocalPravegaEmulator.builder()
+                .controllerPort(conf.getControllerPort())
+                .segmentStorePort(conf.getSegmentStorePort())
+                .zkPort(conf.getZkPort())
+                .restServerPort(conf.getRestServerPort())
+                .enableRestServer(conf.isEnableRestServer())
+                .enableAuth(conf.isEnableAuth())
+                .enableTls(conf.isEnableTls())
+                .certFile(conf.getCertFile())
+                .keyFile(conf.getKeyFile())
+                .enableTlsReload(conf.isEnableSegmentStoreTlsReload())
+                .jksKeyFile(conf.getKeyStoreJKS())
+                .jksTrustFile(conf.getTrustStoreJKS())
+                .keyPasswordFile(conf.getKeyStoreJKSPasswordFile())
+                .passwdFile(conf.getPasswdFile())
+                .userName(conf.getUserName())
+                .passwd(conf.getPasswd())
+                .build()
+                .getInProcPravegaCluster();
 
-        List<InputStream> inputs = new ArrayList<InputStream>();
-        inputs.add(new ByteArrayInputStream(Constants.DEFAULT_JSON_MESSAGE.getBytes()));
+        log.warn("Starting Pravega Emulator with ports: ZK port {}, controllerPort {}, SegmentStorePort {}",
+                conf.getZkPort(), conf.getControllerPort(), conf.getSegmentStorePort());
 
-        List<SimpleOperationResult> actual = tester.executeCreateOperation(inputs);
-        assertEquals("OK", actual.get(0).getStatusCode());
+        localPravega.start();
 
+        log.warn("Pravega Sandbox is running locally now. You could access it at {}:{}",
+                "127.0.0.1", conf.getControllerPort());
     }
 
-
+    @AfterAll
+    public static void shutdownPravega() throws Exception {
+        if (localPravega != null) localPravega.close();
+    }
 
     @Test
-    public  void testGetOperationPravegaReader() throws Exception
-    {
-        PravegaConnector connector = new PravegaConnector();
-        ConnectorTester tester = new ConnectorTester(connector);
+    public void testCreateOperation() {
+        try (PravegaConnector connector = new PravegaConnector()) {
+            ConnectorTester tester = new ConnectorTester(connector);
 
-        Map<String, Object> connProps = new HashMap<String,Object>();
-        connProps.put(Constants.URI_PROPERTY, Constants.DEFAULT_CONTROLLER_URI);
-        connProps.put(Constants.SCOPE_PROPERTY, Constants.DEFAULT_SCOPE);
-        connProps.put(Constants.NAME_PROPERTY, Constants.DEFAULT_STREAM_NAME);
-        connProps.put(Constants.ROUTINGKEY_NEEDED_PROPERTY, true);
+            Map<String, Object> connProps = new HashMap<>();
+            connProps.put(Constants.URI_PROPERTY, TestConstants.DEFAULT_CONTROLLER_URI);
+            connProps.put(Constants.SCOPE_PROPERTY, TestConstants.DEFAULT_SCOPE);
+            connProps.put(Constants.NAME_PROPERTY, TestConstants.DEFAULT_STREAM_NAME);
 
-        Map<String, Object> opProps = new HashMap<String,Object>();
-        opProps.put(Constants.READTIMEOUT_PROPERTY, 5000L);
-        opProps.put(Constants.ROUTINGKEY_CONFIG_VALUE_PROPERTY, Constants.DEFAULT_ROUTING_CONFIG_VALUE);
+            Map<String, Object> opProps = new HashMap<>();
+            opProps.put(Constants.ROUTINGKEY_NEEDED_PROPERTY, true);
+            opProps.put(Constants.FIXED_ROUTINGKEY_PROPERTY, TestConstants.DEFAULT_ROUTING_KEY);
+            opProps.put(Constants.ROUTINGKEY_CONFIG_VALUE_PROPERTY, TestConstants.DEFAULT_ROUTING_CONFIG_VALUE);
+            tester.setOperationContext(OperationType.CREATE, connProps, opProps, null, null);
 
-        tester.setOperationContext(OperationType.GET, connProps, opProps, null, null);
-        List <SimpleOperationResult> results = tester.executeGetOperation("");
-        assertEquals("OK",results.get(0).getStatusCode());
+            // must use random generated test data to avoid false positive for existing events in the stream
+            List<InputStream> inputs = new ArrayList<>();
+            String randomMessage = UUID.randomUUID().toString();
+            String json = "{\"name\":\"foo\",\"message\":\"" + randomMessage + "\"}";
+            inputs.add(new ByteArrayInputStream(json.getBytes()));
 
-        List payloads = results.get(0).getPayloads();
-        System.out.println("Number of documents:" + payloads.size());
-        //We should get at least one document
-        assertTrue(payloads.size()>0);
-        for(int i =0; i<payloads.size(); i++){
-            byte documentBytes[] = (byte[])payloads.get(i);
-            //The first document should match our test message
-            assertEquals(Constants.DEFAULT_JSON_MESSAGE, new String(documentBytes));
+            List<SimpleOperationResult> actual = tester.executeCreateOperation(inputs);
+            assertEquals("OK", actual.get(0).getStatusCode());
+
+            // TODO: read from stream and verify event data
         }
-
-
     }
 
-    
+    @Test
+    public void testGetOperation() {
+        try (PravegaConnector connector = new PravegaConnector()) {
+            ConnectorTester tester = new ConnectorTester(connector);
+
+            Map<String, Object> connProps = new HashMap<>();
+            connProps.put(Constants.URI_PROPERTY, TestConstants.DEFAULT_CONTROLLER_URI);
+            connProps.put(Constants.SCOPE_PROPERTY, TestConstants.DEFAULT_SCOPE);
+            connProps.put(Constants.NAME_PROPERTY, TestConstants.DEFAULT_STREAM_NAME);
+
+            Map<String, Object> opProps = new HashMap<>();
+            opProps.put(Constants.READTIMEOUT_PROPERTY, 5000L);
+
+            String randomMessage = UUID.randomUUID().toString();
+            String json = "{\"name\":\"foo\",\"message\":\"" + randomMessage + "\"}";
+            // TODO: send random data to stream first
+
+            tester.setOperationContext(OperationType.GET, connProps, opProps, null, null);
+            List<SimpleOperationResult> results = tester.executeGetOperation("");
+            assertEquals("OK", results.get(0).getStatusCode());
+
+            List payloads = results.get(0).getPayloads();
+            System.out.println("Number of documents:" + payloads.size());
+            // we should get one document
+            assertEquals(1, payloads.size());
+            byte[] documentBytes = (byte[]) payloads.get(0);
+            // document should match our test message
+            assertEquals(json, new String(documentBytes));
+        }
+    }
 }

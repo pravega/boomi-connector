@@ -1,34 +1,30 @@
 package com.boomi.connector.pravega;
 
+import com.boomi.connector.api.*;
+import com.boomi.connector.util.BaseGetOperation;
+import io.pravega.client.stream.EventRead;
+import io.pravega.client.stream.EventStreamReader;
+import io.pravega.client.stream.ReinitializationRequiredException;
+import io.pravega.client.stream.impl.JavaSerializer;
+
 import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URI;
-import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.boomi.connector.api.GetRequest;
-import com.boomi.connector.api.ObjectIdData;
-import com.boomi.connector.api.OperationResponse;
-import com.boomi.connector.api.OperationStatus;
-import com.boomi.connector.api.ResponseUtil;
-import com.boomi.connector.util.BaseGetOperation;
+public class PravegaGetOperation extends BaseGetOperation implements AutoCloseable {
+	private PravegaConfig pravegaConfig;
+	private ReaderConfig readerConfig;
+	private EventStreamReader<String> reader;
 
-import io.pravega.client.stream.EventRead;
-import io.pravega.client.stream.ReinitializationRequiredException;
-
-
-public class PravegaGetOperation extends BaseGetOperation {
-
-    private PravegaReader pravegaReader;
-
-    protected PravegaGetOperation(PravegaConnection conn) {
+	PravegaGetOperation(PravegaConnection conn) {
         super(conn);
+		pravegaConfig = conn.getPravegaConfig();
+		readerConfig = ReaderConfig.fromContext(this.getContext());
 
-        pravegaReader = PravegaReader.getInstance(this.getContext());
-
+		// create event reader
+		reader = conn.getClientFactory().createReader(UUID.randomUUID().toString(), conn.getReaderGroup(),
+				new JavaSerializer<>(), io.pravega.client.stream.ReaderConfig.builder().build());
     }
 
 	@Override
@@ -36,27 +32,36 @@ public class PravegaGetOperation extends BaseGetOperation {
     	Logger logger = response.getLogger();
         ObjectIdData input = request.getObjectId();
 
-        logger.log(Level.INFO, String.format("Reading all the events from %s/%s%n", pravegaReader.getScope(), pravegaReader.getStreamName()));
-		EventRead<String> event = null;
-		do {
-			try {
-				event = pravegaReader.getReader().readNextEvent(pravegaReader.getReadTimeout());
-				if (event.getEvent() != null) {
-					logger.log(Level.INFO, String.format("Read event '%s'%n", event.getEvent()));
-		            response.addPartialResult(input, OperationStatus.SUCCESS, "OK",
-		                    "OK", ResponseUtil.toPayload(new ByteArrayInputStream(event.getEvent().getBytes())));
-//		            ResponseUtil.addPartialSuccess(response, input, httpResponse.getResponseCodeAsString(), ResponseUtil.toPayload(is)); 
+		try {
+			logger.info(String.format("Reading all the events from %s/%s", pravegaConfig.getScope(), pravegaConfig.getStreamName()));
+			EventRead<String> event = null;
+			do {
+				try {
+					event = reader.readNextEvent(readerConfig.getReadTimeout());
+					if (event.getEvent() != null) {
+						logger.log(Level.INFO, String.format("Read event size: %d", event.getEvent().length()));
+						response.addPartialResult(input, OperationStatus.SUCCESS, "OK",
+								"OK", ResponseUtil.toPayload(new ByteArrayInputStream(event.getEvent().getBytes())));
+					}
+				} catch (ReinitializationRequiredException e) {
+					// There are certain circumstances where the reader needs to be reinitialized
+					// TODO: what needs to be done here?  if we re-initialize, how do we resume?
+					e.printStackTrace();
 				}
-			} catch (ReinitializationRequiredException e) {
-				// There are certain circumstances where the reader needs to be reinitialized
-				e.printStackTrace();
-			}
-		} while (event.getEvent() != null);
-		
-		logger.log(Level.INFO, String.format("No more events from %s/%s%n", pravegaReader.getScope(), pravegaReader.getStreamName()));
-        
+			} while (event != null && event.getEvent() != null);
+
+			logger.log(Level.INFO, String.format("No more events from %s/%s", pravegaConfig.getScope(), pravegaConfig.getStreamName()));
+		} catch (Exception e) {
+			logger.log(Level.SEVERE, String.format("Error reading from %s/%s", pravegaConfig.getScope(), pravegaConfig.getStreamName()), e);
+			ResponseUtil.addExceptionFailure(response, input, e);
+		}
 
         response.finishPartialResult(input);
+	}
+
+	@Override
+	public void close() {
+		if (reader != null) reader.close();
 	}
 
 	@Override
