@@ -9,7 +9,10 @@ import io.pravega.client.stream.impl.JavaSerializer;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
+import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -32,6 +35,7 @@ public class PravegaCreateOperation extends BaseUpdateOperation implements AutoC
 	protected void executeUpdate(UpdateRequest request, OperationResponse response) {
     	Logger logger = response.getLogger();
 
+        List<CompletableFuture> futures = new ArrayList<>();
         for (ObjectData input : request) {
             try {
             	String message = inputStreamToString(input.getData());
@@ -44,15 +48,25 @@ public class PravegaCreateOperation extends BaseUpdateOperation implements AutoC
                 // note: this is an async call, so we will add an additional async completion stage to the call,
                 // which will handle the result, whether it was successful or not
                 if (routingKey != null && routingKey.length() > 0) {
-                    writer.writeEvent(routingKey, message)
-                            .whenCompleteAsync((aVoid, throwable) -> handleResult(input, response, throwable));
+                    futures.add(writer.writeEvent(routingKey, message)
+                            .whenCompleteAsync((aVoid, throwable) -> handleResult(input, response, throwable)));
                 } else {
-                    writer.writeEvent(message)
-                            .whenCompleteAsync((aVoid, throwable) -> handleResult(input, response, throwable));
+                    futures.add(writer.writeEvent(message)
+                            .whenCompleteAsync((aVoid, throwable) -> handleResult(input, response, throwable)));
                 }
             } catch (Exception e) {
                 // make best effort to process every input
                 ResponseUtil.addExceptionFailure(response, input, e);
+            }
+        }
+
+        // wait for writes to complete before returning; not sure how Boomi would handle returning here with unfinished
+        // writer threads
+        for (CompletableFuture future : futures) {
+            try {
+                future.get();
+            } catch (Exception e) {
+                // ignore (this is only to join the writer threads; we already dealt with any exceptions)
             }
         }
     }
