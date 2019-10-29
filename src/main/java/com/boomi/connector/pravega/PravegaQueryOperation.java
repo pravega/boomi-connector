@@ -1,7 +1,7 @@
 package com.boomi.connector.pravega;
 
 import com.boomi.connector.api.*;
-import com.boomi.connector.util.BaseGetOperation;
+import com.boomi.connector.util.BaseQueryOperation;
 import io.pravega.client.stream.EventRead;
 import io.pravega.client.stream.EventStreamReader;
 import io.pravega.client.stream.ReinitializationRequiredException;
@@ -12,12 +12,12 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class PravegaGetOperation extends BaseGetOperation implements AutoCloseable {
+public class PravegaQueryOperation extends BaseQueryOperation implements AutoCloseable {
 	private PravegaConfig pravegaConfig;
 	private ReaderConfig readerConfig;
 	private EventStreamReader<String> reader;
 
-	PravegaGetOperation(PravegaConnection conn) {
+	PravegaQueryOperation(PravegaConnection conn) {
         super(conn);
 		pravegaConfig = conn.getPravegaConfig();
 		readerConfig = ReaderConfig.fromContext(this.getContext());
@@ -28,9 +28,9 @@ public class PravegaGetOperation extends BaseGetOperation implements AutoCloseab
     }
 
 	@Override
-	protected void executeGet(GetRequest request, OperationResponse response) {
+	protected void executeQuery(QueryRequest request, OperationResponse response) {
     	Logger logger = response.getLogger();
-        ObjectIdData input = request.getObjectId();
+		FilterData input = request.getFilter();
 
 		try {
 			logger.info(String.format("Reading all the events from %s/%s", pravegaConfig.getScope(), pravegaConfig.getStreamName()));
