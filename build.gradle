@@ -57,6 +57,7 @@ distributions {
             into('lib') {
                 from shadowJar
             }
+            into '/'
         }
     }
 }
