@@ -7,9 +7,7 @@ import io.pravega.local.InProcPravegaCluster;
 import io.pravega.local.LocalPravegaEmulator;
 import io.pravega.local.SingleNodeConfig;
 import io.pravega.segmentstore.server.store.ServiceBuilderConfig;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,10 +22,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * @author Mohammad Omar Faruk
  * @author Stu Arnett
  */
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class PravegaOperationTest {
     private static final Logger log = LoggerFactory.getLogger(PravegaOperationTest.class);
 
     private static InProcPravegaCluster localPravega;
+    private static String json;
 
     @BeforeAll
     public static void startPravegaStandalone() throws Exception {
@@ -67,6 +67,9 @@ public class PravegaOperationTest {
 
         log.warn("Pravega Sandbox is running locally now. You could access it at {}:{}",
                 "127.0.0.1", conf.getControllerPort());
+
+        String randomMessage = UUID.randomUUID().toString();
+        json = "{\"name\":\"foo\",\"message\":\"" + randomMessage + "\"}";
     }
 
     @AfterAll
@@ -75,6 +78,7 @@ public class PravegaOperationTest {
     }
 
     @Test
+    @Order(1)
     public void testCreateOperation() {
         try (PravegaConnector connector = new PravegaConnector()) {
             ConnectorTester tester = new ConnectorTester(connector);
@@ -92,18 +96,17 @@ public class PravegaOperationTest {
 
             // must use random generated test data to avoid false positive for existing events in the stream
             List<InputStream> inputs = new ArrayList<>();
-            String randomMessage = UUID.randomUUID().toString();
-            String json = "{\"name\":\"foo\",\"message\":\"" + randomMessage + "\"}";
             inputs.add(new ByteArrayInputStream(json.getBytes()));
 
             List<SimpleOperationResult> actual = tester.executeCreateOperation(inputs);
             assertEquals("OK", actual.get(0).getStatusCode());
 
-            // TODO: read from stream and verify event data
+            // TODO: read from stream and verify event data, instead of relying on test execution order
         }
     }
 
     @Test
+    @Order(2)
     public void testGetOperation() {
         try (PravegaConnector connector = new PravegaConnector()) {
             ConnectorTester tester = new ConnectorTester(connector);
@@ -116,9 +119,7 @@ public class PravegaOperationTest {
             Map<String, Object> opProps = new HashMap<>();
             opProps.put(Constants.READTIMEOUT_PROPERTY, 5000L);
 
-            String randomMessage = UUID.randomUUID().toString();
-            String json = "{\"name\":\"foo\",\"message\":\"" + randomMessage + "\"}";
-            // TODO: send random data to stream first
+            // TODO: send random data to stream first, instead of relying on test execution order
 
             tester.setOperationContext(OperationType.GET, connProps, opProps, null, null);
             List<SimpleOperationResult> results = tester.executeGetOperation("");
