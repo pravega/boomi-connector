@@ -19,10 +19,14 @@ description = "Boomi Pravega Connector"
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
+configurations {
+    localDeps
+}
+
 dependencies {
     compile "io.pravega:pravega-client:${pravegaVersion}"
     compile "com.jayway.jsonpath:json-path:${jsonPathVersion}"
-    compile "com.boomi:connector-sdk-util:${boomiSdkVersion}"
+    localDeps "com.boomi:connector-sdk-util:${boomiSdkVersion}"
     compileOnly "com.boomi:connector-sdk-api:${boomiSdkVersion}"
     testImplementation "org.junit.jupiter:junit-jupiter:5.5.2"
     testCompile "io.pravega:pravega-standalone:${pravegaVersion}"
@@ -31,12 +35,13 @@ dependencies {
     testCompile "org.slf4j:slf4j-api:1.7.9"
     testCompile "ch.qos.logback:logback-core:1.2.3"
     testRuntime "ch.qos.logback:logback-classic:1.2.3"
+    compile configurations.localDeps
 }
 
 shadowJar {
-    minimize() {
+    /*minimize() {
         // exclude dependencies here to re-add them if they are mistakenly removed
-    }
+    }*/
     append('META-INF/connector-config')
     manifest {
         attributes 'Implementation-Version': project.version
@@ -47,6 +52,7 @@ shadowJar {
     }
 }
 
+
 distributions {
     main {
         baseName = archivesBaseName
@@ -55,7 +61,10 @@ distributions {
                 from(project.file('src/main/resources/connector-config.xml'))
             }
             into('lib') {
-                from shadowJar
+                //from shadowJar
+                from configurations.localDeps
+                from jar
+                
             }
             into '/'
         }
