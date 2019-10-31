@@ -107,7 +107,7 @@ public class PravegaOperationTest {
 
     @Test
     @Order(2)
-    public void testGetOperation() {
+    public void testQueryOperation() {
         try (PravegaConnector connector = new PravegaConnector()) {
             ConnectorTester tester = new ConnectorTester(connector);
 
@@ -121,8 +121,8 @@ public class PravegaOperationTest {
 
             // TODO: send random data to stream first, instead of relying on test execution order
 
-            tester.setOperationContext(OperationType.GET, connProps, opProps, null, null);
-            List<SimpleOperationResult> results = tester.executeGetOperation("");
+            tester.setOperationContext(OperationType.QUERY, connProps, opProps, null, null);
+            List<SimpleOperationResult> results = tester.executeQueryOperation(null);
             assertEquals("OK", results.get(0).getStatusCode());
 
             List payloads = results.get(0).getPayloads();

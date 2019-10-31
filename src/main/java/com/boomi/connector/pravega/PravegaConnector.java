@@ -13,8 +13,8 @@ public class PravegaConnector extends BaseConnector implements AutoCloseable {
     private List<PravegaConnection> createdConnections = new ArrayList<>();
 
     @Override
-    protected Operation createGetOperation(OperationContext context) {
-        return new PravegaGetOperation(createConnection(context));
+    protected Operation createQueryOperation(OperationContext context) {
+        return new PravegaQueryOperation(createConnection(context));
     }
 
     @Override
