@@ -46,7 +46,7 @@ public class PravegaConnection extends BaseConnection implements AutoCloseable {
 		clientFactory = EventStreamClientFactory.withScope(pravegaConfig.getScope(), clientConfig);
 
 		// create reader group
-		// NOTE: this is currently unique per connector instance, but multiple Get operators will end up distributing
+		// NOTE: this is currently unique per connector instance, but multiple Query operators will end up distributing
 		// reads.. TODO: should this be unique per operation?
 		readerGroup = "boomi-reader-" + pravegaConfig.getScope() + "-" + pravegaConfig.getStreamName()
 				+ "-" + pravegaConfig.hashCode();

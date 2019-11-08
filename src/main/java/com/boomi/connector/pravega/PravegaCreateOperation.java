@@ -56,6 +56,8 @@ public class PravegaCreateOperation extends BaseUpdateOperation implements AutoC
                 }
             } catch (Exception e) {
                 // make best effort to process every input
+                // TODO: if Boomi retries this document, it might be inserted out of order.. if it does not retry, then
+                // the data might be lost - how can we guarantee order and exactly-once?
                 ResponseUtil.addExceptionFailure(response, input, e);
             }
         }

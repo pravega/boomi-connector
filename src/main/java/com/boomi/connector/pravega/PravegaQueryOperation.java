@@ -46,7 +46,7 @@ public class PravegaQueryOperation extends BaseQueryOperation implements AutoClo
 				} catch (ReinitializationRequiredException e) {
 					// There are certain circumstances where the reader needs to be reinitialized
 					// TODO: what needs to be done here?  if we re-initialize, how do we resume?
-					e.printStackTrace();
+					logger.log(Level.WARNING, "caught ReinitializationRequiredException - Pravega client needs to be reinitialized", e);
 				}
 			} while (event != null && event.getEvent() != null);
 
