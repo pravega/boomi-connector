@@ -4,13 +4,13 @@ import com.boomi.connector.api.OperationContext;
 
 import java.util.Map;
 
-public class WriterConfig {
-    public static WriterConfig fromContext(OperationContext context) {
+class WriterConfig {
+    static WriterConfig fromContext(OperationContext context) {
         WriterConfig writerConfig = new WriterConfig();
         Map<String, Object> props = context.getOperationProperties();
-        writerConfig.setRoutingKeyNeeded((boolean) props.getOrDefault(Constants.ROUTINGKEY_NEEDED_PROPERTY, false));
-        writerConfig.setFixedRoutingKey((String) props.get(Constants.FIXED_ROUTINGKEY_PROPERTY));
-        writerConfig.setRoutingKeyConfigValue((String) props.get(Constants.ROUTINGKEY_CONFIG_VALUE_PROPERTY));
+        writerConfig.setRoutingKeyNeeded((boolean) props.getOrDefault(Constants.ROUTING_KEY_NEEDED_PROPERTY, false));
+        writerConfig.setFixedRoutingKey((String) props.get(Constants.FIXED_ROUTING_KEY_PROPERTY));
+        writerConfig.setRoutingKeyConfigValue((String) props.get(Constants.ROUTING_KEY_CONFIG_VALUE_PROPERTY));
         return writerConfig;
     }
 

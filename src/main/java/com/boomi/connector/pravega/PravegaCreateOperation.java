@@ -22,27 +22,27 @@ public class PravegaCreateOperation extends BaseUpdateOperation implements AutoC
     private WriterConfig writerConfig;
 
     PravegaCreateOperation(PravegaConnection conn) {
-		super(conn);
+        super(conn);
         pravegaConfig = conn.getPravegaConfig();
         writerConfig = WriterConfig.fromContext(this.getContext());
 
         // create event writer
         writer = conn.getClientFactory().createEventWriter(
-                pravegaConfig.getStreamName(), new JavaSerializer<>(), EventWriterConfig.builder().build());
+                pravegaConfig.getStream(), new JavaSerializer<>(), EventWriterConfig.builder().build());
     }
 
-	@Override
-	protected void executeUpdate(UpdateRequest request, OperationResponse response) {
-    	Logger logger = response.getLogger();
+    @Override
+    protected void executeUpdate(UpdateRequest request, OperationResponse response) {
+        Logger logger = response.getLogger();
 
         List<CompletableFuture> futures = new ArrayList<>();
         for (ObjectData input : request) {
             try {
-            	String message = inputStreamToString(input.getData());
+                String message = inputStreamToString(input.getData());
                 String routingKey = getRoutingKey(message, logger);
 
                 logger.log(Level.INFO, String.format("Writing message size: '%d' with routing-key: '%s' to stream '%s / %s'%n",
-                        input.getDataSize(), routingKey, pravegaConfig.getScope(), pravegaConfig.getStreamName()));
+                        input.getDataSize(), routingKey, pravegaConfig.getScope(), pravegaConfig.getStream()));
 
                 // write the event
                 // note: this is an async call, so we will add an additional async completion stage to the call,
@@ -93,12 +93,6 @@ public class PravegaCreateOperation extends BaseUpdateOperation implements AutoC
         return (PravegaConnection) super.getConnection();
     }
 
-    static String inputStreamToString(InputStream is) {
-    	try (Scanner scanner = new Scanner(is, "UTF-8")) {
-    		return scanner.useDelimiter("\\A").next();
-    	}
-    }
-
     private String getRoutingKey(String message, Logger logger) {
         try {
             String routingKey;
@@ -108,10 +102,15 @@ public class PravegaCreateOperation extends BaseUpdateOperation implements AutoC
                 routingKey = writerConfig.getFixedRoutingKey();
             }
             return routingKey;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             logger.warning("could not parse routing key: " + e);
             return "";
+        }
+    }
+
+    private static String inputStreamToString(InputStream is) {
+        try (Scanner scanner = new Scanner(is, "UTF-8")) {
+            return scanner.useDelimiter("\\A").next();
         }
     }
 }

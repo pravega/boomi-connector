@@ -13,20 +13,20 @@ public class PravegaConfig {
         Map<String, Object> props = context.getConnectionProperties();
 
         // URI, scope, and stream should always be set
-        String controllerUri = (String) props.get(Constants.URI_PROPERTY);
+        String controllerUri = (String) props.get(Constants.CONTROLLER_URI_PROPERTY);
         if (controllerUri == null || controllerUri.trim().length() == 0)
             throw new ConnectorException("Pravega Controller URI must be set");
         String scope = (String) props.get(Constants.SCOPE_PROPERTY);
         if (scope == null || scope.trim().length() == 0)
             throw new ConnectorException("Pravega Scope must be set");
-        String stream = (String) props.get(Constants.NAME_PROPERTY);
+        String stream = (String) props.get(Constants.STREAM_PROPERTY);
         if (stream == null || stream.trim().length() == 0)
             throw new ConnectorException("Pravega Stream URI must be set");
 
         pravegaConfig.setControllerUri(URI.create(controllerUri));
         pravegaConfig.setScope(scope);
-        pravegaConfig.setStreamName(stream);
-        pravegaConfig.setPravegaStandalone((boolean) props.getOrDefault(Constants.IS_PRAVEGA_STANDALONE_PROPERTY, true));
+        pravegaConfig.setStream(stream);
+        pravegaConfig.setCreateScope((boolean) props.getOrDefault(Constants.CREATE_SCOPE_PROPERTY, true));
         pravegaConfig.setEnableAuth((boolean) props.getOrDefault(Constants.ENABLE_AUTH_PROPERTY, false));
         pravegaConfig.setUserName((String) props.get(Constants.USER_NAME_PROPERTY));
         pravegaConfig.setPassword((String) props.get(Constants.PASSWORD_PROPERTY));
@@ -35,11 +35,11 @@ public class PravegaConfig {
 
     private URI controllerUri;
     private String scope;
-    private String streamName;
+    private String stream;
     private boolean enableAuth;
     private String userName;
     private String password;
-    private boolean isPravegaStandalone;
+    private boolean createScope;
 
     public URI getControllerUri() {
         return controllerUri;
@@ -57,12 +57,12 @@ public class PravegaConfig {
         this.scope = scope;
     }
 
-    public String getStreamName() {
-        return streamName;
+    public String getStream() {
+        return stream;
     }
 
-    public void setStreamName(String streamName) {
-        this.streamName = streamName;
+    public void setStream(String stream) {
+        this.stream = stream;
     }
 
     public boolean isEnableAuth() {
@@ -89,12 +89,12 @@ public class PravegaConfig {
         this.password = password;
     }
 
-    public boolean isPravegaStandalone() {
-        return isPravegaStandalone;
+    public boolean isCreateScope() {
+        return createScope;
     }
 
-    public void setPravegaStandalone(boolean pravegaStandalone) {
-        isPravegaStandalone = pravegaStandalone;
+    public void setCreateScope(boolean createScope) {
+        this.createScope = createScope;
     }
 
     @Override
@@ -104,11 +104,11 @@ public class PravegaConfig {
         PravegaConfig that = (PravegaConfig) o;
         return Objects.equals(controllerUri, that.controllerUri) &&
                 Objects.equals(scope, that.scope) &&
-                Objects.equals(streamName, that.streamName);
+                Objects.equals(stream, that.stream);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(controllerUri, scope, streamName);
+        return Objects.hash(controllerUri, scope, stream);
     }
 }

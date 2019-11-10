@@ -1,35 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <GenericConnectorDescriptor>
-    <field id="uri" label="URI" type="string">
-        <!-- <defaultValue>tcp://localhost:9090</defaultValue>   -->
-        <helpText>The URI to the controller in the form tcp://host:port</helpText>
-    </field>
-    <field id="name" label="Stream Name" type="string">
-        <helpText>The name of the stream to read from.</helpText>
+    <field id="controllerUri" label="URI" type="string">
+        <helpText>The URI to the Pravega controller in the form tcp://host:port</helpText>
     </field>
     <field id="scope" label="Scope" type="string">
-        <helpText>The scope name of the stream to read from.</helpText>
+        <helpText>The Pravega scope containing the data stream.</helpText>
     </field>
-    <field id="isPravegaStandalone" label="Pravega Standalone" type="boolean">
-        <helpText>Indicates The Pravega Running Standalone or not.</helpText>
+    <field id="stream" label="Stream Name" type="string">
+        <helpText>The name of the data stream.</helpText>
+    </field>
+    <field id="createScope" label="Create Scope" type="boolean">
+        <helpText>When checked, Pravega scope will be automatically created. Only enable this if Pravega is running in
+            stand-alone mode.
+        </helpText>
         <defaultValue>true</defaultValue>
     </field>
-    <field id="enableAuth" label="Pravega Authentication Enabled" type="boolean">
-        <helpText>Indicates The Authentication Enabled for Pravega or Not.</helpText>
+    <field id="enableAuth" label="Pravega Authentication Required" type="boolean">
+        <helpText>Indicates whether authentication is required for Pravega.</helpText>
         <defaultValue>false</defaultValue>
     </field>
     <field id="userName" label="Pravega User Name" type="string">
-        <helpText>The configuration value of Pravega User Name.</helpText>
-        <defaultValue>admin</defaultValue>
+        <helpText>The Pravega user.</helpText>
     </field>
     <field id="password" label="Pravega Password" type="string">
-        <helpText>The configuration value of Pravega Password.</helpText>
-        <defaultValue>1111_aaaa</defaultValue>
+        <helpText>The Pravega user's password.</helpText>
     </field>
     <testConnection method="CUSTOM"/>
     <operation types="QUERY" supportsBrowse="false">
         <field id="readTimeout" label="Read Timeout (ms)" type="integer">
-            <helpText>The maximum amount of time the consumer will wait for a message</helpText>
+            <helpText>The maximum amount of time the reader will wait for a message</helpText>
             <defaultValue>2000</defaultValue>
         </field>
     </operation>

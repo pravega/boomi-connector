@@ -4,11 +4,11 @@ import com.boomi.connector.api.OperationContext;
 
 import java.util.Map;
 
-public class ReaderConfig {
-    public static ReaderConfig fromContext(OperationContext context) {
+class ReaderConfig {
+    static ReaderConfig fromContext(OperationContext context) {
         ReaderConfig readerConfig = new ReaderConfig();
         Map<String, Object> props = context.getOperationProperties();
-        readerConfig.setReadTimeout((long) props.get(Constants.READTIMEOUT_PROPERTY));
+        readerConfig.setReadTimeout((long) props.get(Constants.READ_TIMEOUT_PROPERTY));
         return readerConfig;
     }
 

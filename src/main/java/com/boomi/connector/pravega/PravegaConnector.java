@@ -21,18 +21,18 @@ public class PravegaConnector extends BaseConnector implements AutoCloseable {
     protected Operation createCreateOperation(OperationContext context) {
         return new PravegaCreateOperation(createConnection(context));
     }
-   
+
     private PravegaConnection createConnection(BrowseContext context) {
         PravegaConnection connection = new PravegaConnection(context);
         createdConnections.add(connection);
         return connection;
     }
 
-	@Override
-	public Browser createBrowser(BrowseContext context) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public Browser createBrowser(BrowseContext context) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
     @Override
     public void close() {

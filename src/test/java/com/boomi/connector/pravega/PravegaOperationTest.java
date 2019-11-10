@@ -152,13 +152,13 @@ public class PravegaOperationTest {
             ConnectorTester tester = new ConnectorTester(connector);
 
             Map<String, Object> connProps = new HashMap<>();
-            connProps.put(Constants.URI_PROPERTY, PRAVEGA_CONTROLLER_URI);
+            connProps.put(Constants.CONTROLLER_URI_PROPERTY, PRAVEGA_CONTROLLER_URI);
             connProps.put(Constants.SCOPE_PROPERTY, PRAVEGA_SCOPE);
-            connProps.put(Constants.NAME_PROPERTY, PRAVEGA_STREAM);
+            connProps.put(Constants.STREAM_PROPERTY, PRAVEGA_STREAM);
 
             Map<String, Object> opProps = new HashMap<>();
-            opProps.put(Constants.ROUTINGKEY_NEEDED_PROPERTY, true);
-            opProps.put(Constants.ROUTINGKEY_CONFIG_VALUE_PROPERTY, JSON_ROUTING_KEY);
+            opProps.put(Constants.ROUTING_KEY_NEEDED_PROPERTY, true);
+            opProps.put(Constants.ROUTING_KEY_CONFIG_VALUE_PROPERTY, JSON_ROUTING_KEY);
             tester.setOperationContext(OperationType.CREATE, connProps, opProps, null, null);
 
             // prep test message
@@ -186,13 +186,13 @@ public class PravegaOperationTest {
             ConnectorTester tester = new ConnectorTester(connector);
 
             Map<String, Object> connProps = new HashMap<>();
-            connProps.put(Constants.URI_PROPERTY, PRAVEGA_CONTROLLER_URI);
+            connProps.put(Constants.CONTROLLER_URI_PROPERTY, PRAVEGA_CONTROLLER_URI);
             connProps.put(Constants.SCOPE_PROPERTY, PRAVEGA_SCOPE);
-            connProps.put(Constants.NAME_PROPERTY, PRAVEGA_STREAM);
+            connProps.put(Constants.STREAM_PROPERTY, PRAVEGA_STREAM);
 
             Map<String, Object> opProps = new HashMap<>();
-            opProps.put(Constants.ROUTINGKEY_NEEDED_PROPERTY, false);
-            opProps.put(Constants.FIXED_ROUTINGKEY_PROPERTY, FIXED_ROUTING_KEY);
+            opProps.put(Constants.ROUTING_KEY_NEEDED_PROPERTY, false);
+            opProps.put(Constants.FIXED_ROUTING_KEY_PROPERTY, FIXED_ROUTING_KEY);
             tester.setOperationContext(OperationType.CREATE, connProps, opProps, null, null);
 
             // prep test message
@@ -219,12 +219,12 @@ public class PravegaOperationTest {
             ConnectorTester tester = new ConnectorTester(connector);
 
             Map<String, Object> connProps = new HashMap<>();
-            connProps.put(Constants.URI_PROPERTY, PRAVEGA_CONTROLLER_URI);
+            connProps.put(Constants.CONTROLLER_URI_PROPERTY, PRAVEGA_CONTROLLER_URI);
             connProps.put(Constants.SCOPE_PROPERTY, PRAVEGA_SCOPE);
-            connProps.put(Constants.NAME_PROPERTY, PRAVEGA_STREAM);
+            connProps.put(Constants.STREAM_PROPERTY, PRAVEGA_STREAM);
 
             Map<String, Object> opProps = new HashMap<>();
-            opProps.put(Constants.READTIMEOUT_PROPERTY, 5000L);
+            opProps.put(Constants.READ_TIMEOUT_PROPERTY, 5000L);
 
             // write test event to stream first
             pravegaWriter.writeEvent(json).get();
