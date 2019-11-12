@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <GenericConnectorDescriptor>
+<!--<GenericConnectorDescriptor xmlns="http://www.boomi.com/connector/descriptor"-->
+<!--                            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"-->
+<!--                            xsi:schemaLocation="http://www.boomi.com/connector/descriptor genericconnectordesc.xsd">-->
     <field id="controllerUri" label="URI" type="string">
         <helpText>The URI to the Pravega controller in the form tcp://host:port</helpText>
     </field>
@@ -27,20 +30,38 @@
     </field>
     <testConnection method="CUSTOM"/>
     <operation types="QUERY" supportsBrowse="false">
+        <field id="readerGroup" label="Pravega Reader Group" type="integer">
+            <helpText>The name of the reader group for this reader within Pravega. Naming the reader group will maintain
+                the reader's position in the stream. Note: multiple readers sharing the same reader group will never see
+                the same event twice. If different readers each need to process all events in the stream, they should
+                use different reader groups.
+            </helpText>
+        </field>
         <field id="readTimeout" label="Read Timeout (ms)" type="integer">
-            <helpText>The maximum amount of time the reader will wait for a message</helpText>
-            <defaultValue>2000</defaultValue>
+            <helpText>The maximum amount of time the reader will wait for a response from Pravega.</helpText>
+            <defaultValue>5000</defaultValue>
         </field>
     </operation>
     <operation types="CREATE" supportsBrowse="false">
-        <field id="fixedRoutingKey" label=" Fixed Routing Key" type="string">
-            <helpText>The routing key of the message to write.</helpText>
+        <field id="routingKeyType" label="Routing Key Type" type="string">
+            <helpText>The type of routing key to use for each event.
+                "Fixed" means to use the literal value of the Routing Key below.
+                "JsonReference" means the event data is JSON and the value will be extracted from the body using the
+                Routing Key below as a JSON reference (i.e. a value of "myVar" will look for the "myVar" key in the JSON
+                of each event, and use its corresponding value as the routing key for that event).
+            </helpText>
+            <allowedValue>
+                <value>Fixed</value>
+                <value>JsonReference</value>
+            </allowedValue>
         </field>
-        <field id="routingKeyNeeded" label="Routing Key Needed" type="boolean">
-            <helpText>The routing key is needed or not.</helpText>
-        </field>
-        <field id="routingKeyConfigValue" label="Routing Key Config Value" type="string">
-            <helpText>The configuration value of routing key.</helpText>
+        <field id="routingKey" label="Routing Key" type="string">
+            <helpText>The routing key to use for each event written to the stream. If the Routing Key Type is "Fixed",
+                this value will be used literally and will be the same for every event. If the Routing Key Type is
+                "JsonReference", the routing key for each event will be evaluated from the JSON body, using the
+                reference
+                provided here.
+            </helpText>
         </field>
     </operation>
 </GenericConnectorDescriptor>

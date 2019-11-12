@@ -20,8 +20,8 @@ public class Constants {
     static final String USER_NAME_PROPERTY = "userName";
     static final String PASSWORD_PROPERTY = "password";
 
+    static final String READER_GROUP_PROPERTY = "readerGroup";
     static final String READ_TIMEOUT_PROPERTY = "readTimeout";
-    static final String FIXED_ROUTING_KEY_PROPERTY = "fixedRoutingKey";
-    static final String ROUTING_KEY_NEEDED_PROPERTY = "routingKeyNeeded";
-    static final String ROUTING_KEY_CONFIG_VALUE_PROPERTY = "routingKeyConfigValue";
+    static final String ROUTING_KEY_TYPE_PROPERTY = "routingKeyType";
+    static final String ROUTING_KEY_PROPERTY = "routingKey";
 }

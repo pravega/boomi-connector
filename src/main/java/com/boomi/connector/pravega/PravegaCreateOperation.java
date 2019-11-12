@@ -96,10 +96,10 @@ public class PravegaCreateOperation extends BaseUpdateOperation implements AutoC
     private String getRoutingKey(String message, Logger logger) {
         try {
             String routingKey;
-            if (writerConfig.isRoutingKeyNeeded()) {
-                routingKey = JsonPath.read(message, writerConfig.getRoutingKeyConfigValue());
+            if (WriterConfig.RoutingKeyType.JsonReference == writerConfig.getRoutingKeyType()) {
+                routingKey = JsonPath.read(message, writerConfig.getRoutingKey());
             } else {
-                routingKey = writerConfig.getFixedRoutingKey();
+                routingKey = writerConfig.getRoutingKey();
             }
             return routingKey;
         } catch (Exception e) {

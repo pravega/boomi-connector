@@ -2,9 +2,8 @@ package com.boomi.connector.pravega;
 
 import com.boomi.connector.api.*;
 import com.boomi.connector.util.BaseQueryOperation;
-import io.pravega.client.stream.EventRead;
-import io.pravega.client.stream.EventStreamReader;
-import io.pravega.client.stream.ReinitializationRequiredException;
+import io.pravega.client.admin.ReaderGroupManager;
+import io.pravega.client.stream.*;
 import io.pravega.client.stream.impl.JavaSerializer;
 
 import java.io.ByteArrayInputStream;
@@ -22,8 +21,15 @@ public class PravegaQueryOperation extends BaseQueryOperation implements AutoClo
         pravegaConfig = conn.getPravegaConfig();
         readerConfig = ReaderConfig.fromContext(this.getContext());
 
+        // create reader group
+        ReaderGroupConfig readerGroupConfig = ReaderGroupConfig.builder()
+                .stream(Stream.of(pravegaConfig.getScope(), pravegaConfig.getStream())).build();
+        try (ReaderGroupManager readerGroupManager = ReaderGroupManager.withScope(pravegaConfig.getScope(), conn.getClientConfig())) {
+            readerGroupManager.createReaderGroup(readerConfig.getReaderGroup(), readerGroupConfig);
+        }
+
         // create event reader
-        reader = conn.getClientFactory().createReader(UUID.randomUUID().toString(), conn.getReaderGroup(),
+        reader = conn.getClientFactory().createReader(UUID.randomUUID().toString(), readerConfig.getReaderGroup(),
                 new JavaSerializer<>(), io.pravega.client.stream.ReaderConfig.builder().build());
     }
 
