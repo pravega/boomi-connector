@@ -4,41 +4,34 @@ import com.boomi.connector.api.OperationContext;
 
 import java.util.Map;
 
-public class WriterConfig {
-    public static WriterConfig fromContext(OperationContext context) {
+class WriterConfig {
+    static WriterConfig fromContext(OperationContext context) {
         WriterConfig writerConfig = new WriterConfig();
         Map<String, Object> props = context.getOperationProperties();
-        writerConfig.setRoutingKeyNeeded((boolean) props.getOrDefault(Constants.ROUTINGKEY_NEEDED_PROPERTY, false));
-        writerConfig.setFixedRoutingKey((String) props.get(Constants.FIXED_ROUTINGKEY_PROPERTY));
-        writerConfig.setRoutingKeyConfigValue((String) props.get(Constants.ROUTINGKEY_CONFIG_VALUE_PROPERTY));
+        String routingKeyType = (String) props.get(Constants.ROUTING_KEY_TYPE_PROPERTY);
+        if (routingKeyType != null) writerConfig.setRoutingKeyType(RoutingKeyType.valueOf(routingKeyType));
+        writerConfig.setRoutingKey((String) props.get(Constants.ROUTING_KEY_PROPERTY));
         return writerConfig;
     }
 
-    private boolean isRoutingKeyNeeded;
-    private String fixedRoutingKey;
-    private String routingKeyConfigValue;
+    private RoutingKeyType routingKeyType;
+    private String routingKey;
 
-    public boolean isRoutingKeyNeeded() {
-        return isRoutingKeyNeeded;
+    public RoutingKeyType getRoutingKeyType() {
+        return routingKeyType;
     }
 
-    public void setRoutingKeyNeeded(boolean routingKeyNeeded) {
-        isRoutingKeyNeeded = routingKeyNeeded;
+    public void setRoutingKeyType(RoutingKeyType routingKeyType) {
+        this.routingKeyType = routingKeyType;
     }
 
-    public String getFixedRoutingKey() {
-        return fixedRoutingKey;
+    public String getRoutingKey() {
+        return routingKey;
     }
 
-    public void setFixedRoutingKey(String fixedRoutingKey) {
-        this.fixedRoutingKey = fixedRoutingKey;
+    public void setRoutingKey(String routingKey) {
+        this.routingKey = routingKey;
     }
 
-    public String getRoutingKeyConfigValue() {
-        return routingKeyConfigValue;
-    }
-
-    public void setRoutingKeyConfigValue(String routingKeyConfigValue) {
-        this.routingKeyConfigValue = routingKeyConfigValue;
-    }
+    enum RoutingKeyType {Fixed, JsonReference}
 }
