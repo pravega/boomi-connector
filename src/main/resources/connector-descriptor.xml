@@ -38,8 +38,19 @@
             </helpText>
         </field>
         <field id="readTimeout" label="Read Timeout (ms)" type="integer">
-            <helpText>The maximum amount of time the reader will wait for a response from Pravega.</helpText>
-            <defaultValue>5000</defaultValue>
+            <helpText>The maximum amount of time the reader will wait for the next event from Pravega.</helpText>
+            <defaultValue>2000</defaultValue>
+        </field>
+        <field id="maxReadTimePerExecution" label="Max Read Time per Execution" type="integer">
+            <helpText>For each execution of the operation, The maximum number of seconds the reader will read and
+                collect events from the stream before moving to the next component in the process. For example, if this
+                is set to 30 seconds, the operation will spend a maximum of 30 seconds reading events from the stream.
+                If it hits the tail of the stream (no more events), or this time (30 seconds), it will exit execution
+                and the collection of events will be sent to the next component in the process flow. If this is set to
+                0, the operation will continue reading from the stream until it hits the tail (there are no more
+                events). Note that if there are a lot of events, this may overload the Boomi document cache.
+            </helpText>
+            <defaultValue>30</defaultValue>
         </field>
     </operation>
     <operation types="CREATE" supportsBrowse="false">
@@ -50,8 +61,14 @@
                 Routing Key below as a JSON reference (i.e. a value of "myVar" will look for the "myVar" key in the JSON
                 of each event, and use its corresponding value as the routing key for that event).
             </helpText>
-            <allowedValue>
+            <allowedValue label="This option will use the literal value of the Routing Key below as the routing key for
+            every message.">
                 <value>Fixed</value>
+            </allowedValue>
+            <allowedValue label="This option specifies that the event data is JSON and the routing key will be extracted
+            from the body using the Routing Key below as a JSON reference (i.e. a value of &quot;myVar&quot; will look
+            for the &quot;myVar&quot; key in the JSON of each event, and use its corresponding value as the routing key
+            for that event).">
                 <value>JsonReference</value>
             </allowedValue>
         </field>
