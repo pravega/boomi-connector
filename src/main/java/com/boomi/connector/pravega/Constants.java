@@ -22,6 +22,7 @@ public class Constants {
 
     static final String READER_GROUP_PROPERTY = "readerGroup";
     static final String READ_TIMEOUT_PROPERTY = "readTimeout";
+    static final String MAX_READ_TIME_PER_EXECUTION_PROPERTY = "maxReadTimePerExecution";
     static final String ROUTING_KEY_TYPE_PROPERTY = "routingKeyType";
     static final String ROUTING_KEY_PROPERTY = "routingKey";
 }
