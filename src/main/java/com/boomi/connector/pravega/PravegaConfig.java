@@ -8,8 +8,18 @@ import java.util.Map;
 import java.util.Objects;
 
 public class PravegaConfig {
-    public static PravegaConfig fromContext(BrowseContext context) {
-        PravegaConfig pravegaConfig = new PravegaConfig();
+    private URI controllerUri;
+    private String scope;
+    private String stream;
+    private boolean enableAuth;
+    private String userName;
+    private String password;
+    private boolean createScope;
+
+    public PravegaConfig() {
+    }
+
+    public PravegaConfig(BrowseContext context) {
         Map<String, Object> props = context.getConnectionProperties();
 
         // URI, scope, and stream should always be set
@@ -23,23 +33,14 @@ public class PravegaConfig {
         if (stream == null || stream.trim().length() == 0)
             throw new ConnectorException("Pravega Stream URI must be set");
 
-        pravegaConfig.setControllerUri(URI.create(controllerUri));
-        pravegaConfig.setScope(scope);
-        pravegaConfig.setStream(stream);
-        pravegaConfig.setCreateScope((boolean) props.getOrDefault(Constants.CREATE_SCOPE_PROPERTY, true));
-        pravegaConfig.setEnableAuth((boolean) props.getOrDefault(Constants.ENABLE_AUTH_PROPERTY, false));
-        pravegaConfig.setUserName((String) props.get(Constants.USER_NAME_PROPERTY));
-        pravegaConfig.setPassword((String) props.get(Constants.PASSWORD_PROPERTY));
-        return pravegaConfig;
+        setControllerUri(URI.create(controllerUri));
+        setScope(scope);
+        setStream(stream);
+        setCreateScope((boolean) props.getOrDefault(Constants.CREATE_SCOPE_PROPERTY, true));
+        setEnableAuth((boolean) props.getOrDefault(Constants.ENABLE_AUTH_PROPERTY, false));
+        setUserName((String) props.get(Constants.USER_NAME_PROPERTY));
+        setPassword((String) props.get(Constants.PASSWORD_PROPERTY));
     }
-
-    private URI controllerUri;
-    private String scope;
-    private String stream;
-    private boolean enableAuth;
-    private String userName;
-    private String password;
-    private boolean createScope;
 
     public URI getControllerUri() {
         return controllerUri;

@@ -2,35 +2,40 @@ package com.boomi.connector.pravega;
 
 import com.boomi.connector.api.*;
 import com.boomi.connector.util.BaseQueryOperation;
-import io.pravega.client.admin.ReaderGroupManager;
-import io.pravega.client.stream.*;
-import io.pravega.client.stream.impl.JavaSerializer;
+import io.pravega.client.EventStreamClientFactory;
+import io.pravega.client.stream.EventRead;
+import io.pravega.client.stream.EventStreamReader;
+import io.pravega.client.stream.ReinitializationRequiredException;
+import io.pravega.client.stream.impl.UTF8StringSerializer;
 
 import java.io.ByteArrayInputStream;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class PravegaQueryOperation extends BaseQueryOperation implements AutoCloseable {
-    private PravegaConfig pravegaConfig;
-    private ReaderConfig readerConfig;
-    private EventStreamReader<String> reader;
+    private static final Logger logger = Logger.getLogger(PravegaQueryOperation.class.getName());
 
-    PravegaQueryOperation(PravegaConnection conn) {
-        super(conn);
-        pravegaConfig = conn.getPravegaConfig();
-        readerConfig = ReaderConfig.fromContext(this.getContext());
+    private ReaderConfig readerConfig;
+    private EventStreamClientFactory clientFactory;
+    private EventStreamReader<String> reader;
+    private AtomicBoolean closed = new AtomicBoolean(false);
+
+    PravegaQueryOperation(OperationContext context) {
+        super(context);
+        readerConfig = new ReaderConfig(context);
+
+        // create client factory
+        // TODO: find an appropriate way to cache client factories
+        clientFactory = PravegaUtil.createClientFactory(readerConfig);
 
         // create reader group
-        ReaderGroupConfig readerGroupConfig = ReaderGroupConfig.builder()
-                .stream(Stream.of(pravegaConfig.getScope(), pravegaConfig.getStream())).build();
-        try (ReaderGroupManager readerGroupManager = ReaderGroupManager.withScope(pravegaConfig.getScope(), conn.getClientConfig())) {
-            readerGroupManager.createReaderGroup(readerConfig.getReaderGroup(), readerGroupConfig);
-        }
+        PravegaUtil.createReaderGroup(readerConfig);
 
         // create event reader
-        reader = conn.getClientFactory().createReader(UUID.randomUUID().toString(), readerConfig.getReaderGroup(),
-                new JavaSerializer<>(), io.pravega.client.stream.ReaderConfig.builder().build());
+        reader = clientFactory.createReader(UUID.randomUUID().toString(), readerConfig.getReaderGroup(),
+                new UTF8StringSerializer(), io.pravega.client.stream.ReaderConfig.builder().build());
     }
 
     @Override
@@ -41,7 +46,9 @@ public class PravegaQueryOperation extends BaseQueryOperation implements AutoClo
         long eventCounter = 0;
 
         try {
-            logger.info(String.format("Reading events from %s/%s", pravegaConfig.getScope(), pravegaConfig.getStream()));
+            if (closed.get()) throw new IllegalStateException("This operation instance has been closed");
+
+            logger.info(String.format("Reading events from %s/%s", readerConfig.getScope(), readerConfig.getStream()));
             EventRead<String> event = null;
             long maxDuration = readerConfig.getMaxReadTimePerExecution() * 1000; // convert to ms
             do {
@@ -66,12 +73,12 @@ public class PravegaQueryOperation extends BaseQueryOperation implements AutoClo
                     && (maxDuration > 0 && System.currentTimeMillis() - executionStartTime < maxDuration));
 
             if (event.getEvent() == null)
-                logger.log(Level.INFO, String.format("No more events from %s/%s: exiting", pravegaConfig.getScope(), pravegaConfig.getStream()));
+                logger.log(Level.INFO, String.format("No more events from %s/%s: exiting", readerConfig.getScope(), readerConfig.getStream()));
             else
                 logger.log(Level.INFO, String.format("Hit maximum read time (start: %d ms, now: %d ms, max: %d seconds): exiting",
                         executionStartTime, System.currentTimeMillis(), readerConfig.getMaxReadTimePerExecution()));
         } catch (Exception e) {
-            logger.log(Level.SEVERE, String.format("Error reading from %s/%s", pravegaConfig.getScope(), pravegaConfig.getStream()), e);
+            logger.log(Level.SEVERE, String.format("Error reading from %s/%s", readerConfig.getScope(), readerConfig.getStream()), e);
             ResponseUtil.addExceptionFailure(response, input, e);
         }
 
@@ -80,13 +87,29 @@ public class PravegaQueryOperation extends BaseQueryOperation implements AutoClo
         response.finishPartialResult(input);
     }
 
+    // Idempotent
+    // Exception free
     @Override
-    public void close() {
-        if (reader != null) reader.close();
+    public synchronized void close() {
+        if (closed.compareAndSet(false, true)) {
+            if (reader != null) try {
+                reader.close();
+            } catch (Throwable t) {
+                logger.log(Level.WARNING, "Could not close Pravega reader", t);
+            }
+            reader = null;
+            if (clientFactory != null) try {
+                clientFactory.close();
+            } catch (Throwable t) {
+                logger.log(Level.WARNING, "Could not close Pravega client factory", t);
+            }
+            clientFactory = null;
+        }
     }
 
     @Override
-    public PravegaConnection getConnection() {
-        return (PravegaConnection) super.getConnection();
+    protected void finalize() throws Throwable {
+        close();
+        super.finalize();
     }
 }

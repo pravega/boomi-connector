@@ -6,38 +6,19 @@ import com.boomi.connector.api.Operation;
 import com.boomi.connector.api.OperationContext;
 import com.boomi.connector.util.BaseConnector;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class PravegaConnector extends BaseConnector implements AutoCloseable {
-    private List<PravegaConnection> createdConnections = new ArrayList<>();
-
+public class PravegaConnector extends BaseConnector {
     @Override
     protected Operation createQueryOperation(OperationContext context) {
-        return new PravegaQueryOperation(createConnection(context));
+        return new PravegaQueryOperation(context);
     }
 
     @Override
     protected Operation createCreateOperation(OperationContext context) {
-        return new PravegaCreateOperation(createConnection(context));
-    }
-
-    private PravegaConnection createConnection(BrowseContext context) {
-        PravegaConnection connection = new PravegaConnection(context);
-        createdConnections.add(connection);
-        return connection;
+        return new PravegaCreateOperation(context);
     }
 
     @Override
     public Browser createBrowser(BrowseContext context) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public void close() {
-        for (PravegaConnection connection : createdConnections) {
-            connection.close();
-        }
+        return new PravegaBrowser(context);
     }
 }
