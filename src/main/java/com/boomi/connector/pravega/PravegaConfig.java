@@ -36,10 +36,17 @@ public class PravegaConfig {
         setControllerUri(URI.create(controllerUri));
         setScope(scope);
         setStream(stream);
-        setCreateScope((boolean) props.getOrDefault(Constants.CREATE_SCOPE_PROPERTY, true));
-        setEnableAuth((boolean) props.getOrDefault(Constants.ENABLE_AUTH_PROPERTY, false));
+        setCreateScope((boolean) getOrDefault(props, Constants.CREATE_SCOPE_PROPERTY, true));
+        setEnableAuth((boolean) getOrDefault(props, Constants.ENABLE_AUTH_PROPERTY, false));
         setUserName((String) props.get(Constants.USER_NAME_PROPERTY));
         setPassword((String) props.get(Constants.PASSWORD_PROPERTY));
+    }
+
+    protected Object getOrDefault(Map<String, Object> map, String key, Object defaultValue) {
+        Object value = map.get(key);
+        if (value == null || (value instanceof String && ((String) value).trim().length() == 0))
+            value = defaultValue;
+        return value;
     }
 
     public URI getControllerUri() {
