@@ -8,11 +8,8 @@ import io.pravega.client.EventStreamClientFactory;
 import io.pravega.client.admin.ReaderGroupManager;
 import io.pravega.client.admin.StreamManager;
 import io.pravega.client.stream.*;
-import io.pravega.client.stream.impl.JavaSerializer;
+import io.pravega.client.stream.impl.UTF8StringSerializer;
 import io.pravega.local.InProcPravegaCluster;
-import io.pravega.local.LocalPravegaEmulator;
-import io.pravega.local.SingleNodeConfig;
-import io.pravega.segmentstore.server.store.ServiceBuilderConfig;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -25,7 +22,6 @@ import java.net.URI;
 import java.util.*;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -40,7 +36,7 @@ public class PravegaOperationTest {
     private static final String PRAVEGA_SCOPE = "boomi-test";
     private static final String CREATE_OPERATION_STREAM = "connector-test-create";
     private static final String QUERY_OPERATION_STREAM = "connector-test-query";
-    private static final String PRAVEGA_CONTROLLER_URI = "tcp://127.0.0.1:9090";
+    static final String PRAVEGA_CONTROLLER_URI = "tcp://127.0.0.1:9090";
 
     private static final String FIXED_ROUTING_KEY = "test-1";
     private static final String JSON_ROUTING_KEY = "message";
@@ -57,54 +53,18 @@ public class PravegaOperationTest {
 
     @BeforeAll
     public static void classSetup() throws Exception {
-        // start Pravega stand-alone
-        Properties standaloneProperties = new Properties();
-        standaloneProperties.load(PravegaOperationTest.class.getResourceAsStream("/standalone-config.properties"));
-        ServiceBuilderConfig config = ServiceBuilderConfig
-                .builder()
-                .include(standaloneProperties)
-                .include(System.getProperties())
-                .build();
-        SingleNodeConfig conf = config.getConfig(SingleNodeConfig::builder);
-
-        localPravega = LocalPravegaEmulator.builder()
-                .controllerPort(conf.getControllerPort())
-                .segmentStorePort(conf.getSegmentStorePort())
-                .zkPort(conf.getZkPort())
-                .restServerPort(conf.getRestServerPort())
-                .enableRestServer(conf.isEnableRestServer())
-                .enableAuth(conf.isEnableAuth())
-                .enableTls(conf.isEnableTls())
-                .certFile(conf.getCertFile())
-                .keyFile(conf.getKeyFile())
-                .enableTlsReload(conf.isEnableSegmentStoreTlsReload())
-                .jksKeyFile(conf.getKeyStoreJKS())
-                .jksTrustFile(conf.getTrustStoreJKS())
-                .keyPasswordFile(conf.getKeyStoreJKSPasswordFile())
-                .passwdFile(conf.getPasswdFile())
-                .userName(conf.getUserName())
-                .passwd(conf.getPasswd())
-                .build()
-                .getInProcPravegaCluster();
-
-        log.warn("Starting Pravega Emulator with ports: ZK port {}, controllerPort {}, SegmentStorePort {}",
-                conf.getZkPort(), conf.getControllerPort(), conf.getSegmentStorePort());
-
-        localPravega.start();
-
-        log.warn("Pravega Sandbox is running locally now. You could access it at {}:{}",
-                "127.0.0.1", conf.getControllerPort());
+        localPravega = PravegaHelper.startStandalone();
 
         // initialize Pravega client
         pravegaClientFactory = initClient();
 
         // init Query operation test writer
         pravegaQueryOperationWriter = pravegaClientFactory.createEventWriter(QUERY_OPERATION_STREAM,
-                new JavaSerializer<>(), EventWriterConfig.builder().build());
+                new UTF8StringSerializer(), EventWriterConfig.builder().build());
 
         // init Create operation test reader
         pravegaCreateOperationReader = pravegaClientFactory.createReader(UUID.randomUUID().toString(), CREATE_OPERATION_READER_GROUP,
-                new JavaSerializer<>(), io.pravega.client.stream.ReaderConfig.builder().build());
+                new UTF8StringSerializer(), io.pravega.client.stream.ReaderConfig.builder().build());
     }
 
     private static EventStreamClientFactory initClient() {
@@ -152,9 +112,9 @@ public class PravegaOperationTest {
     }
 
     @Test
-    public void testCreateWithJsonRoutingKey() {
+    public void testCreateWithJsonRoutingKey() throws Exception {
         String json = generateJsonMessage();
-        try (PravegaConnector connector = new PravegaConnector()) {
+        try (PravegaTestConnector connector = new PravegaTestConnector()) {
             ConnectorTester tester = new ConnectorTester(connector);
 
             Map<String, Object> connProps = new HashMap<>();
@@ -188,9 +148,9 @@ public class PravegaOperationTest {
     }
 
     @Test
-    public void testCreateOperation() {
+    public void testCreateOperation() throws Exception {
         String json = generateJsonMessage();
-        try (PravegaConnector connector = new PravegaConnector()) {
+        try (PravegaTestConnector connector = new PravegaTestConnector()) {
             ConnectorTester tester = new ConnectorTester(connector);
 
             Map<String, Object> connProps = new HashMap<>();
@@ -224,9 +184,9 @@ public class PravegaOperationTest {
     }
 
     @Test
-    public void testCreateWithNullRoutingKeyType() {
+    public void testCreateWithNullRoutingKeyType() throws Exception {
         String json = generateJsonMessage();
-        try (PravegaConnector connector = new PravegaConnector()) {
+        try (PravegaTestConnector connector = new PravegaTestConnector()) {
             ConnectorTester tester = new ConnectorTester(connector);
 
             Map<String, Object> connProps = new HashMap<>();
@@ -260,7 +220,7 @@ public class PravegaOperationTest {
     @Test
     public void testQueryOperation() throws Exception {
         String json = generateJsonMessage();
-        try (PravegaConnector connector = new PravegaConnector()) {
+        try (PravegaTestConnector connector = new PravegaTestConnector()) {
             ConnectorTester tester = new ConnectorTester(connector);
 
             Map<String, Object> connProps = new HashMap<>();
@@ -295,19 +255,19 @@ public class PravegaOperationTest {
     public void testMaxReadPerExecution() throws Exception {
         String stream = "connector-test-max-read-time";
         long maxReadTime = 4L; // seconds
-        long writeTime = maxReadTime * 5; // writes are slower than reads for stand-alone
+        long writeTime = maxReadTime * 10; // background writer is much slower than our reader here
 
         // create new test stream for this test case
         createStreams(stream);
 
         // use background writer (write for writeTime seconds)
-        try (BackgroundStreamWriter backgroundWriter = new BackgroundStreamWriter(stream, 0L)) {
+        try (BackgroundStreamWriter backgroundWriter = new BackgroundStreamWriter(stream)) {
             Thread.sleep(writeTime * 1000);
             backgroundWriter.close();
             backgroundWriter.waitForAck();
         }
 
-        try (PravegaConnector connector = new PravegaConnector()) {
+        try (PravegaTestConnector connector = new PravegaTestConnector()) {
             ConnectorTester tester = new ConnectorTester(connector);
 
             Map<String, Object> connProps = new HashMap<>();
@@ -351,13 +311,13 @@ public class PravegaOperationTest {
     private static class BackgroundStreamWriter implements Runnable, AutoCloseable {
         EventStreamWriter<String> eventWriter;
         AtomicBoolean running = new AtomicBoolean(true);
-        AtomicLong eventCounter = new AtomicLong();
-        long writeInterval, startTime;
-        List<Future> futures = new ArrayList<>();
+        int eventCounter = 0;
+        long startTime;
+        List<Future> futures = new ArrayList<>(500000); // don't let resizing slow us down
+        String jsonMessage = generateJsonMessage();
 
-        BackgroundStreamWriter(String stream, long writeInterval) {
-            eventWriter = pravegaClientFactory.createEventWriter(stream, new JavaSerializer<>(), EventWriterConfig.builder().build());
-            this.writeInterval = writeInterval;
+        BackgroundStreamWriter(String stream) {
+            eventWriter = pravegaClientFactory.createEventWriter(stream, new UTF8StringSerializer(), EventWriterConfig.builder().build());
             Thread thread = new Thread(this);
             thread.setDaemon(true);
             thread.start();
@@ -368,18 +328,10 @@ public class PravegaOperationTest {
             startTime = System.currentTimeMillis();
             while (running.get()) {
                 try {
-                    futures.add(eventWriter.writeEvent(generateJsonMessage()));
-                    eventCounter.incrementAndGet();
+                    futures.add(eventWriter.writeEvent(jsonMessage));
+                    eventCounter++;
                 } catch (Exception e) {
                     log.error("error writing to stream from background writer", e);
-                }
-
-                if (writeInterval > 0) {
-                    try {
-                        Thread.sleep(writeInterval);
-                    } catch (InterruptedException e) {
-                        // ignore
-                    }
                 }
             }
         }
@@ -390,7 +342,7 @@ public class PravegaOperationTest {
             if (eventWriter != null) {
                 eventWriter.close();
                 eventWriter = null;
-                log.info("wrote {} events in {} ms", eventCounter.get(), System.currentTimeMillis() - startTime);
+                log.info("wrote {} events in {} ms", eventCounter, System.currentTimeMillis() - startTime);
             }
         }
 

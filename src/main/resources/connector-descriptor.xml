@@ -25,7 +25,7 @@
     <field id="userName" label="Pravega User Name" type="string">
         <helpText>The Pravega user.</helpText>
     </field>
-    <field id="password" label="Pravega Password" type="string">
+    <field id="password" label="Pravega Password" type="password">
         <helpText>The Pravega user's password.</helpText>
     </field>
     <testConnection method="CUSTOM"/>

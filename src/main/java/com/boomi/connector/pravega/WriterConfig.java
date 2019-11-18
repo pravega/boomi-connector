@@ -1,21 +1,23 @@
 package com.boomi.connector.pravega;
 
-import com.boomi.connector.api.OperationContext;
+import com.boomi.connector.api.BrowseContext;
 
 import java.util.Map;
 
-class WriterConfig {
-    static WriterConfig fromContext(OperationContext context) {
-        WriterConfig writerConfig = new WriterConfig();
-        Map<String, Object> props = context.getOperationProperties();
-        String routingKeyType = (String) props.get(Constants.ROUTING_KEY_TYPE_PROPERTY);
-        if (routingKeyType != null) writerConfig.setRoutingKeyType(RoutingKeyType.valueOf(routingKeyType));
-        writerConfig.setRoutingKey((String) props.get(Constants.ROUTING_KEY_PROPERTY));
-        return writerConfig;
-    }
-
+class WriterConfig extends PravegaConfig {
     private RoutingKeyType routingKeyType;
     private String routingKey;
+
+    public WriterConfig() {
+    }
+
+    public WriterConfig(BrowseContext context) {
+        super(context);
+        Map<String, Object> props = context.getOperationProperties();
+        String routingKeyType = (String) props.get(Constants.ROUTING_KEY_TYPE_PROPERTY);
+        if (routingKeyType != null) setRoutingKeyType(RoutingKeyType.valueOf(routingKeyType));
+        setRoutingKey((String) props.get(Constants.ROUTING_KEY_PROPERTY));
+    }
 
     public RoutingKeyType getRoutingKeyType() {
         return routingKeyType;

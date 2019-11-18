@@ -5,24 +5,26 @@ import com.boomi.connector.api.OperationContext;
 import java.util.Map;
 import java.util.UUID;
 
-class ReaderConfig {
+class ReaderConfig extends PravegaConfig {
     public static final long DEFAULT_READ_TIMEOUT = 2000; // ms
     public static final long DEFAULT_MAX_READ_TIME = 30; // seconds
-
-    static ReaderConfig fromContext(OperationContext context) {
-        ReaderConfig readerConfig = new ReaderConfig();
-        Map<String, Object> props = context.getOperationProperties();
-        String readerGroup = (String) props.get(Constants.READER_GROUP_PROPERTY);
-        if (readerGroup == null) readerGroup = "boomi-reader-" + UUID.randomUUID().toString();
-        readerConfig.setReaderGroup(readerGroup);
-        readerConfig.setReadTimeout((long) props.getOrDefault(Constants.READ_TIMEOUT_PROPERTY, DEFAULT_READ_TIMEOUT));
-        readerConfig.setMaxReadTimePerExecution((long) props.getOrDefault(Constants.MAX_READ_TIME_PER_EXECUTION_PROPERTY, DEFAULT_MAX_READ_TIME));
-        return readerConfig;
-    }
 
     private String readerGroup;
     private long readTimeout;
     private long maxReadTimePerExecution;
+
+    public ReaderConfig() {
+    }
+
+    public ReaderConfig(OperationContext context) {
+        super(context);
+        Map<String, Object> props = context.getOperationProperties();
+        String readerGroup = (String) props.get(Constants.READER_GROUP_PROPERTY);
+        if (readerGroup == null) readerGroup = "boomi-reader-" + UUID.randomUUID().toString();
+        setReaderGroup(readerGroup);
+        setReadTimeout((long) props.getOrDefault(Constants.READ_TIMEOUT_PROPERTY, DEFAULT_READ_TIMEOUT));
+        setMaxReadTimePerExecution((long) props.getOrDefault(Constants.MAX_READ_TIME_PER_EXECUTION_PROPERTY, DEFAULT_MAX_READ_TIME));
+    }
 
     public String getReaderGroup() {
         return readerGroup;

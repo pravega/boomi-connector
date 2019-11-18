@@ -3,9 +3,10 @@ package com.boomi.connector.pravega;
 import com.boomi.connector.api.*;
 import com.boomi.connector.util.BaseUpdateOperation;
 import com.jayway.jsonpath.JsonPath;
+import io.pravega.client.EventStreamClientFactory;
 import io.pravega.client.stream.EventStreamWriter;
 import io.pravega.client.stream.EventWriterConfig;
-import io.pravega.client.stream.impl.JavaSerializer;
+import io.pravega.client.stream.impl.UTF8StringSerializer;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -13,22 +14,29 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class PravegaCreateOperation extends BaseUpdateOperation implements AutoCloseable {
-    private EventStreamWriter<String> writer;
-    private PravegaConfig pravegaConfig;
-    private WriterConfig writerConfig;
+    private static final Logger logger = Logger.getLogger(PravegaCreateOperation.class.getName());
 
-    PravegaCreateOperation(PravegaConnection conn) {
-        super(conn);
-        pravegaConfig = conn.getPravegaConfig();
-        writerConfig = WriterConfig.fromContext(this.getContext());
+    private WriterConfig writerConfig;
+    private EventStreamClientFactory clientFactory;
+    private EventStreamWriter<String> writer;
+    private AtomicBoolean closed = new AtomicBoolean(false);
+
+    PravegaCreateOperation(OperationContext context) {
+        super(context);
+        writerConfig = new WriterConfig(context);
+
+        // create client factory
+        // TODO: find an appropriate way to cache client factories
+        clientFactory = PravegaUtil.createClientFactory(writerConfig);
 
         // create event writer
-        writer = conn.getClientFactory().createEventWriter(
-                pravegaConfig.getStream(), new JavaSerializer<>(), EventWriterConfig.builder().build());
+        writer = clientFactory.createEventWriter(
+                writerConfig.getStream(), new UTF8StringSerializer(), EventWriterConfig.builder().build());
     }
 
     @Override
@@ -38,11 +46,13 @@ public class PravegaCreateOperation extends BaseUpdateOperation implements AutoC
         List<CompletableFuture> futures = new ArrayList<>();
         for (ObjectData input : request) {
             try {
+                if (closed.get()) throw new IllegalStateException("This operation instance has been closed");
+
                 String message = inputStreamToString(input.getData());
                 String routingKey = getRoutingKey(message, logger);
 
                 logger.log(Level.INFO, String.format("Writing message size: '%d' with routing-key: '%s' to stream '%s / %s'%n",
-                        input.getDataSize(), routingKey, pravegaConfig.getScope(), pravegaConfig.getStream()));
+                        input.getDataSize(), routingKey, writerConfig.getScope(), writerConfig.getStream()));
 
                 // write the event
                 // note: this is an async call, so we will add an additional async completion stage to the call,
@@ -83,16 +93,6 @@ public class PravegaCreateOperation extends BaseUpdateOperation implements AutoC
         }
     }
 
-    @Override
-    public void close() {
-        if (writer != null) writer.close();
-    }
-
-    @Override
-    public PravegaConnection getConnection() {
-        return (PravegaConnection) super.getConnection();
-    }
-
     private String getRoutingKey(String message, Logger logger) {
         try {
             String routingKey;
@@ -112,5 +112,31 @@ public class PravegaCreateOperation extends BaseUpdateOperation implements AutoC
         try (Scanner scanner = new Scanner(is, "UTF-8")) {
             return scanner.useDelimiter("\\A").next();
         }
+    }
+
+    // Idempotent
+    // Exception free
+    @Override
+    public synchronized void close() {
+        if (closed.compareAndSet(false, true)) {
+            if (writer != null) try {
+                writer.close();
+            } catch (Throwable t) {
+                logger.log(Level.WARNING, "Could not close Pravega writer", t);
+            }
+            writer = null;
+            if (clientFactory != null) try {
+                clientFactory.close();
+            } catch (Throwable t) {
+                logger.log(Level.WARNING, "Could not close Pravega client factory", t);
+            }
+            clientFactory = null;
+        }
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        close();
+        super.finalize();
     }
 }
