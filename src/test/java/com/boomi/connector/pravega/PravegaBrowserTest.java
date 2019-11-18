@@ -56,13 +56,14 @@ public class PravegaBrowserTest {
 
     @Test
     public void testTestConnectorBadScope() throws Exception {
+        String scope = "foo234", stream = "bar";
         try (PravegaTestConnector connector = new PravegaTestConnector()) {
             ConnectorTester tester = new ConnectorTester(connector);
 
             Map<String, Object> connProps = new HashMap<>();
             connProps.put(Constants.CONTROLLER_URI_PROPERTY, "tcp://localhost:9090");
-            connProps.put(Constants.SCOPE_PROPERTY, "foo");
-            connProps.put(Constants.STREAM_PROPERTY, "bar");
+            connProps.put(Constants.SCOPE_PROPERTY, scope);
+            connProps.put(Constants.STREAM_PROPERTY, stream);
             connProps.put(Constants.CREATE_SCOPE_PROPERTY, false);
 
             Map<String, Object> opProps = new HashMap<>();
