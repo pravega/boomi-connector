@@ -19,9 +19,7 @@ class ReaderConfig extends PravegaConfig {
     public ReaderConfig(OperationContext context) {
         super(context);
         Map<String, Object> props = context.getOperationProperties();
-        String readerGroup = (String) props.get(Constants.READER_GROUP_PROPERTY);
-        if (readerGroup == null) readerGroup = "boomi-reader-" + UUID.randomUUID().toString();
-        setReaderGroup(readerGroup);
+        setReaderGroup((String) props.getOrDefault(Constants.READER_GROUP_PROPERTY, "boomi-reader-" + UUID.randomUUID().toString()));
         setReadTimeout((long) props.getOrDefault(Constants.READ_TIMEOUT_PROPERTY, DEFAULT_READ_TIMEOUT));
         setMaxReadTimePerExecution((long) props.getOrDefault(Constants.MAX_READ_TIME_PER_EXECUTION_PROPERTY, DEFAULT_MAX_READ_TIME));
     }

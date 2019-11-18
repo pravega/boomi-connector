@@ -27,7 +27,8 @@ public class PravegaQueryOperation extends BaseQueryOperation implements AutoClo
         readerConfig = new ReaderConfig(context);
 
         // create client factory
-        // TODO: find an appropriate way to cache client factories
+        // TODO: find an appropriate way to cache client factories while facilitating cleanup
+        //  (this instance is not closed automatically)
         clientFactory = PravegaUtil.createClientFactory(readerConfig);
 
         // create reader group
