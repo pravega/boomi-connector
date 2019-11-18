@@ -31,7 +31,8 @@ public class PravegaCreateOperation extends BaseUpdateOperation implements AutoC
         writerConfig = new WriterConfig(context);
 
         // create client factory
-        // TODO: find an appropriate way to cache client factories
+        // TODO: find an appropriate way to cache client factories while facilitating cleanup
+        //  (this instance is not closed automatically)
         clientFactory = PravegaUtil.createClientFactory(writerConfig);
 
         // create event writer
