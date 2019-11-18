@@ -263,7 +263,7 @@ public class PravegaOperationTest {
         // use background writer (write for writeTime seconds)
         try (BackgroundStreamWriter backgroundWriter = new BackgroundStreamWriter(stream)) {
             Thread.sleep(writeTime * 1000);
-            backgroundWriter.close();
+            backgroundWriter.stop();
             backgroundWriter.waitForAck();
         }
 
@@ -293,11 +293,54 @@ public class PravegaOperationTest {
             }
 
             // we should have received multiple events
-            assertTrue(results.size() >= 1);
+            assertTrue(results.size() > 0);
+            assertTrue(results.get(0).getPayloads().size() > 1);
             // execution should have taken at least the max-read-time
             assertTrue(stopTime - startTime > maxReadTime * 1000);
             // execution should not have taken much long than that (add buffer for initialization and latency)
             assertTrue(stopTime - startTime < maxReadTime * 1000 + ReaderConfig.DEFAULT_READ_TIMEOUT + 2000);
+        }
+    }
+
+    @Test
+    public void testMaxEventsPerExecution() throws Exception {
+        String stream = "connector-test-max-events";
+        int maxEvents = 50000;
+        int writeEvents = maxEvents * 2;
+
+        // create new test stream for this test case
+        createStreams(stream);
+
+        // use background writer (write writeEvents events)
+        try (BackgroundStreamWriter backgroundWriter = new BackgroundStreamWriter(stream, writeEvents)) {
+            backgroundWriter.waitForMaxEvents();
+        }
+
+        try (PravegaTestConnector connector = new PravegaTestConnector()) {
+            ConnectorTester tester = new ConnectorTester(connector);
+
+            Map<String, Object> connProps = new HashMap<>();
+            connProps.put(Constants.CONTROLLER_URI_PROPERTY, PRAVEGA_CONTROLLER_URI);
+            connProps.put(Constants.SCOPE_PROPERTY, PRAVEGA_SCOPE);
+            connProps.put(Constants.STREAM_PROPERTY, stream);
+
+            Map<String, Object> opProps = new HashMap<>();
+            // no reader group specified, so Query operation will generate a unique reader group
+            opProps.put(Constants.READ_TIMEOUT_PROPERTY, ReaderConfig.DEFAULT_READ_TIMEOUT);
+            // should read only maxEvents events
+            opProps.put(Constants.MAX_EVENTS_PER_EXECUTION_PROPERTY, (long) maxEvents);
+
+            // execute the connector to read events
+            tester.setOperationContext(OperationType.QUERY, connProps, opProps, null, null);
+            List<SimpleOperationResult> results = tester.executeQueryOperation(null);
+
+            // should have exactly maxEvents
+            assertTrue(results.size() > 0);
+            assertEquals(maxEvents, results.get(0).getPayloads().size());
+            // validate read success
+            for (SimpleOperationResult result : results) {
+                assertEquals("OK", result.getStatusCode());
+            }
         }
     }
 
@@ -312,11 +355,19 @@ public class PravegaOperationTest {
         EventStreamWriter<String> eventWriter;
         AtomicBoolean running = new AtomicBoolean(true);
         int eventCounter = 0;
+        int maxEvents;
+        int errorCount = 0;
+        int maxErrors = 10;
         long startTime;
         List<Future> futures = new ArrayList<>(500000); // don't let resizing slow us down
         String jsonMessage = generateJsonMessage();
 
         BackgroundStreamWriter(String stream) {
+            this(stream, Integer.MAX_VALUE);
+        }
+
+        BackgroundStreamWriter(String stream, int maxEvents) {
+            this.maxEvents = maxEvents;
             eventWriter = pravegaClientFactory.createEventWriter(stream, new UTF8StringSerializer(), EventWriterConfig.builder().build());
             Thread thread = new Thread(this);
             thread.setDaemon(true);
@@ -324,30 +375,51 @@ public class PravegaOperationTest {
         }
 
         @Override
-        public void run() {
+        public synchronized void run() {
             startTime = System.currentTimeMillis();
-            while (running.get()) {
+            while (running.get() && eventCounter < maxEvents && errorCount < maxErrors) {
                 try {
                     futures.add(eventWriter.writeEvent(jsonMessage));
                     eventCounter++;
                 } catch (Exception e) {
                     log.error("error writing to stream from background writer", e);
+                    errorCount++;
+                }
+            }
+            running.set(false);
+        }
+
+        void stop() {
+            running.set(false);
+        }
+
+        @Override
+        public void close() {
+            stop();
+            synchronized (this) { // since run() is synchronized, this will wait until execution is complete
+                if (eventWriter != null) {
+                    eventWriter.close();
+                    eventWriter = null;
+                    log.info("wrote {} events in {} ms, with {} failures",
+                            eventCounter, System.currentTimeMillis() - startTime, errorCount);
                 }
             }
         }
 
-        @Override
-        public synchronized void close() {
-            running.set(false);
-            if (eventWriter != null) {
-                eventWriter.close();
-                eventWriter = null;
-                log.info("wrote {} events in {} ms", eventCounter, System.currentTimeMillis() - startTime);
-            }
+        void waitForAck() throws Exception {
+            for (Future future : futures) future.get();
         }
 
-        public void waitForAck() throws Exception {
-            for (Future future : futures) future.get();
+        void waitForMaxEvents() throws Exception {
+            assert maxEvents < Integer.MAX_VALUE; // dummy detector
+
+            while (running.get() && startTime == 0) { // wait until execution actually starts
+                Thread.sleep(1000);
+            }
+
+            synchronized (this) { // since run() is synchronized, this will wait until execution is complete
+                waitForAck();
+            }
         }
     }
 }

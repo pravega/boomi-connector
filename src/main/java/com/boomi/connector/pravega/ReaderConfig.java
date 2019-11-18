@@ -8,10 +8,12 @@ import java.util.UUID;
 class ReaderConfig extends PravegaConfig {
     public static final long DEFAULT_READ_TIMEOUT = 2000; // ms
     public static final long DEFAULT_MAX_READ_TIME = 30; // seconds
+    public static final long DEFAULT_MAX_EVENTS = 100000; // events
 
     private String readerGroup;
     private long readTimeout;
     private long maxReadTimePerExecution;
+    private long maxEventsPerExecution;
 
     public ReaderConfig() {
     }
@@ -22,6 +24,7 @@ class ReaderConfig extends PravegaConfig {
         setReaderGroup((String) getOrDefault(props, Constants.READER_GROUP_PROPERTY, "boomi-reader-" + UUID.randomUUID().toString()));
         setReadTimeout((long) getOrDefault(props, Constants.READ_TIMEOUT_PROPERTY, DEFAULT_READ_TIMEOUT));
         setMaxReadTimePerExecution((long) getOrDefault(props, Constants.MAX_READ_TIME_PER_EXECUTION_PROPERTY, DEFAULT_MAX_READ_TIME));
+        setMaxEventsPerExecution((long) getOrDefault(props, Constants.MAX_EVENTS_PER_EXECUTION_PROPERTY, DEFAULT_MAX_EVENTS));
     }
 
     public String getReaderGroup() {
@@ -46,5 +49,13 @@ class ReaderConfig extends PravegaConfig {
 
     public void setMaxReadTimePerExecution(long maxReadTimePerExecution) {
         this.maxReadTimePerExecution = maxReadTimePerExecution;
+    }
+
+    public long getMaxEventsPerExecution() {
+        return maxEventsPerExecution;
+    }
+
+    public void setMaxEventsPerExecution(long maxEventsPerExecution) {
+        this.maxEventsPerExecution = maxEventsPerExecution;
     }
 }

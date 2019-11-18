@@ -6,6 +6,7 @@ import io.pravega.client.EventStreamClientFactory;
 import io.pravega.client.stream.EventRead;
 import io.pravega.client.stream.EventStreamReader;
 import io.pravega.client.stream.ReinitializationRequiredException;
+import io.pravega.client.stream.TruncatedDataException;
 import io.pravega.client.stream.impl.UTF8StringSerializer;
 
 import java.io.ByteArrayInputStream;
@@ -52,40 +53,49 @@ public class PravegaQueryOperation extends BaseQueryOperation implements AutoClo
             logger.info(String.format("Reading events from %s/%s", readerConfig.getScope(), readerConfig.getStream()));
             EventRead<String> event = null;
             long maxDuration = readerConfig.getMaxReadTimePerExecution() * 1000; // convert to ms
+            long maxEvents = readerConfig.getMaxEventsPerExecution();
             do {
                 try {
                     event = reader.readNextEvent(readerConfig.getReadTimeout());
                     if (event.getEvent() != null) {
                         eventCounter++;
                         logger.log(Level.FINE, String.format("Read event size: %d", event.getEvent().length()));
-                        response.addPartialResult(input, OperationStatus.SUCCESS, "OK",
-                                "OK", ResponseUtil.toPayload(new ByteArrayInputStream(event.getEvent().getBytes())));
+                        response.addPartialResult(input, OperationStatus.SUCCESS, "OK", null,
+                                ResponseUtil.toPayload(new ByteArrayInputStream(event.getEvent().getBytes())));
                     }
                 } catch (ReinitializationRequiredException e) {
                     // There are certain circumstances where the reader needs to be reinitialized
                     // TODO: what needs to be done here?  if we re-initialize, how do we resume?
                     logger.log(Level.WARNING, "Caught ReinitializationRequiredException - Pravega client needs to be reinitialized", e);
+                } catch (TruncatedDataException e) {
+                    // Assuming nothing needs to be done here and that the next call to readNextEvent() will return the next event
+                    logger.log(Level.WARNING, "Caught TruncatedDataException", e);
                 }
                 // keep looping as long as:
                 // - an event was read OR we hit a checkpoint
                 //   AND
                 // - maximum execution time has been set (greater than 0) AND our execution time is under that
+                //   AND
+                // - number of events read is less than to the maximum events per execution
             } while ((event.getEvent() != null || event.isCheckpoint())
-                    && (maxDuration > 0 && System.currentTimeMillis() - executionStartTime < maxDuration));
+                    && (maxDuration > 0 && System.currentTimeMillis() - executionStartTime < maxDuration)
+                    && (maxEvents > 0 && eventCounter < maxEvents));
 
             if (event.getEvent() == null)
                 logger.log(Level.INFO, String.format("No more events from %s/%s: exiting", readerConfig.getScope(), readerConfig.getStream()));
             else
                 logger.log(Level.INFO, String.format("Hit maximum read time (start: %d ms, now: %d ms, max: %d seconds): exiting",
                         executionStartTime, System.currentTimeMillis(), readerConfig.getMaxReadTimePerExecution()));
-        } catch (Exception e) {
-            logger.log(Level.SEVERE, String.format("Error reading from %s/%s", readerConfig.getScope(), readerConfig.getStream()), e);
-            ResponseUtil.addExceptionFailure(response, input, e);
+
+            logger.log(Level.INFO, String.format("Read %d events in %d ms", eventCounter, System.currentTimeMillis() - executionStartTime));
+
+            if (eventCounter > 0) response.finishPartialResult(input);
+            else response.addEmptyResult(input, OperationStatus.SUCCESS, "OK", null);
+
+        } catch (Throwable t) {
+            logger.log(Level.SEVERE, String.format("Error reading from %s/%s", readerConfig.getScope(), readerConfig.getStream()), t);
+            ResponseUtil.addExceptionFailure(response, input, t);
         }
-
-        logger.log(Level.INFO, String.format("Read %d events in %d ms", eventCounter, System.currentTimeMillis() - executionStartTime));
-
-        response.finishPartialResult(input);
     }
 
     // Idempotent
