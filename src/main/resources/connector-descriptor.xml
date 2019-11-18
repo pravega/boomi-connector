@@ -30,7 +30,7 @@
     </field>
     <testConnection method="CUSTOM"/>
     <operation types="QUERY" supportsBrowse="false">
-        <field id="readerGroup" label="Pravega Reader Group" type="integer">
+        <field id="readerGroup" label="Pravega Reader Group" type="string">
             <helpText>The name of the reader group for this reader within Pravega. Naming the reader group will maintain
                 the reader's position in the stream. Note: multiple readers sharing the same reader group will never see
                 the same event twice. If different readers each need to process all events in the stream, they should
@@ -61,14 +61,10 @@
                 Routing Key below as a JSON reference (i.e. a value of "myVar" will look for the "myVar" key in the JSON
                 of each event, and use its corresponding value as the routing key for that event).
             </helpText>
-            <allowedValue label="This option will use the literal value of the Routing Key below as the routing key for
-            every message.">
+            <allowedValue>
                 <value>Fixed</value>
             </allowedValue>
-            <allowedValue label="This option specifies that the event data is JSON and the routing key will be extracted
-            from the body using the Routing Key below as a JSON reference (i.e. a value of &quot;myVar&quot; will look
-            for the &quot;myVar&quot; key in the JSON of each event, and use its corresponding value as the routing key
-            for that event).">
+            <allowedValue>
                 <value>JsonReference</value>
             </allowedValue>
         </field>
@@ -76,8 +72,7 @@
             <helpText>The routing key to use for each event written to the stream. If the Routing Key Type is "Fixed",
                 this value will be used literally and will be the same for every event. If the Routing Key Type is
                 "JsonReference", the routing key for each event will be evaluated from the JSON body, using the
-                reference
-                provided here.
+                reference provided here.
             </helpText>
         </field>
     </operation>
