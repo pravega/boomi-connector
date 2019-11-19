@@ -22,4 +22,8 @@ mvn install:install-file -Dfile=connector-sdk-test-util-1.3.2.jar -DgroupId=com.
 ```
 ./gradlew distZip
 ```
-This will build a connector package which you can upload to your Boomi account.
+This will build a connector package which you can upload to your Boomi account. Note that this jar only includes the connector classes and no dependencies. This is because there is a 10MB size limitation on connector package uploads in the Boomi platform site and the connector dependencies total more than that (about 13MB). You will need to upload and create a custom library for the connector in your Boomi account before it will function properly.
+```
+./gradlew dependencyJar
+```
+This will build a fat jar with all of the dependencies required for the connector to work.
