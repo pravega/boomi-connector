@@ -26,4 +26,4 @@ This will build a connector package which you can upload to your Boomi account. 
 ```
 ./gradlew dependencyJar
 ```
-This will build a fat jar with all of the dependencies required for the connector to work.
+This will build a fat jar with all of the dependencies required for the connector to work. Upload this as an account library and create a custom library for the Pravega connector and deploy it to any environment that will run the connector.
