@@ -21,7 +21,7 @@ public class PravegaBrowserTest {
 
     @BeforeAll
     public static void beforeAll() throws Exception {
-        localPravega = PravegaHelper.startStandalone();
+        localPravega = TestUtils.startStandalone();
     }
 
     @AfterAll
@@ -31,53 +31,51 @@ public class PravegaBrowserTest {
 
     @Test
     public void testTestConnectorBadPort() throws Exception {
-        try (PravegaTestConnector connector = new PravegaTestConnector()) {
-            ConnectorTester tester = new ConnectorTester(connector);
+        PravegaConnector connector = new PravegaConnector();
+        ConnectorTester tester = new ConnectorTester(connector);
 
-            Map<String, Object> connProps = new HashMap<>();
-            connProps.put(Constants.CONTROLLER_URI_PROPERTY, "tcp://localhost:8123");
-            connProps.put(Constants.SCOPE_PROPERTY, "foo");
-            connProps.put(Constants.STREAM_PROPERTY, "bar");
+        Map<String, Object> connProps = new HashMap<>();
+        connProps.put(Constants.CONTROLLER_URI_PROPERTY, "tcp://localhost:8123");
+        connProps.put(Constants.SCOPE_PROPERTY, "foo");
+        connProps.put(Constants.STREAM_PROPERTY, "bar");
 
-            Map<String, Object> opProps = new HashMap<>();
+        Map<String, Object> opProps = new HashMap<>();
 
-            tester.setOperationContext(OperationType.QUERY, connProps, opProps, null, null);
+        tester.setOperationContext(OperationType.QUERY, connProps, opProps, null, null);
 
-            ConnectionTester connTester = new PravegaBrowser(tester.getOperationContext());
+        ConnectionTester connTester = new PravegaBrowser(tester.getOperationContext());
 
-            try {
-                connTester.testConnection();
-                Assertions.fail("connection test should have failed");
-            } catch (ConnectorException e) {
-                Assertions.assertFalse(e.getCause() instanceof NoSuchScopeException);
-            }
+        try {
+            connTester.testConnection();
+            Assertions.fail("connection test should have failed");
+        } catch (ConnectorException e) {
+            Assertions.assertFalse(e.getCause() instanceof NoSuchScopeException);
         }
     }
 
     @Test
     public void testTestConnectorBadScope() throws Exception {
         String scope = "foo234", stream = "bar";
-        try (PravegaTestConnector connector = new PravegaTestConnector()) {
-            ConnectorTester tester = new ConnectorTester(connector);
+        PravegaConnector connector = new PravegaConnector();
+        ConnectorTester tester = new ConnectorTester(connector);
 
-            Map<String, Object> connProps = new HashMap<>();
-            connProps.put(Constants.CONTROLLER_URI_PROPERTY, "tcp://localhost:9090");
-            connProps.put(Constants.SCOPE_PROPERTY, scope);
-            connProps.put(Constants.STREAM_PROPERTY, stream);
-            connProps.put(Constants.CREATE_SCOPE_PROPERTY, false);
+        Map<String, Object> connProps = new HashMap<>();
+        connProps.put(Constants.CONTROLLER_URI_PROPERTY, "tcp://localhost:9090");
+        connProps.put(Constants.SCOPE_PROPERTY, scope);
+        connProps.put(Constants.STREAM_PROPERTY, stream);
+        connProps.put(Constants.CREATE_SCOPE_PROPERTY, false);
 
-            Map<String, Object> opProps = new HashMap<>();
+        Map<String, Object> opProps = new HashMap<>();
 
-            tester.setOperationContext(OperationType.QUERY, connProps, opProps, null, null);
+        tester.setOperationContext(OperationType.QUERY, connProps, opProps, null, null);
 
-            ConnectionTester connTester = new PravegaBrowser(tester.getOperationContext());
+        ConnectionTester connTester = new PravegaBrowser(tester.getOperationContext());
 
-            try {
-                connTester.testConnection();
-                Assertions.fail("connection test should have failed");
-            } catch (ConnectorException e) {
-                Assertions.assertTrue(e.getCause() instanceof NoSuchScopeException);
-            }
+        try {
+            connTester.testConnection();
+            Assertions.fail("connection test should have failed");
+        } catch (ConnectorException e) {
+            Assertions.assertTrue(e.getCause() instanceof NoSuchScopeException);
         }
     }
 
@@ -85,7 +83,7 @@ public class PravegaBrowserTest {
     public void testTestConnectorSuccess() throws Exception {
         String scope = "foo", stream = "bar";
         PravegaConfig pravegaConfig = new PravegaConfig();
-        pravegaConfig.setControllerUri(new URI(PravegaOperationTest.PRAVEGA_CONTROLLER_URI));
+        pravegaConfig.setControllerUri(new URI(TestUtils.PRAVEGA_CONTROLLER_URI));
         pravegaConfig.setScope(scope);
         pravegaConfig.setStream(stream);
         pravegaConfig.setCreateScope(true);
@@ -94,26 +92,25 @@ public class PravegaBrowserTest {
         EventStreamClientFactory clientFactory = PravegaUtil.createClientFactory(pravegaConfig);
         clientFactory.close();
 
-        try (PravegaTestConnector connector = new PravegaTestConnector()) {
-            ConnectorTester tester = new ConnectorTester(connector);
+        PravegaConnector connector = new PravegaConnector();
+        ConnectorTester tester = new ConnectorTester(connector);
 
-            Map<String, Object> connProps = new HashMap<>();
-            connProps.put(Constants.CONTROLLER_URI_PROPERTY, PravegaOperationTest.PRAVEGA_CONTROLLER_URI);
-            connProps.put(Constants.SCOPE_PROPERTY, scope);
-            connProps.put(Constants.STREAM_PROPERTY, stream);
-            connProps.put(Constants.CREATE_SCOPE_PROPERTY, true);
+        Map<String, Object> connProps = new HashMap<>();
+        connProps.put(Constants.CONTROLLER_URI_PROPERTY, TestUtils.PRAVEGA_CONTROLLER_URI);
+        connProps.put(Constants.SCOPE_PROPERTY, scope);
+        connProps.put(Constants.STREAM_PROPERTY, stream);
+        connProps.put(Constants.CREATE_SCOPE_PROPERTY, true);
 
-            Map<String, Object> opProps = new HashMap<>();
+        Map<String, Object> opProps = new HashMap<>();
 
-            tester.setOperationContext(OperationType.QUERY, connProps, opProps, null, null);
+        tester.setOperationContext(OperationType.QUERY, connProps, opProps, null, null);
 
-            ConnectionTester connTester = new PravegaBrowser(tester.getOperationContext());
+        ConnectionTester connTester = new PravegaBrowser(tester.getOperationContext());
 
-            try {
-                connTester.testConnection();
-            } catch (ConnectorException e) {
-                Assertions.fail("connection test should have succeeded", e);
-            }
+        try {
+            connTester.testConnection();
+        } catch (ConnectorException e) {
+            Assertions.fail("connection test should have succeeded", e);
         }
     }
 }
