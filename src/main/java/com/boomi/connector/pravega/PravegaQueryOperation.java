@@ -11,35 +11,34 @@ import io.pravega.client.stream.impl.UTF8StringSerializer;
 
 import java.io.ByteArrayInputStream;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class PravegaQueryOperation extends BaseQueryOperation implements AutoCloseable {
+public class PravegaQueryOperation extends BaseQueryOperation {
     private static final Logger logger = Logger.getLogger(PravegaQueryOperation.class.getName());
 
     private ReaderConfig readerConfig;
-    private EventStreamClientFactory clientFactory;
-    private EventStreamReader<String> reader;
-    private AtomicBoolean closed = new AtomicBoolean(false);
 
     PravegaQueryOperation(OperationContext context) {
         super(context);
         readerConfig = new ReaderConfig(context);
 
-        // create client factory
-        // TODO: find an appropriate way to cache client factories while facilitating cleanup
-        //  (this instance is not closed automatically)
-        clientFactory = PravegaUtil.createClientFactory(readerConfig);
-
         // create reader group
         PravegaUtil.createReaderGroup(readerConfig);
+    }
 
-        // create event reader
-        reader = clientFactory.createReader(UUID.randomUUID().toString(), readerConfig.getReaderGroup(),
+    // caller must close
+    private EventStreamReader<String> createReader(EventStreamClientFactory clientFactory) {
+        return clientFactory.createReader(UUID.randomUUID().toString(), readerConfig.getReaderGroup(),
                 new UTF8StringSerializer(), io.pravega.client.stream.ReaderConfig.builder().build());
     }
 
+    /**
+     * Note: The Boomi execution process (which is a black box to us) does not have any mechanism to explicitly close
+     * connectors or operation resources, and we *must* close the reader instance if it will no longer be used,
+     * otherwise it will continue to own the segments assigned by the reader group and starve all other readers of the
+     * stream. Therefore, we must explicitly close the reader after every execution (we have no other choice).
+     */
     @Override
     protected void executeQuery(QueryRequest request, OperationResponse response) {
         Logger logger = response.getLogger();
@@ -47,8 +46,9 @@ public class PravegaQueryOperation extends BaseQueryOperation implements AutoClo
         long executionStartTime = System.currentTimeMillis();
         long eventCounter = 0;
 
-        try {
-            if (closed.get()) throw new IllegalStateException("This operation instance has been closed");
+        EventStreamReader<String> reader = null;
+        try (EventStreamClientFactory clientFactory = PravegaUtil.createClientFactory(readerConfig)) {
+            reader = createReader(clientFactory); // this should be closed when the clientFactory is closed
 
             logger.info(String.format("Reading events from %s/%s", readerConfig.getScope(), readerConfig.getStream()));
             EventRead<String> event = null;
@@ -65,8 +65,9 @@ public class PravegaQueryOperation extends BaseQueryOperation implements AutoClo
                     }
                 } catch (ReinitializationRequiredException e) {
                     // There are certain circumstances where the reader needs to be reinitialized
-                    // TODO: what needs to be done here?  if we re-initialize, how do we resume?
                     logger.log(Level.WARNING, "Caught ReinitializationRequiredException - Pravega client needs to be reinitialized", e);
+                    close(reader);
+                    reader = createReader(clientFactory);
                 } catch (TruncatedDataException e) {
                     // Assuming nothing needs to be done here and that the next call to readNextEvent() will return the next event
                     logger.log(Level.WARNING, "Caught TruncatedDataException", e);
@@ -74,15 +75,17 @@ public class PravegaQueryOperation extends BaseQueryOperation implements AutoClo
                 // keep looping as long as:
                 // - an event was read OR we hit a checkpoint
                 //   AND
-                // - maximum execution time has been set (greater than 0) AND our execution time is under that
+                // - our execution time is under the maximum execution time (if set)
                 //   AND
-                // - number of events read is less than to the maximum events per execution
+                // - number of events read is less than the maximum events to read (if set)
             } while ((event.getEvent() != null || event.isCheckpoint())
-                    && (maxDuration > 0 && System.currentTimeMillis() - executionStartTime < maxDuration)
-                    && (maxEvents > 0 && eventCounter < maxEvents));
+                    && (maxDuration <= 0 || System.currentTimeMillis() - executionStartTime < maxDuration)
+                    && (maxEvents <= 0 || eventCounter < maxEvents));
 
             if (event.getEvent() == null)
                 logger.log(Level.INFO, String.format("No more events from %s/%s: exiting", readerConfig.getScope(), readerConfig.getStream()));
+            else if (maxEvents > 0 && eventCounter >= maxEvents)
+                logger.log(Level.INFO, String.format("Hit maximum event count(read: %d, max: %d): exiting", eventCounter, maxEvents));
             else
                 logger.log(Level.INFO, String.format("Hit maximum read time (start: %d ms, now: %d ms, max: %d seconds): exiting",
                         executionStartTime, System.currentTimeMillis(), readerConfig.getMaxReadTimePerExecution()));
@@ -92,35 +95,22 @@ public class PravegaQueryOperation extends BaseQueryOperation implements AutoClo
             if (eventCounter > 0) response.finishPartialResult(input);
             else response.addEmptyResult(input, OperationStatus.SUCCESS, "OK", null);
 
+            // make sure we close the reader before the client is closed, otherwise it seems the reader is not properly
+            // removed from the reader group and may starve other readers in that group (i.e. in subsequent executions)
+            close(reader);
         } catch (Throwable t) {
             logger.log(Level.SEVERE, String.format("Error reading from %s/%s", readerConfig.getScope(), readerConfig.getStream()), t);
             ResponseUtil.addExceptionFailure(response, input, t);
+            close(reader);
         }
     }
 
-    // Idempotent
     // Exception free
-    @Override
-    public synchronized void close() {
-        if (closed.compareAndSet(false, true)) {
-            if (reader != null) try {
-                reader.close();
-            } catch (Throwable t) {
-                logger.log(Level.WARNING, "Could not close Pravega reader", t);
-            }
-            reader = null;
-            if (clientFactory != null) try {
-                clientFactory.close();
-            } catch (Throwable t) {
-                logger.log(Level.WARNING, "Could not close Pravega client factory", t);
-            }
-            clientFactory = null;
+    private void close(EventStreamReader reader) {
+        if (reader != null) try {
+            reader.close();
+        } catch (Throwable t) {
+            logger.log(Level.WARNING, "Could not close Pravega reader", t);
         }
-    }
-
-    @Override
-    protected void finalize() throws Throwable {
-        close();
-        super.finalize();
     }
 }
