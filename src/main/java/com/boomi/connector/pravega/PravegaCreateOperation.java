@@ -77,7 +77,7 @@ public class PravegaCreateOperation extends BaseUpdateOperation {
             // wait for writes to complete before returning; Boomi will complain if we don't generate a response for every
             // input document
             for (CompletableFuture future : futures) {
-                // this is likely fatal, so bubble exceptions
+                // an exception here is likely fatal, so bubble it up
                 future.join();
             }
         }

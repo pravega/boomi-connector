@@ -48,7 +48,7 @@ public class PravegaQueryOperation extends BaseQueryOperation {
 
         EventStreamReader<String> reader = null;
         try (EventStreamClientFactory clientFactory = PravegaUtil.createClientFactory(readerConfig)) {
-            reader = createReader(clientFactory); // this should be closed when the clientFactory is closed
+            reader = createReader(clientFactory);
 
             logger.info(String.format("Reading events from %s/%s", readerConfig.getScope(), readerConfig.getStream()));
             EventRead<String> event = null;
