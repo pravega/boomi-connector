@@ -9,12 +9,12 @@ import com.boomi.connector.util.BaseConnector;
 public class PravegaConnector extends BaseConnector {
     @Override
     protected Operation createQueryOperation(OperationContext context) {
-        return new PravegaQueryOperation(context);
+        return new PravegaReadOperation(context);
     }
 
     @Override
     protected Operation createCreateOperation(OperationContext context) {
-        return new PravegaCreateOperation(context);
+        return new PravegaWriteOperation(context);
     }
 
     @Override

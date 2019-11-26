@@ -40,8 +40,8 @@ public class PravegaOperationTest {
     private static ClientConfig clientConfig = ClientConfig.builder().controllerURI(URI.create(TestUtils.PRAVEGA_CONTROLLER_URI)).build();
     private static InProcPravegaCluster localPravega;
     private static EventStreamClientFactory pravegaClientFactory;
-    private static EventStreamWriter<String> pravegaQueryOperationWriter;
-    private static EventStreamReader<String> pravegaCreateOperationReader;
+    private static EventStreamWriter<String> pravegaReadOperationWriter;
+    private static EventStreamReader<String> pravegaWriteOperationReader;
 
     @BeforeAll
     public static void classSetup() throws Exception {
@@ -51,11 +51,11 @@ public class PravegaOperationTest {
         pravegaClientFactory = initClient();
 
         // init Query operation test writer
-        pravegaQueryOperationWriter = pravegaClientFactory.createEventWriter(QUERY_OPERATION_STREAM,
+        pravegaReadOperationWriter = pravegaClientFactory.createEventWriter(QUERY_OPERATION_STREAM,
                 new UTF8StringSerializer(), EventWriterConfig.builder().build());
 
         // init Create operation test reader
-        pravegaCreateOperationReader = pravegaClientFactory.createReader(UUID.randomUUID().toString(), CREATE_OPERATION_READER_GROUP,
+        pravegaWriteOperationReader = pravegaClientFactory.createReader(UUID.randomUUID().toString(), CREATE_OPERATION_READER_GROUP,
                 new UTF8StringSerializer(), io.pravega.client.stream.ReaderConfig.builder().build());
     }
 
@@ -78,8 +78,8 @@ public class PravegaOperationTest {
     @AfterAll
     public static void classTearDown() throws Exception {
         // shut down client
-        if (pravegaCreateOperationReader != null) pravegaCreateOperationReader.close();
-        if (pravegaQueryOperationWriter != null) pravegaQueryOperationWriter.close();
+        if (pravegaWriteOperationReader != null) pravegaWriteOperationReader.close();
+        if (pravegaReadOperationWriter != null) pravegaReadOperationWriter.close();
         if (pravegaClientFactory != null) pravegaClientFactory.close();
 
         // shut down Pravega stand-alone
@@ -87,7 +87,7 @@ public class PravegaOperationTest {
     }
 
     @Test
-    public void testCreateWithJsonRoutingKey() {
+    public void testWriteWithJsonRoutingKey() {
         String json = TestUtils.generateJsonMessage();
         PravegaConnector connector = new PravegaConnector();
         ConnectorTester tester = new ConnectorTester(connector);
@@ -113,7 +113,7 @@ public class PravegaOperationTest {
         // read from stream and verify event data
         EventRead<String> event;
         do {
-            event = pravegaCreateOperationReader.readNextEvent(READ_TIMEOUT);
+            event = pravegaWriteOperationReader.readNextEvent(READ_TIMEOUT);
         } while (event.isCheckpoint());
 
         // validate message data
@@ -122,7 +122,7 @@ public class PravegaOperationTest {
     }
 
     @Test
-    public void testCreateOperation() {
+    public void testWriteOperation() {
         String json = TestUtils.generateJsonMessage();
         PravegaConnector connector = new PravegaConnector();
         ConnectorTester tester = new ConnectorTester(connector);
@@ -148,7 +148,7 @@ public class PravegaOperationTest {
         // read from stream and verify event data
         EventRead<String> event;
         do {
-            event = pravegaCreateOperationReader.readNextEvent(READ_TIMEOUT);
+            event = pravegaWriteOperationReader.readNextEvent(READ_TIMEOUT);
         } while (event.isCheckpoint());
 
         // validate message data
@@ -157,7 +157,7 @@ public class PravegaOperationTest {
     }
 
     @Test
-    public void testCreateWithNullRoutingKeyType() {
+    public void testWriteWithNullRoutingKeyType() {
         String json = TestUtils.generateJsonMessage();
         PravegaConnector connector = new PravegaConnector();
         ConnectorTester tester = new ConnectorTester(connector);
@@ -181,7 +181,7 @@ public class PravegaOperationTest {
         // read from stream and verify event data
         EventRead<String> event;
         do {
-            event = pravegaCreateOperationReader.readNextEvent(READ_TIMEOUT);
+            event = pravegaWriteOperationReader.readNextEvent(READ_TIMEOUT);
         } while (event.isCheckpoint());
 
         // validate message data
@@ -190,7 +190,7 @@ public class PravegaOperationTest {
     }
 
     @Test
-    public void testCreateMultipleDocuments() {
+    public void testWriteMultipleDocuments() {
         String[] messages = {TestUtils.generateJsonMessage(), TestUtils.generateJsonMessage(), TestUtils.generateJsonMessage()};
         PravegaConnector connector = new PravegaConnector();
         ConnectorTester tester = new ConnectorTester(connector);
@@ -221,7 +221,7 @@ public class PravegaOperationTest {
         for (String message : messages) {
             EventRead<String> event;
             do {
-                event = pravegaCreateOperationReader.readNextEvent(READ_TIMEOUT);
+                event = pravegaWriteOperationReader.readNextEvent(READ_TIMEOUT);
             } while (event.isCheckpoint());
             assertNotNull(event.getEvent());
             assertEquals(message, event.getEvent());
@@ -229,7 +229,7 @@ public class PravegaOperationTest {
     }
 
     @Test
-    public void testQueryOperation() throws Exception {
+    public void testReadOperation() throws Exception {
         String json = TestUtils.generateJsonMessage();
         PravegaConnector connector = new PravegaConnector();
         ConnectorTester tester = new ConnectorTester(connector);
@@ -244,7 +244,7 @@ public class PravegaOperationTest {
         opProps.put(Constants.READ_TIMEOUT_PROPERTY, 5000L);
 
         // write test event to stream first
-        pravegaQueryOperationWriter.writeEvent(json).get();
+        pravegaReadOperationWriter.writeEvent(json).get();
 
         // execute the connector to read the event
         tester.setOperationContext(OperationType.QUERY, connProps, opProps, null, null);
@@ -262,7 +262,7 @@ public class PravegaOperationTest {
     }
 
     @Test
-    public void testQueryWithMultipleDocuments() throws Exception {
+    public void testReadWithMultipleDocuments() throws Exception {
         String[] messages = {TestUtils.generateJsonMessage(), TestUtils.generateJsonMessage(), TestUtils.generateJsonMessage()};
         PravegaConnector connector = new PravegaConnector();
         ConnectorTester tester = new ConnectorTester(connector);
@@ -278,7 +278,7 @@ public class PravegaOperationTest {
 
         // write test events to stream first
         for (String message : messages) {
-            pravegaQueryOperationWriter.writeEvent(message).get();
+            pravegaReadOperationWriter.writeEvent(message).get();
         }
 
         // execute the connector to read the events
