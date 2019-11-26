@@ -1,4 +1,4 @@
-package com.boomi.connector.pravega;
+package io.pravega.connector.boomi;
 
 import com.boomi.connector.api.ConnectionTester;
 import com.boomi.connector.api.ConnectorException;
