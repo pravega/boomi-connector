@@ -1,4 +1,4 @@
-package com.boomi.connector.pravega;
+package io.pravega.connector.boomi;
 
 import io.pravega.client.ClientConfig;
 import io.pravega.client.admin.StreamManager;

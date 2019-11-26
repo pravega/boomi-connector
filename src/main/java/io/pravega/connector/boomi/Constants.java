@@ -8,7 +8,7 @@
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
  */
-package com.boomi.connector.pravega;
+package io.pravega.connector.boomi;
 
 public class Constants {
     static final String CONTROLLER_URI_PROPERTY = "controllerUri";
