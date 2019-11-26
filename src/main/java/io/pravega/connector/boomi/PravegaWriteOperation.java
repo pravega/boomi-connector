@@ -17,12 +17,12 @@ import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class PravegaCreateOperation extends BaseUpdateOperation {
-    private static final Logger logger = Logger.getLogger(PravegaCreateOperation.class.getName());
+public class PravegaWriteOperation extends BaseUpdateOperation {
+    private static final Logger logger = Logger.getLogger(PravegaWriteOperation.class.getName());
 
     private WriterConfig writerConfig;
 
-    PravegaCreateOperation(OperationContext context) {
+    PravegaWriteOperation(OperationContext context) {
         super(context);
         writerConfig = new WriterConfig(context);
     }

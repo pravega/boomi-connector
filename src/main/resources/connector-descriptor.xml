@@ -29,11 +29,12 @@
         <helpText>The Pravega user's password.</helpText>
     </field>
     <testConnection method="CUSTOM"/>
-    <operation types="QUERY" supportsBrowse="false">
+    <operation types="QUERY" supportsBrowse="false" customTypeLabel="Read">
         <field id="readerGroup" label="Pravega Reader Group" type="string">
-            <helpText>The name of the reader group for this reader within Pravega. Naming the reader group will maintain
-                the reader's position in the stream. Note: multiple readers sharing the same reader group will never see
-                the same event twice. If different readers each need to process all events in the stream, they should
+            <helpText>The name of the reader group for this reader within Pravega. Each reader group will maintain
+                its position in the stream between executions. Note: a reader group will distribute events between its
+                readers. Be careful when naming your reader group so that you do not mistakenly share events with
+                another reader. If different readers each need to process all events in the stream, they should
                 use different reader groups.
             </helpText>
         </field>
@@ -54,7 +55,7 @@
             </helpText>
             <defaultValue>100000</defaultValue>
         </field>
-        <field id="maxReadTimePerExecution" label="Max Read Time per Execution" type="integer">
+        <field id="maxReadTimePerExecution" label="Max Read Time per Execution (seconds)" type="integer">
             <helpText>For each execution of the operation, The maximum number of seconds the reader will read and
                 collect events from the stream before moving to the next component in the process. For example, if this
                 is set to 30 seconds, the operation will spend a maximum of 30 seconds reading events from the stream.
@@ -66,7 +67,7 @@
             <defaultValue>30</defaultValue>
         </field>
     </operation>
-    <operation types="CREATE" supportsBrowse="false">
+    <operation types="CREATE" supportsBrowse="false" customTypeLabel="Write">
         <field id="routingKeyType" label="Routing Key Type" type="string">
             <helpText>The type of routing key to use for each event.
                 "Fixed" means to use the literal value of the Routing Key below.

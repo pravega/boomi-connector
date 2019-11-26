@@ -14,12 +14,12 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class PravegaQueryOperation extends BaseQueryOperation {
-    private static final Logger logger = Logger.getLogger(PravegaQueryOperation.class.getName());
+public class PravegaReadOperation extends BaseQueryOperation {
+    private static final Logger logger = Logger.getLogger(PravegaReadOperation.class.getName());
 
     private ReaderConfig readerConfig;
 
-    PravegaQueryOperation(OperationContext context) {
+    PravegaReadOperation(OperationContext context) {
         super(context);
         readerConfig = new ReaderConfig(context);
 
