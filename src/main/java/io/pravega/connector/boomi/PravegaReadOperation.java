@@ -29,7 +29,10 @@ public class PravegaReadOperation extends BaseQueryOperation {
 
     // caller must close
     private EventStreamReader<String> createReader(EventStreamClientFactory clientFactory) {
-        return clientFactory.createReader(UUID.randomUUID().toString(), readerConfig.getReaderGroup(),
+        String readerId = UUID.randomUUID().toString();
+        logger.info(String.format("Creating reader for stream %s / %s using group %s and ID %s",
+                readerConfig.getScope(), readerConfig.getStream(), readerConfig.getReaderGroup(), readerId));
+        return clientFactory.createReader(readerId, readerConfig.getReaderGroup(),
                 new UTF8StringSerializer(), io.pravega.client.stream.ReaderConfig.builder().build());
     }
 
@@ -99,9 +102,9 @@ public class PravegaReadOperation extends BaseQueryOperation {
             // removed from the reader group and may starve other readers in that group (i.e. in subsequent executions)
             close(reader);
         } catch (Throwable t) {
+            close(reader);
             logger.log(Level.SEVERE, String.format("Error reading from %s/%s", readerConfig.getScope(), readerConfig.getStream()), t);
             ResponseUtil.addExceptionFailure(response, input, t);
-            close(reader);
         }
     }
 

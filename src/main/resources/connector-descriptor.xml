@@ -4,13 +4,13 @@
 <!--                            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"-->
 <!--                            xsi:schemaLocation="http://www.boomi.com/connector/descriptor genericconnectordesc.xsd">-->
     <field id="controllerUri" label="URI" type="string">
-        <helpText>The URI to the Pravega controller in the form tcp://host:port</helpText>
+        <helpText>(Required) The URI to the Pravega controller in the form tcp://host:port</helpText>
     </field>
     <field id="scope" label="Scope" type="string">
-        <helpText>The Pravega scope containing the data stream.</helpText>
+        <helpText>(Required) The Pravega scope containing the data stream.</helpText>
     </field>
     <field id="stream" label="Stream Name" type="string">
-        <helpText>The name of the data stream.</helpText>
+        <helpText>(Required) The name of the data stream.</helpText>
     </field>
     <field id="createScope" label="Create Scope" type="boolean">
         <helpText>When checked, Pravega scope will be automatically created. Only enable this if Pravega is running in
@@ -31,10 +31,10 @@
     <testConnection method="CUSTOM"/>
     <operation types="QUERY" supportsBrowse="false" customTypeLabel="Read">
         <field id="readerGroup" label="Pravega Reader Group" type="string">
-            <helpText>The name of the reader group for this reader within Pravega. Each reader group will maintain
-                its position in the stream between executions. Note: a reader group will distribute events between its
-                readers. Be careful when naming your reader group so that you do not mistakenly share events with
-                another reader. If different readers each need to process all events in the stream, they should
+            <helpText>(Required) The name of the reader group for this reader within Pravega. Each reader group will
+                maintain its position in the stream between executions. Note: a reader group will distribute events
+                between its readers. Be careful when naming your reader group so that you do not mistakenly share events
+                with another reader. If different readers each need to process all events in the stream, they should
                 use different reader groups.
             </helpText>
         </field>

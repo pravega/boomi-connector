@@ -1,9 +1,9 @@
 package io.pravega.connector.boomi;
 
+import com.boomi.connector.api.ConnectorException;
 import com.boomi.connector.api.OperationContext;
 
 import java.util.Map;
-import java.util.UUID;
 
 class ReaderConfig extends PravegaConfig {
     public static final long DEFAULT_READ_TIMEOUT = 2000; // ms
@@ -21,7 +21,13 @@ class ReaderConfig extends PravegaConfig {
     public ReaderConfig(OperationContext context) {
         super(context);
         Map<String, Object> props = context.getOperationProperties();
-        setReaderGroup((String) getOrDefault(props, Constants.READER_GROUP_PROPERTY, "boomi-reader-" + UUID.randomUUID().toString()));
+
+        // reader group should always be set
+        String readerGroup = (String) props.get(Constants.READER_GROUP_PROPERTY);
+        if (readerGroup == null || readerGroup.trim().length() == 0)
+            throw new ConnectorException("Reader Group must be set");
+
+        setReaderGroup(readerGroup);
         setReadTimeout((long) getOrDefault(props, Constants.READ_TIMEOUT_PROPERTY, DEFAULT_READ_TIMEOUT));
         setMaxReadTimePerExecution((long) getOrDefault(props, Constants.MAX_READ_TIME_PER_EXECUTION_PROPERTY, DEFAULT_MAX_READ_TIME));
         setMaxEventsPerExecution((long) getOrDefault(props, Constants.MAX_EVENTS_PER_EXECUTION_PROPERTY, DEFAULT_MAX_EVENTS));
