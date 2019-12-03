@@ -66,7 +66,7 @@ public class PravegaOperationTest {
 
         // create Create operation test reader group
         ReaderGroupConfig readerGroupConfig = ReaderGroupConfig.builder()
-                .groupRefreshTimeMillis(0).stream(Stream.of(PRAVEGA_SCOPE, CREATE_OPERATION_STREAM)).build();
+                .stream(Stream.of(PRAVEGA_SCOPE, CREATE_OPERATION_STREAM)).build();
         try (ReaderGroupManager readerGroupManager = ReaderGroupManager.withScope(PRAVEGA_SCOPE, clientConfig)) {
             readerGroupManager.createReaderGroup(CREATE_OPERATION_READER_GROUP, readerGroupConfig);
         }
@@ -321,7 +321,7 @@ public class PravegaOperationTest {
         connProps.put(Constants.STREAM_PROPERTY, stream);
 
         Map<String, Object> opProps = new HashMap<>();
-        // no reader group specified, so Query operation will generate a unique reader group
+        opProps.put(Constants.READER_GROUP_PROPERTY, stream + "-readers");
         opProps.put(Constants.READ_TIMEOUT_PROPERTY, ReaderConfig.DEFAULT_READ_TIMEOUT);
         // should read for only maxReadTime seconds
         opProps.put(Constants.MAX_READ_TIME_PER_EXECUTION_PROPERTY, maxReadTime);
@@ -371,7 +371,7 @@ public class PravegaOperationTest {
         connProps.put(Constants.STREAM_PROPERTY, stream);
 
         Map<String, Object> opProps = new HashMap<>();
-        // no reader group specified, so Query operation will generate a unique reader group
+        opProps.put(Constants.READER_GROUP_PROPERTY, stream + "-readers");
         opProps.put(Constants.READ_TIMEOUT_PROPERTY, ReaderConfig.DEFAULT_READ_TIMEOUT);
         // should read only maxEvents events
         opProps.put(Constants.MAX_EVENTS_PER_EXECUTION_PROPERTY, (long) maxEvents);
