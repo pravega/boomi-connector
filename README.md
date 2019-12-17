@@ -58,7 +58,7 @@ _Note: this step is necessary because the dependency libraries of this connector
 Before you can deploy any process that uses the Pravega connector, you must first create and deploy a custom library that contains its dependencies. This is accomplished in 3 steps (the process is described in more detail [here](https://help.boomi.com/bundle/integration/page/c-atm-Working_with_custom_libraries_96f10864-334e-4eba-ac3f-f52b4e65fdb2.html)):
 
 1. Upload dependency jar
-    * [download](#pravega-connector---dependency-library-download) the appropriate dependency jar that matches the version of the connector you want to deploy
+    * [download](#dependency-jar-download) the appropriate dependency jar that matches the version of the connector you want to deploy
     * Go to your Boomi account setup and under `Development Resources` on the left, click on `Account Libraries`
     * Click on "Upload a File" and select the dependency jar you downloaded in the above step
 1. Create custom connector library
