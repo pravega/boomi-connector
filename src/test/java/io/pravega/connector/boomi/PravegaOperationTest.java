@@ -1,6 +1,10 @@
 package io.pravega.connector.boomi;
 
 import com.boomi.connector.api.OperationType;
+import com.boomi.connector.api.ResponseUtil;
+import com.boomi.connector.api.listen.Listener;
+import com.boomi.connector.api.listen.ListenerExecutionResult;
+import com.boomi.connector.api.listen.SubmitOptions;
 import com.boomi.connector.testutil.ConnectorTester;
 import com.boomi.connector.testutil.SimpleOperationResult;
 import io.pravega.client.ClientConfig;
@@ -12,12 +16,20 @@ import io.pravega.local.InProcPravegaCluster;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-
+import com.boomi.connector.api.Payload;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.net.URI;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
-
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.LinkedBlockingQueue;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -388,4 +400,88 @@ public class PravegaOperationTest {
             assertEquals("OK", result.getStatusCode());
         }
     }
+
+
+    @Test
+    public void testListenerOperation() throws Exception {
+        String[] messages = {TestUtils.generateJsonMessage(), TestUtils.generateJsonMessage(), TestUtils.generateJsonMessage()};
+
+        PravegaConnector connector = new PravegaConnector();
+        ConnectorTester tester = new ConnectorTester(connector);
+
+        Map<String, Object> connProps = new HashMap<>();
+        connProps.put(Constants.CONTROLLER_URI_PROPERTY, TestUtils.PRAVEGA_CONTROLLER_URI);
+        connProps.put(Constants.SCOPE_PROPERTY, PRAVEGA_SCOPE);
+        connProps.put(Constants.STREAM_PROPERTY, QUERY_OPERATION_STREAM);
+
+        Map<String, Object> opProps = new HashMap<>();
+        opProps.put(Constants.READER_GROUP_PROPERTY, QUERY_OPERATION_READER_GROUP);
+        opProps.put(Constants.READ_TIMEOUT_PROPERTY, 5000L);
+
+        // write test events to stream first
+        for (String message : messages) {
+            pravegaReadOperationWriter.writeEvent(message).get();
+        }
+
+        tester.setOperationContext(OperationType.LISTEN, connProps, opProps, null, null);
+        PravegaListenOperation pravegaListenOperation  = new PravegaListenOperation(tester.getOperationContext());
+        SimpleListener simpleListener = new SimpleListener();
+
+        Thread thread = new Thread(() -> {
+            pravegaListenOperation.start(simpleListener);
+        });
+
+        thread.start();
+
+        for (int i = 0; i < messages.length; i++) {
+            String message = messages[i];
+
+            InputStream inputStream = simpleListener.getNextDocument().readFrom();
+
+            StringBuilder textBuilder = new StringBuilder();
+            try (Reader reader = new BufferedReader(new InputStreamReader
+                    (inputStream, Charset.forName(StandardCharsets.UTF_8.name())))) {
+                int c = 0;
+                while ((c = reader.read()) != -1) {
+                    textBuilder.append((char) c);
+                }
+            }
+
+            String text = textBuilder.toString();
+            assertEquals(message, text);
+        }
+
+        pravegaListenOperation.stop();
+
+    }
+
+    class SimpleListener implements Listener {
+
+        LinkedBlockingQueue<Payload> linkedQueue = new LinkedBlockingQueue<Payload>();
+
+        @Override
+        public void submit(Payload var1){
+            linkedQueue.add(var1);
+        }
+
+        @Override
+        public void submit(Throwable var1){
+
+        }
+
+        public Future<ListenerExecutionResult> submit(Payload var1, SubmitOptions var2){
+            return null;
+        }
+
+        public Payload getNextDocument(){
+            try {
+                return linkedQueue.poll(5, TimeUnit.DAYS.SECONDS);
+            }catch (java.lang.InterruptedException E){
+
+            }
+            return null;
+
+        }
+    }
+
 }

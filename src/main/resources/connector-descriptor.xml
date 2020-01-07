@@ -90,4 +90,7 @@
             </helpText>
         </field>
     </operation>
+    <operation types="LISTEN" customTypeLabel="Listen">
+        <field id="TOPIC" label="Topic" type="string"/>
+    </operation>
 </GenericConnectorDescriptor>
