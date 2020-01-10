@@ -14,6 +14,7 @@ class ReaderConfig extends PravegaConfig {
     private long readTimeout;
     private long maxReadTimePerExecution;
     private long maxEventsPerExecution;
+    private InitialReaderPosition initialReaderPosition;
 
     public ReaderConfig() {
     }
@@ -31,6 +32,9 @@ class ReaderConfig extends PravegaConfig {
         setReadTimeout((long) getOrDefault(props, Constants.READ_TIMEOUT_PROPERTY, DEFAULT_READ_TIMEOUT));
         setMaxReadTimePerExecution((long) getOrDefault(props, Constants.MAX_READ_TIME_PER_EXECUTION_PROPERTY, DEFAULT_MAX_READ_TIME));
         setMaxEventsPerExecution((long) getOrDefault(props, Constants.MAX_EVENTS_PER_EXECUTION_PROPERTY, DEFAULT_MAX_EVENTS));
+        String initialReaderPosition = (String) props.get(Constants.INITIAL_READER_GROUP_POSITION);
+        if (initialReaderPosition != null)
+            setInitialReaderPosition(InitialReaderPosition.valueOf(initialReaderPosition));
     }
 
     public String getReaderGroup() {
@@ -64,4 +68,14 @@ class ReaderConfig extends PravegaConfig {
     public void setMaxEventsPerExecution(long maxEventsPerExecution) {
         this.maxEventsPerExecution = maxEventsPerExecution;
     }
+
+    public InitialReaderPosition getInitialReaderPosition() {
+        return initialReaderPosition;
+    }
+
+    public void setInitialReaderPosition(InitialReaderPosition initialReaderPosition) {
+        this.initialReaderPosition = initialReaderPosition;
+    }
+
+    enum InitialReaderPosition {Head, Tail}
 }

@@ -4,11 +4,14 @@ import com.boomi.connector.api.BrowseContext;
 import io.pravega.client.ClientConfig;
 import io.pravega.client.EventStreamClientFactory;
 import io.pravega.client.admin.ReaderGroupManager;
+import io.pravega.client.admin.StreamInfo;
 import io.pravega.client.admin.StreamManager;
 import io.pravega.client.stream.*;
 import io.pravega.client.stream.impl.DefaultCredentials;
 
 import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CompletionException;
 
 final class PravegaUtil {
@@ -20,11 +23,24 @@ final class PravegaUtil {
     }
 
     static void createReaderGroup(ReaderConfig readerConfig) {
-        ReaderGroupConfig readerGroupConfig = ReaderGroupConfig.builder()
-                .stream(Stream.of(readerConfig.getScope(), readerConfig.getStream())).build();
+        Stream stream = Stream.of(readerConfig.getScope(), readerConfig.getStream());
+        StreamCut startStreamCut = StreamCut.UNBOUNDED;
+        if (readerConfig.getInitialReaderPosition() == ReaderConfig.InitialReaderPosition.Tail) {
+            startStreamCut = getStreamInfo(readerConfig).getTailStreamCut();
+        }
+        Map<Stream, StreamCut> streamCuts = new HashMap<>();
+        streamCuts.put(stream, startStreamCut);
+        ReaderGroupConfig readerGroupConfig = ReaderGroupConfig.builder().stream(stream).startFromStreamCuts(streamCuts).build();
         try (ReaderGroupManager readerGroupManager =
                      ReaderGroupManager.withScope(readerConfig.getScope(), createClientConfig(readerConfig))) {
             readerGroupManager.createReaderGroup(readerConfig.getReaderGroup(), readerGroupConfig);
+        }
+    }
+
+    public static StreamInfo getStreamInfo(ReaderConfig readerConfig) {
+        ClientConfig clientConfig = createClientConfig(readerConfig);
+        try (StreamManager streamManager = StreamManager.create(clientConfig)) {
+            return streamManager.getStreamInfo(readerConfig.getScope(), readerConfig.getStream());
         }
     }
 
