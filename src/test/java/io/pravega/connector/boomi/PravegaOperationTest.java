@@ -475,7 +475,7 @@ public class PravegaOperationTest {
 
         public Payload getNextDocument(){
             try {
-                return linkedQueue.poll(5, TimeUnit.DAYS.SECONDS);
+                return linkedQueue.poll(READ_TIMEOUT, TimeUnit.DAYS.SECONDS);
             }catch (java.lang.InterruptedException E){
 
             }
