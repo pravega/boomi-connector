@@ -52,7 +52,6 @@
             <allowedValue>
                 <value>Tail</value>
             </allowedValue>
-            <defaultValue>Head</defaultValue>
         </field>
         <field id="readTimeout" label="Read Timeout (ms)" type="integer">
             <helpText>The maximum amount of time the reader will wait for the next event from Pravega (in
@@ -129,7 +128,6 @@
             <allowedValue>
                 <value>Tail</value>
             </allowedValue>
-            <defaultValue>Tail</defaultValue>
         </field>
     </operation>
 </GenericConnectorDescriptor>

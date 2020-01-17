@@ -21,7 +21,7 @@ public class PravegaListenOperation extends UnmanagedListenOperation {
     private static final Logger logger = Logger.getLogger(PravegaListenOperation.class.getName());
 
     private ReaderConfig readerConfig;
-    private boolean isRunning = false;
+    private Boolean isRunning = false;
 
     protected PravegaListenOperation(OperationContext context) {
         super(context);
@@ -81,17 +81,10 @@ public class PravegaListenOperation extends UnmanagedListenOperation {
                 // - our execution time is under the maximum execution time (if set)
                 //   AND
                 // - number of events read is less than the maximum events to read (if set)
-            } while ((event.getEvent() != null || event.isCheckpoint())
-                    && (maxDuration <= 0 || System.currentTimeMillis() - executionStartTime < maxDuration)
-                    && (maxEvents <= 0 || eventCounter < maxEvents) && isRunning);
+            } while (isRunning);
 
             if (event.getEvent() == null)
                 logger.log(Level.INFO, String.format("No more events from %s/%s: exiting", readerConfig.getScope(), readerConfig.getStream()));
-            else if (maxEvents > 0 && eventCounter >= maxEvents)
-                logger.log(Level.INFO, String.format("Hit maximum event count(read: %d, max: %d): exiting", eventCounter, maxEvents));
-            else
-                logger.log(Level.INFO, String.format("Hit maximum read time (start: %d ms, now: %d ms, max: %d seconds): exiting",
-                        executionStartTime, System.currentTimeMillis(), readerConfig.getMaxReadTimePerExecution()));
 
             logger.log(Level.INFO, String.format("Read %d events in %d ms", eventCounter, System.currentTimeMillis() - executionStartTime));
 

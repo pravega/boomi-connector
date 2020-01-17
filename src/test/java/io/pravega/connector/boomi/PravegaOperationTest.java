@@ -2,9 +2,7 @@ package io.pravega.connector.boomi;
 
 import com.boomi.connector.api.OperationType;
 import com.boomi.connector.api.ResponseUtil;
-import com.boomi.connector.api.listen.Listener;
-import com.boomi.connector.api.listen.ListenerExecutionResult;
-import com.boomi.connector.api.listen.SubmitOptions;
+import com.boomi.connector.api.listen.*;
 import com.boomi.connector.testutil.ConnectorTester;
 import com.boomi.connector.testutil.SimpleOperationResult;
 import io.pravega.client.ClientConfig;
@@ -458,6 +456,14 @@ public class PravegaOperationTest {
     class SimpleListener implements Listener {
 
         LinkedBlockingQueue<Payload> linkedQueue = new LinkedBlockingQueue<Payload>();
+
+        public PayloadBatch getBatch(){
+            return null;
+        }
+
+        public <T> IndexedPayloadBatch<T> getBatch(T index){
+            return null;
+        }
 
         @Override
         public void submit(Payload var1){
