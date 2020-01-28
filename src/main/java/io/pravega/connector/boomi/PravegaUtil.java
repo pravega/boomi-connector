@@ -8,13 +8,18 @@ import io.pravega.client.admin.StreamInfo;
 import io.pravega.client.admin.StreamManager;
 import io.pravega.client.stream.*;
 import io.pravega.client.stream.impl.DefaultCredentials;
+import io.pravega.client.stream.impl.UTF8StringSerializer;
 
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.CompletionException;
+import java.util.logging.Logger;
 
 final class PravegaUtil {
+    private static final Logger logger = Logger.getLogger(PravegaUtil.class.getName());
+
     static ClientConfig createClientConfig(PravegaConfig pravegaConfig) {
         ClientConfig.ClientConfigBuilder clientBuilder = ClientConfig.builder().controllerURI(URI.create(pravegaConfig.getControllerUri().toString()));
         if (pravegaConfig.isEnableAuth())
@@ -91,6 +96,15 @@ final class PravegaUtil {
                 }
             }
         }
+    }
+
+    // caller must close
+    static EventStreamReader<String> createReader(ReaderConfig readerConfig, EventStreamClientFactory clientFactory) {
+        String readerId = UUID.randomUUID().toString();
+        logger.info(String.format("Creating reader for stream %s / %s using group %s and ID %s",
+                readerConfig.getScope(), readerConfig.getStream(), readerConfig.getReaderGroup(), readerId));
+        return clientFactory.createReader(readerId, readerConfig.getReaderGroup(),
+                new UTF8StringSerializer(), io.pravega.client.stream.ReaderConfig.builder().build());
     }
 
     private PravegaUtil() {

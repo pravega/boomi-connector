@@ -7,9 +7,7 @@ import io.pravega.client.stream.EventRead;
 import io.pravega.client.stream.EventStreamReader;
 import io.pravega.client.stream.ReinitializationRequiredException;
 import io.pravega.client.stream.TruncatedDataException;
-import io.pravega.client.stream.impl.UTF8StringSerializer;
 
-import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -24,15 +22,6 @@ public class PravegaReadOperation extends BaseQueryOperation {
 
         // create reader group
         PravegaUtil.createReaderGroup(readerConfig);
-    }
-
-    // caller must close
-    private EventStreamReader<String> createReader(EventStreamClientFactory clientFactory) {
-        String readerId = UUID.randomUUID().toString();
-        logger.info(String.format("Creating reader for stream %s / %s using group %s and ID %s",
-                readerConfig.getScope(), readerConfig.getStream(), readerConfig.getReaderGroup(), readerId));
-        return clientFactory.createReader(readerId, readerConfig.getReaderGroup(),
-                new UTF8StringSerializer(), io.pravega.client.stream.ReaderConfig.builder().build());
     }
 
     /**
@@ -50,7 +39,7 @@ public class PravegaReadOperation extends BaseQueryOperation {
 
         EventStreamReader<String> reader = null;
         try (EventStreamClientFactory clientFactory = PravegaUtil.createClientFactory(readerConfig)) {
-            reader = createReader(clientFactory);
+            reader = PravegaUtil.createReader(readerConfig, clientFactory);
 
             logger.info(String.format("Reading events from %s/%s", readerConfig.getScope(), readerConfig.getStream()));
             EventRead<String> event = null;
@@ -69,7 +58,7 @@ public class PravegaReadOperation extends BaseQueryOperation {
                     // There are certain circumstances where the reader needs to be reinitialized
                     logger.log(Level.WARNING, "Caught ReinitializationRequiredException - Pravega client needs to be reinitialized", e);
                     close(reader);
-                    reader = createReader(clientFactory);
+                    reader = PravegaUtil.createReader(readerConfig, clientFactory);
                 } catch (TruncatedDataException e) {
                     // Assuming nothing needs to be done here and that the next call to readNextEvent() will return the next event
                     logger.log(Level.WARNING, "Caught TruncatedDataException", e);
@@ -108,7 +97,7 @@ public class PravegaReadOperation extends BaseQueryOperation {
     }
 
     // Exception free
-    private void close(EventStreamReader reader) {
+    private void close(EventStreamReader<?> reader) {
         if (reader != null) try {
             reader.close();
         } catch (Throwable t) {
