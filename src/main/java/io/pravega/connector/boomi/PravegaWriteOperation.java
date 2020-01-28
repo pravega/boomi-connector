@@ -112,13 +112,15 @@ public class PravegaWriteOperation extends BaseUpdateOperation {
     }
 
     private static String inputStreamToUtf8String(InputStream is) throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        byte[] buffer = new byte[16 * 1024];
-        int c;
-        while ((c = is.read(buffer)) >= 0) {
-            baos.write(buffer, 0, c);
+        try (InputStream dataStream = is) {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            byte[] buffer = new byte[16 * 1024];
+            int c;
+            while ((c = dataStream.read(buffer)) >= 0) {
+                baos.write(buffer, 0, c);
+            }
+            return new String(baos.toByteArray(), StandardCharsets.UTF_8);
         }
-        return new String(baos.toByteArray(), StandardCharsets.UTF_8);
     }
 
     static class ResultFuture<V> implements Future<V> {

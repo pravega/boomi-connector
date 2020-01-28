@@ -11,7 +11,6 @@ import io.pravega.client.stream.ReinitializationRequiredException;
 import io.pravega.client.stream.TruncatedDataException;
 import io.pravega.client.stream.impl.UTF8StringSerializer;
 
-import java.io.ByteArrayInputStream;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -41,7 +40,7 @@ public class PravegaListenOperation extends UnmanagedListenOperation {
     }
 
     @Override
-    protected void start(Listener listener){
+    protected void start(Listener listener) {
         isRunning = true;
         long executionStartTime = System.currentTimeMillis();
         long eventCounter = 0;
@@ -61,10 +60,10 @@ public class PravegaListenOperation extends UnmanagedListenOperation {
                         eventCounter++;
                         logger.log(Level.FINE, String.format("Read event size: %d", event.getEvent().length()));
 
-                        listener.submit(ResponseUtil.toPayload(new ByteArrayInputStream(event.getEvent().getBytes())));
+                        listener.submit(ResponseUtil.toPayload(event.getEvent()));
 
                         //response.addPartialResult(input, OperationStatus.SUCCESS, "OK", null,
-                                //ResponseUtil.toPayload(new ByteArrayInputStream(event.getEvent().getBytes())));
+                        //ResponseUtil.toPayload(new ByteArrayInputStream(event.getEvent().getBytes())));
                     }
                 } catch (ReinitializationRequiredException e) {
                     // There are certain circumstances where the reader needs to be reinitialized
@@ -102,7 +101,7 @@ public class PravegaListenOperation extends UnmanagedListenOperation {
     }
 
     @Override
-    public void stop(){
+    public void stop() {
         isRunning = false;
 
     }
