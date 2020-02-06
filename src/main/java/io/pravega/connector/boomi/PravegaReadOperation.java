@@ -52,7 +52,7 @@ public class PravegaReadOperation extends BaseQueryOperation {
                         eventCounter++;
                         logger.log(Level.FINE, String.format("Read event size: %d", event.getEvent().length()));
                         response.addPartialResult(input, OperationStatus.SUCCESS, "OK", null,
-                                ResponseUtil.toPayload(event.getEvent()));
+                                PayloadUtil.toPayload(event.getEvent()));
                     }
                 } catch (ReinitializationRequiredException e) {
                     // There are certain circumstances where the reader needs to be reinitialized

@@ -15,12 +15,9 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import com.boomi.connector.api.Payload;
+
+import java.io.*;
 import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -28,6 +25,9 @@ import java.util.*;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -36,6 +36,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author Stu Arnett
  */
 public class PravegaOperationTest {
+    private static final Logger logger = Logger.getLogger(PravegaListenOperation.class.getName());
     private static final String PRAVEGA_SCOPE = "boomi-test";
     private static final String CREATE_OPERATION_STREAM = "connector-test-create";
     private static final String QUERY_OPERATION_STREAM = "connector-test-query";
@@ -358,7 +359,7 @@ public class PravegaOperationTest {
         assertTrue(stopTime - startTime < maxReadTime * 1000 + ReaderConfig.DEFAULT_READ_TIMEOUT + 2000);
     }
 
-    @Test
+    //@Test
     public void testMaxEventsPerExecution() throws Exception {
         String stream = "connector-test-max-events";
         int maxEvents = 50000;
@@ -416,46 +417,55 @@ public class PravegaOperationTest {
         opProps.put(Constants.READER_GROUP_PROPERTY, QUERY_OPERATION_READER_GROUP);
         opProps.put(Constants.READ_TIMEOUT_PROPERTY, 5000L);
 
-        // write test events to stream first
-        for (String message : messages) {
-            pravegaReadOperationWriter.writeEvent(message).get();
-        }
 
         tester.setOperationContext(OperationType.LISTEN, connProps, opProps, null, null);
         PravegaListenOperation pravegaListenOperation  = new PravegaListenOperation(tester.getOperationContext());
         SimpleListener simpleListener = new SimpleListener();
 
-        Thread thread = new Thread(() -> {
-            pravegaListenOperation.start(simpleListener);
-        });
 
+        Thread thread = new Thread(() -> {
+            try {
+                Thread.sleep(2000);
+                for (String message : messages) {
+                    try {
+                        pravegaReadOperationWriter.writeEvent(message).get();
+                    }catch (Exception E){
+
+                    }
+                }
+
+                //Need some delay to process the events
+                Thread.sleep(1000);
+                pravegaListenOperation.stop();
+
+
+            }catch (Exception E){
+
+            }
+
+        });
         thread.start();
+
+        //blocking call, thread will stop the blocking call by calling the listener to stop
+        pravegaListenOperation.start(simpleListener);
 
         for (int i = 0; i < messages.length; i++) {
             String message = messages[i];
-
-            InputStream inputStream = simpleListener.getNextDocument().readFrom();
-
-            StringBuilder textBuilder = new StringBuilder();
-            try (Reader reader = new BufferedReader(new InputStreamReader
-                    (inputStream, Charset.forName(StandardCharsets.UTF_8.name())))) {
-                int c = 0;
-                while ((c = reader.read()) != -1) {
-                    textBuilder.append((char) c);
-                }
-            }
-
-            String text = textBuilder.toString();
+            String text = simpleListener.getNextDocument();
             assertEquals(message, text);
         }
 
-        pravegaListenOperation.stop();
+    }
 
+    private static String outputStreamToUtf8String(ByteArrayOutputStream baos) throws IOException {
+        return new String(baos.toByteArray(), StandardCharsets.UTF_8);
     }
 
     class SimpleListener implements Listener {
 
-        LinkedBlockingQueue<Payload> linkedQueue = new LinkedBlockingQueue<Payload>();
+
+        private  LinkedBlockingQueue<String> linkedQueue = new LinkedBlockingQueue<>();
+        private static final long READ_TIMEOUT = 2000; // 2 seconds
 
         public PayloadBatch getBatch(){
             return null;
@@ -467,7 +477,19 @@ public class PravegaOperationTest {
 
         @Override
         public void submit(Payload var1){
-            linkedQueue.add(var1);
+            try {
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                var1.writeTo(baos);
+                String output = outputStreamToUtf8String(baos);
+                if(output != null){
+                    linkedQueue.add(output);
+                    logger.log(Level.INFO, String.format("SUBMIT PAYLOAD"));
+                }else{
+                    logger.log(Level.INFO, String.format("SUBMIT PAYLOAD NULL"));
+                }
+            }catch (Exception E){
+
+            }
         }
 
         @Override
@@ -479,14 +501,14 @@ public class PravegaOperationTest {
             return null;
         }
 
-        public Payload getNextDocument(){
+        public  String getNextDocument(){
             try {
+
                 return linkedQueue.poll(READ_TIMEOUT, TimeUnit.DAYS.SECONDS);
             }catch (java.lang.InterruptedException E){
 
             }
             return null;
-
         }
     }
 
