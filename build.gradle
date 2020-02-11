@@ -38,20 +38,6 @@ dependencies {
     compile configurations.localDeps
 }
 
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-
-task dependencyJar(type: ShadowJar) {
-    classifier = 'dependencies'
-    configurations = [project.configurations.runtime]
-    manifest {
-        attributes 'Implementation-Version': project.version
-    }
-    mergeServiceFiles()
-    dependencies {
-        exclude(dependency('com.boomi:connector-sdk-util'))
-        exclude(dependency('io.netty:netty-tcnative-boringssl-static'))
-    }
-}
 
 distributions {
     main {
@@ -61,7 +47,7 @@ distributions {
                 from(project.file('src/main/resources/connector-config.xml'))
             }
             into('lib') {
-                from configurations.localDeps
+                from configurations.compile
                 from jar
             }
             into '/'
