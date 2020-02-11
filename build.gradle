@@ -47,7 +47,7 @@ distributions {
                 from(project.file('src/main/resources/connector-config.xml'))
             }
             into('lib') {
-                from configurations.compile
+                from configurations.runtime
                 from jar
             }
             into '/'
