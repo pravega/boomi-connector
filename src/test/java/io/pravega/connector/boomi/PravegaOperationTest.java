@@ -400,7 +400,6 @@ public class PravegaOperationTest {
         }
     }
 
-
     @Test
     public void testListenerOperation() throws Exception {
         String[] messages = {TestUtils.generateJsonMessage(), TestUtils.generateJsonMessage(), TestUtils.generateJsonMessage()};
@@ -417,11 +416,9 @@ public class PravegaOperationTest {
         opProps.put(Constants.READER_GROUP_PROPERTY, QUERY_OPERATION_READER_GROUP);
         opProps.put(Constants.READ_TIMEOUT_PROPERTY, 5000L);
 
-
         tester.setOperationContext(OperationType.LISTEN, connProps, opProps, null, null);
         PravegaListenOperation pravegaListenOperation  = new PravegaListenOperation(tester.getOperationContext());
         SimpleListener simpleListener = new SimpleListener();
-
 
         Thread thread = new Thread(() -> {
             try {
@@ -430,31 +427,23 @@ public class PravegaOperationTest {
                     try {
                         pravegaReadOperationWriter.writeEvent(message).get();
                     }catch (Exception E){
-
                     }
                 }
-
                 //Need some delay to process the events
                 Thread.sleep(1000);
                 pravegaListenOperation.stop();
-
-
             }catch (Exception E){
-
             }
-
         });
         thread.start();
 
         //blocking call, thread will stop the blocking call by calling the listener to stop
         pravegaListenOperation.start(simpleListener);
-
         for (int i = 0; i < messages.length; i++) {
             String message = messages[i];
             String text = simpleListener.getNextDocument();
             assertEquals(message, text);
         }
-
     }
 
     private static String outputStreamToUtf8String(ByteArrayOutputStream baos) throws IOException {
@@ -462,7 +451,6 @@ public class PravegaOperationTest {
     }
 
     class SimpleListener implements Listener {
-
 
         private  LinkedBlockingQueue<String> linkedQueue = new LinkedBlockingQueue<>();
         private static final long READ_TIMEOUT = 2000; // 2 seconds
@@ -476,10 +464,10 @@ public class PravegaOperationTest {
         }
 
         @Override
-        public void submit(Payload var1){
+        public void submit(Payload payload){
             try {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                var1.writeTo(baos);
+                payload.writeTo(baos);
                 String output = outputStreamToUtf8String(baos);
                 if(output != null){
                     linkedQueue.add(output);
@@ -488,7 +476,7 @@ public class PravegaOperationTest {
                     logger.log(Level.INFO, String.format("SUBMIT PAYLOAD NULL"));
                 }
             }catch (Exception E){
-
+                logger.log(Level.INFO, String.format("Got exeption during submit paylaod"));
             }
         }
 
@@ -511,5 +499,4 @@ public class PravegaOperationTest {
             return null;
         }
     }
-
 }
