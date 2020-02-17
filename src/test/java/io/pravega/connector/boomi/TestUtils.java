@@ -11,6 +11,7 @@ import io.pravega.segmentstore.server.store.ServiceBuilderConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
 import java.util.Properties;
 import java.util.UUID;
 
@@ -77,6 +78,13 @@ final class TestUtils {
                 streamManager.createStream(scope, stream, streamBuilder.build());
             }
         }
+    }
+
+    static String generate2MBmessage(){
+        char[] chars = new char[2000000];
+        Arrays.fill(chars, 'a');
+        String randomMessage =  new String(chars);
+        return "{\"name\":\"foo\",\"message\":\"" + randomMessage + "\"}";
     }
 
     static String generateJsonMessage() {

@@ -2,6 +2,7 @@ package io.pravega.connector.boomi;
 
 import com.boomi.connector.api.*;
 import com.boomi.connector.util.BaseUpdateOperation;
+import com.boomi.connector.util.SizeLimitedUpdateOperation;
 import com.jayway.jsonpath.JsonPath;
 import io.pravega.client.EventStreamClientFactory;
 import io.pravega.client.stream.EventStreamWriter;
@@ -21,7 +22,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class PravegaWriteOperation extends BaseUpdateOperation {
+public class PravegaWriteOperation extends SizeLimitedUpdateOperation {
     private WriterConfig writerConfig;
 
     PravegaWriteOperation(OperationContext context) {
@@ -42,7 +43,7 @@ public class PravegaWriteOperation extends BaseUpdateOperation {
      * after every execution (we have no other choice).
      */
     @Override
-    protected void executeUpdate(UpdateRequest request, OperationResponse response) {
+    protected void executeSizeLimitedUpdate(UpdateRequest request, OperationResponse response) {
         Logger logger = response.getLogger();
 
         try (EventStreamClientFactory clientFactory = PravegaUtil.createClientFactory(writerConfig);
