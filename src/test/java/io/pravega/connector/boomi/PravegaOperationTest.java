@@ -36,7 +36,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author Stu Arnett
  */
 public class PravegaOperationTest {
-    private static final Logger logger = Logger.getLogger(PravegaListenOperation.class.getName());
+    private static final Logger logger = Logger.getLogger(PravegaOperationTest.class.getName());
     private static final String PRAVEGA_SCOPE = "boomi-test";
     private static final String CREATE_OPERATION_STREAM = "connector-test-create";
     private static final String QUERY_OPERATION_STREAM = "connector-test-query";
