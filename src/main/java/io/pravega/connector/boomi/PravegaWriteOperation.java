@@ -1,7 +1,7 @@
 package io.pravega.connector.boomi;
 
 import com.boomi.connector.api.*;
-import com.boomi.connector.util.BaseUpdateOperation;
+import com.boomi.connector.util.SizeLimitedUpdateOperation;
 import com.jayway.jsonpath.JsonPath;
 import io.pravega.client.EventStreamClientFactory;
 import io.pravega.client.stream.EventStreamWriter;
@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class PravegaWriteOperation extends BaseUpdateOperation {
+public class PravegaWriteOperation extends SizeLimitedUpdateOperation {
     private WriterConfig writerConfig;
 
     PravegaWriteOperation(OperationContext context) {
@@ -42,7 +42,7 @@ public class PravegaWriteOperation extends BaseUpdateOperation {
      * after every execution (we have no other choice).
      */
     @Override
-    protected void executeUpdate(UpdateRequest request, OperationResponse response) {
+    protected void executeSizeLimitedUpdate(UpdateRequest request, OperationResponse response) {
         Logger logger = response.getLogger();
 
         try (EventStreamClientFactory clientFactory = PravegaUtil.createClientFactory(writerConfig);
@@ -112,13 +112,15 @@ public class PravegaWriteOperation extends BaseUpdateOperation {
     }
 
     private static String inputStreamToUtf8String(InputStream is) throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        byte[] buffer = new byte[16 * 1024];
-        int c;
-        while ((c = is.read(buffer)) >= 0) {
-            baos.write(buffer, 0, c);
+        try (InputStream dataStream = is) {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            byte[] buffer = new byte[16 * 1024];
+            int c;
+            while ((c = dataStream.read(buffer)) >= 0) {
+                baos.write(buffer, 0, c);
+            }
+            return new String(baos.toByteArray(), StandardCharsets.UTF_8);
         }
-        return new String(baos.toByteArray(), StandardCharsets.UTF_8);
     }
 
     static class ResultFuture<V> implements Future<V> {

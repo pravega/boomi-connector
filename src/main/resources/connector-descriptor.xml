@@ -38,6 +38,21 @@
                 use different reader groups.
             </helpText>
         </field>
+        <field id="initialReaderGroupPosition" label="Initial Reader Group Position" type="string">
+            <helpText>The initial position from which to start reading from the stream. A value of "Head" means the
+                first time the listener runs, it will read from the head (beginning) of the stream. NOTE: this will read
+                the entire stream from start to finish and may cause a very high load while doing so. A value of "Tail"
+                means the first time the listener runs, it will start reading from the tail (end) of the stream. Use
+                this option to start reading real-time events, but be aware that all events that were written before the
+                first process execution will be ignored.
+            </helpText>
+            <allowedValue>
+                <value>Head</value>
+            </allowedValue>
+            <allowedValue>
+                <value>Tail</value>
+            </allowedValue>
+        </field>
         <field id="readTimeout" label="Read Timeout (ms)" type="integer">
             <helpText>The maximum amount of time the reader will wait for the next event from Pravega (in
                 milliseconds).
@@ -88,6 +103,31 @@
                 "JsonReference", the routing key for each event will be evaluated from the JSON body, using the
                 reference provided here.
             </helpText>
+        </field>
+    </operation>
+    <operation types="LISTEN" customTypeLabel="Listen">
+        <field id="readerGroup" label="Pravega Reader Group" type="string">
+            <helpText>(Required) The name of the reader group for this reader within Pravega. Each reader group will
+                maintain its position in the stream between executions. Note: a reader group will distribute events
+                between its readers. Be careful when naming your reader group so that you do not mistakenly share events
+                with another reader. If different readers each need to process all events in the stream, they should
+                use different reader groups.
+            </helpText>
+        </field>
+        <field id="initialReaderGroupPosition" label="Initial Reader Group Position" type="string">
+            <helpText>The initial position from which to start reading from the stream. A value of "Head" means the
+                first time the listener runs, it will read from the head (beginning) of the stream. NOTE: this will read
+                the entire stream from start to finish and may cause a very high load while doing so. A value of "Tail"
+                means the first time the listener runs, it will start reading from the tail (end) of the stream. Use
+                this option to start reading real-time events, but be aware that all events that were written before the
+                first process execution will be ignored.
+            </helpText>
+            <allowedValue>
+                <value>Head</value>
+            </allowedValue>
+            <allowedValue>
+                <value>Tail</value>
+            </allowedValue>
         </field>
     </operation>
 </GenericConnectorDescriptor>

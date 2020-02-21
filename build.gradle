@@ -1,7 +1,6 @@
 plugins {
     id 'distribution'
     id 'java'
-    id 'com.github.johnrengelman.shadow' version '5.1.0'
 }
 
 repositories {
@@ -23,32 +22,21 @@ configurations {
 dependencies {
     compile "io.pravega:pravega-client:${pravegaVersion}"
     compile "com.jayway.jsonpath:json-path:${jsonPathVersion}"
-    localDeps "com.boomi:connector-sdk-util:${boomiSdkVersion}"
-    compileOnly "com.boomi:connector-sdk-api:${boomiSdkVersion}"
+    localDeps "com.boomi:connector-sdk-util:${boomiConnectorVersion}"
+    compileOnly "com.boomi:common-sdk:${boomiCommonSdkVersion}"
+    compileOnly "com.boomi:connector-sdk-api:${boomiConnectorVersion}"
     testImplementation "org.junit.jupiter:junit-jupiter:5.5.2"
     testCompile "io.pravega:pravega-standalone:${pravegaVersion}"
-    testCompile "com.boomi:connector-sdk-api:${boomiSdkVersion}"
-    testCompile "com.boomi:connector-sdk-test-util:${boomiSdkVersion}"
+    testCompile "com.boomi:boomi-util:${boomiUtilVersion}"
+    testCompile "com.boomi:common-sdk:${boomiCommonSdkVersion}"
+    testCompile "com.boomi:connector-sdk-api:${boomiConnectorVersion}"
+    testCompile "com.boomi:connector-sdk-test-util:${boomiConnectorVersion}"
     testCompile "org.slf4j:slf4j-api:1.7.9"
     testCompile "ch.qos.logback:logback-core:1.2.3"
     testRuntime "ch.qos.logback:logback-classic:1.2.3"
     compile configurations.localDeps
 }
 
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-
-task dependencyJar(type: ShadowJar) {
-    classifier = 'dependencies'
-    configurations = [project.configurations.runtime]
-    manifest {
-        attributes 'Implementation-Version': project.version
-    }
-    mergeServiceFiles()
-    dependencies {
-        exclude(dependency('com.boomi:connector-sdk-util'))
-        exclude(dependency('io.netty:netty-tcnative-boringssl-static'))
-    }
-}
 
 distributions {
     main {
@@ -58,7 +46,7 @@ distributions {
                 from(project.file('src/main/resources/connector-config.xml'))
             }
             into('lib') {
-                from configurations.localDeps
+                from configurations.runtime
                 from jar
             }
             into '/'

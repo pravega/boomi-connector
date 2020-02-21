@@ -26,4 +26,5 @@ public class Constants {
     static final String MAX_EVENTS_PER_EXECUTION_PROPERTY = "maxEventsPerExecution";
     static final String ROUTING_KEY_TYPE_PROPERTY = "routingKeyType";
     static final String ROUTING_KEY_PROPERTY = "routingKey";
+    static final String INITIAL_READER_GROUP_POSITION = "initialReaderGroupPosition";
 }

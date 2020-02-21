@@ -1,6 +1,9 @@
 package io.pravega.connector.boomi;
 
+import com.boomi.connector.api.OperationStatus;
 import com.boomi.connector.api.OperationType;
+import com.boomi.connector.api.Payload;
+import com.boomi.connector.api.listen.*;
 import com.boomi.connector.testutil.ConnectorTester;
 import com.boomi.connector.testutil.SimpleOperationResult;
 import io.pravega.client.ClientConfig;
@@ -14,9 +17,16 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -26,6 +36,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author Stu Arnett
  */
 public class PravegaOperationTest {
+    private static final Logger logger = Logger.getLogger(PravegaOperationTest.class.getName());
     private static final String PRAVEGA_SCOPE = "boomi-test";
     private static final String CREATE_OPERATION_STREAM = "connector-test-create";
     private static final String QUERY_OPERATION_STREAM = "connector-test-query";
@@ -154,6 +165,39 @@ public class PravegaOperationTest {
         // validate message data
         assertNotNull(event.getEvent());
         assertEquals(json, event.getEvent());
+    }
+
+    @Test
+    public void testBigMessageWriteOperation() {
+        String json = TestUtils.generate2MBmessage();
+        PravegaConnector connector = new PravegaConnector();
+        ConnectorTester tester = new ConnectorTester(connector);
+
+        Map<String, Object> connProps = new HashMap<>();
+        connProps.put(Constants.CONTROLLER_URI_PROPERTY, TestUtils.PRAVEGA_CONTROLLER_URI);
+        connProps.put(Constants.SCOPE_PROPERTY, PRAVEGA_SCOPE);
+        connProps.put(Constants.STREAM_PROPERTY, CREATE_OPERATION_STREAM);
+
+        Map<String, Object> opProps = new HashMap<>();
+        opProps.put(Constants.ROUTING_KEY_TYPE_PROPERTY, WriterConfig.RoutingKeyType.Fixed.toString());
+        opProps.put(Constants.ROUTING_KEY_PROPERTY, FIXED_ROUTING_KEY);
+        tester.setOperationContext(OperationType.CREATE, connProps, opProps, null, null);
+
+        // prep test message
+        List<InputStream> inputs = new ArrayList<>();
+        inputs.add(new ByteArrayInputStream(json.getBytes()));
+        // send the test message through the connector
+        List<SimpleOperationResult> actual = tester.executeCreateOperation(inputs);
+        assertEquals("413", actual.get(0).getStatusCode());
+        assertEquals(OperationStatus.APPLICATION_ERROR, actual.get(0).getStatus());
+        logger.log(Level.INFO, String.format(actual.get(0).getStatusCode()));
+        // read from stream and verify event data
+        EventRead<String> event;
+        do {
+            event = pravegaWriteOperationReader.readNextEvent(READ_TIMEOUT);
+        } while (event.isCheckpoint());
+        // validate message data
+        assertEquals(null, event.getEvent());
     }
 
     @Test
@@ -387,5 +431,100 @@ public class PravegaOperationTest {
         for (SimpleOperationResult result : results) {
             assertEquals("OK", result.getStatusCode());
         }
+    }
+
+    @Test
+    public void testListenerOperation() throws Exception {
+        String[] messages = {TestUtils.generateJsonMessage(), TestUtils.generateJsonMessage(), TestUtils.generateJsonMessage()};
+
+        PravegaConnector connector = new PravegaConnector();
+        ConnectorTester tester = new ConnectorTester(connector);
+
+        Map<String, Object> connProps = new HashMap<>();
+        connProps.put(Constants.CONTROLLER_URI_PROPERTY, TestUtils.PRAVEGA_CONTROLLER_URI);
+        connProps.put(Constants.SCOPE_PROPERTY, PRAVEGA_SCOPE);
+        connProps.put(Constants.STREAM_PROPERTY, QUERY_OPERATION_STREAM);
+
+        Map<String, Object> opProps = new HashMap<>();
+        opProps.put(Constants.READER_GROUP_PROPERTY, QUERY_OPERATION_READER_GROUP);
+        opProps.put(Constants.READ_TIMEOUT_PROPERTY, 5000L);
+
+        tester.setOperationContext(OperationType.LISTEN, connProps, opProps, null, null);
+        PravegaListenOperation pravegaListenOperation = new PravegaListenOperation(tester.getOperationContext());
+        SimpleListener simpleListener = new SimpleListener();
+
+        Thread thread = new Thread(() -> {
+            try {
+                Thread.sleep(2000);
+                for (String message : messages) {
+                    pravegaReadOperationWriter.writeEvent(message).get();
+                }
+                //Need some delay to process the events
+                Thread.sleep(1000);
+                pravegaListenOperation.stop();
+            } catch (Exception E) {
+                logger.log(Level.INFO, String.format("Got exeption during listen operation"), E);
+            }
+        });
+        thread.start();
+
+        //blocking call, thread will stop the blocking call by calling the listener to stop
+        pravegaListenOperation.start(simpleListener);
+        for (int i = 0; i < messages.length; i++) {
+            String message = messages[i];
+            String text = simpleListener.getNextDocument();
+            assertEquals(message, text);
+        }
+    }
+
+    private static String outputStreamToUtf8String(ByteArrayOutputStream baos) throws IOException {
+        return new String(baos.toByteArray(), StandardCharsets.UTF_8);
+    }
+
+    class SimpleListener implements Listener {
+
+        private LinkedBlockingQueue<String> linkedQueue = new LinkedBlockingQueue<>();
+        private static final long READ_TIMEOUT = 2000; // 2 seconds
+
+        public PayloadBatch getBatch() {
+            return null;
+        }
+
+        public <T> IndexedPayloadBatch<T> getBatch(T index) {
+            return null;
+        }
+
+        @Override
+        public void submit(Payload payload) {
+            try {
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                payload.writeTo(baos);
+                String output = outputStreamToUtf8String(baos);
+                if (output != null) {
+                    linkedQueue.add(output);
+                    logger.log(Level.INFO, String.format("SUBMIT PAYLOAD"));
+                } else {
+                    logger.log(Level.INFO, String.format("SUBMIT PAYLOAD NULL"));
+                }
+            } catch (Exception E) {
+                logger.log(Level.INFO, String.format("Got exeption during submit paylaod"));
+            }
+        }
+
+        @Override
+        public void submit(Throwable var1) {
+
+        }
+
+        public Future<ListenerExecutionResult> submit(Payload var1, SubmitOptions var2) {
+            return null;
+        }
+
+        public String getNextDocument() {
+
+            return linkedQueue.remove();
+
+        }
+
     }
 }
