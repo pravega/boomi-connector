@@ -2,7 +2,7 @@ package io.pravega.connector.boomi;
 
 import com.boomi.connector.api.OperationStatus;
 import com.boomi.connector.api.OperationType;
-import com.boomi.connector.api.ResponseUtil;
+import com.boomi.connector.api.Payload;
 import com.boomi.connector.api.listen.*;
 import com.boomi.connector.testutil.ConnectorTester;
 import com.boomi.connector.testutil.SimpleOperationResult;
@@ -15,16 +15,15 @@ import io.pravega.local.InProcPravegaCluster;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import com.boomi.connector.api.Payload;
 
-import java.io.*;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -191,7 +190,7 @@ public class PravegaOperationTest {
         List<SimpleOperationResult> actual = tester.executeCreateOperation(inputs);
         assertEquals("413", actual.get(0).getStatusCode());
         assertEquals(OperationStatus.APPLICATION_ERROR, actual.get(0).getStatus());
-        logger.log(Level.INFO, String.format(actual.get(0).getStatusCode() ));
+        logger.log(Level.INFO, String.format(actual.get(0).getStatusCode()));
         // read from stream and verify event data
         EventRead<String> event;
         do {
@@ -451,20 +450,20 @@ public class PravegaOperationTest {
         opProps.put(Constants.READ_TIMEOUT_PROPERTY, 5000L);
 
         tester.setOperationContext(OperationType.LISTEN, connProps, opProps, null, null);
-        PravegaListenOperation pravegaListenOperation  = new PravegaListenOperation(tester.getOperationContext());
+        PravegaListenOperation pravegaListenOperation = new PravegaListenOperation(tester.getOperationContext());
         SimpleListener simpleListener = new SimpleListener();
 
         Thread thread = new Thread(() -> {
             try {
                 Thread.sleep(2000);
                 for (String message : messages) {
-                        pravegaReadOperationWriter.writeEvent(message).get();
+                    pravegaReadOperationWriter.writeEvent(message).get();
                 }
                 //Need some delay to process the events
                 Thread.sleep(1000);
                 pravegaListenOperation.stop();
-            }catch (Exception E){
-                logger.log(Level.INFO, String.format("Got exeption during listen operation"));
+            } catch (Exception E) {
+                logger.log(Level.INFO, String.format("Got exeption during listen operation"), E);
             }
         });
         thread.start();
@@ -484,48 +483,48 @@ public class PravegaOperationTest {
 
     class SimpleListener implements Listener {
 
-        private  LinkedBlockingQueue<String> linkedQueue = new LinkedBlockingQueue<>();
+        private LinkedBlockingQueue<String> linkedQueue = new LinkedBlockingQueue<>();
         private static final long READ_TIMEOUT = 2000; // 2 seconds
 
-        public PayloadBatch getBatch(){
+        public PayloadBatch getBatch() {
             return null;
         }
 
-        public <T> IndexedPayloadBatch<T> getBatch(T index){
+        public <T> IndexedPayloadBatch<T> getBatch(T index) {
             return null;
         }
 
         @Override
-        public void submit(Payload payload){
+        public void submit(Payload payload) {
             try {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 payload.writeTo(baos);
                 String output = outputStreamToUtf8String(baos);
-                if(output != null){
+                if (output != null) {
                     linkedQueue.add(output);
                     logger.log(Level.INFO, String.format("SUBMIT PAYLOAD"));
-                }else{
+                } else {
                     logger.log(Level.INFO, String.format("SUBMIT PAYLOAD NULL"));
                 }
-            }catch (Exception E){
+            } catch (Exception E) {
                 logger.log(Level.INFO, String.format("Got exeption during submit paylaod"));
             }
         }
 
         @Override
-        public void submit(Throwable var1){
+        public void submit(Throwable var1) {
 
         }
 
-        public Future<ListenerExecutionResult> submit(Payload var1, SubmitOptions var2){
+        public Future<ListenerExecutionResult> submit(Payload var1, SubmitOptions var2) {
             return null;
         }
 
-        public  String getNextDocument(){
+        public String getNextDocument() {
 
             return linkedQueue.remove();
 
-            }
+        }
 
     }
 }

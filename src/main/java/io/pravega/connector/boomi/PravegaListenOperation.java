@@ -2,7 +2,6 @@ package io.pravega.connector.boomi;
 
 import com.boomi.connector.api.OperationContext;
 import com.boomi.connector.api.PayloadUtil;
-import com.boomi.connector.api.ResponseUtil;
 import com.boomi.connector.api.listen.Listener;
 import com.boomi.connector.util.listen.UnmanagedListenOperation;
 import io.pravega.client.EventStreamClientFactory;
@@ -43,7 +42,7 @@ public class PravegaListenOperation extends UnmanagedListenOperation {
                 try {
                     EventRead<String> event = reader.readNextEvent(readerConfig.getReadTimeout());
                     if (event.getEvent() != null) {
-                        logger.log(Level.FINE, String.format("Listener Read event size: %d", event.getEvent().length()));                   
+                        logger.log(Level.FINE, String.format("Listener Read event size: %d", event.getEvent().length()));
                         listener.submit(PayloadUtil.toPayload(event.getEvent()));
                     } // could check for watermark or checkpoint in else block
                 } catch (ReinitializationRequiredException e) {

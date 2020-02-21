@@ -1,7 +1,6 @@
 package io.pravega.connector.boomi;
 
 import com.boomi.connector.api.*;
-import com.boomi.connector.util.BaseUpdateOperation;
 import com.boomi.connector.util.SizeLimitedUpdateOperation;
 import com.jayway.jsonpath.JsonPath;
 import io.pravega.client.EventStreamClientFactory;
