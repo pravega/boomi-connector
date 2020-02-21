@@ -1,5 +1,6 @@
 package io.pravega.connector.boomi;
 
+import com.boomi.connector.api.OperationStatus;
 import com.boomi.connector.api.OperationType;
 import com.boomi.connector.api.ResponseUtil;
 import com.boomi.connector.api.listen.*;
@@ -189,6 +190,7 @@ public class PravegaOperationTest {
         // send the test message through the connector
         List<SimpleOperationResult> actual = tester.executeCreateOperation(inputs);
         assertEquals("413", actual.get(0).getStatusCode());
+        assertEquals(OperationStatus.APPLICATION_ERROR, actual.get(0).getStatus());
         logger.log(Level.INFO, String.format(actual.get(0).getStatusCode() ));
         // read from stream and verify event data
         EventRead<String> event;
@@ -456,15 +458,13 @@ public class PravegaOperationTest {
             try {
                 Thread.sleep(2000);
                 for (String message : messages) {
-                    try {
                         pravegaReadOperationWriter.writeEvent(message).get();
-                    }catch (Exception E){
-                    }
                 }
                 //Need some delay to process the events
                 Thread.sleep(1000);
                 pravegaListenOperation.stop();
             }catch (Exception E){
+                logger.log(Level.INFO, String.format("Got exeption during listen operation"));
             }
         });
         thread.start();
@@ -522,13 +522,10 @@ public class PravegaOperationTest {
         }
 
         public  String getNextDocument(){
-            try {
 
-                return linkedQueue.poll(READ_TIMEOUT, TimeUnit.DAYS.SECONDS);
-            }catch (java.lang.InterruptedException E){
+            return linkedQueue.remove();
 
             }
-            return null;
-        }
+
     }
 }
