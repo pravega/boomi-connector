@@ -14,6 +14,8 @@ public class PravegaConfig {
     private boolean enableAuth;
     private String userName;
     private String password;
+    private boolean enableNautilusSupport;
+    private String keycloack;
     private boolean createScope;
 
     public PravegaConfig() {
@@ -40,6 +42,8 @@ public class PravegaConfig {
         setEnableAuth((boolean) getOrDefault(props, Constants.ENABLE_AUTH_PROPERTY, false));
         setUserName((String) props.get(Constants.USER_NAME_PROPERTY));
         setPassword((String) props.get(Constants.PASSWORD_PROPERTY));
+        setEnableNautilusSupport((boolean) getOrDefault(props, Constants.ENABLE_NAUT_SUPPORT_PROPERTY, false));
+        setNautilusSupport((String) props.get(Constants.NAUT_SUPPORT_PROPERTY));
     }
 
     protected Object getOrDefault(Map<String, Object> map, String key, Object defaultValue) {
@@ -95,6 +99,22 @@ public class PravegaConfig {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public boolean isEnableNautilusSupport() {
+        return this.enableNautilusSupport;
+    }
+
+    public void setEnableNautilusSupport(boolean enableNautilusSupport) {
+        this.enableNautilusSupport = enableNautilusSupport;
+    }
+
+    public String getNautilusSupport() {
+        return keycloack;
+    }
+
+    public void setNautilusSupport(String keycloack) {
+        this.keycloack = keycloack;
     }
 
     public boolean isCreateScope() {

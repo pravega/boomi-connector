@@ -6,7 +6,12 @@ plugins {
 repositories {
     mavenLocal()
     mavenCentral()
+    maven {
+        url "https://oss.jfrog.org/jfrog-dependencies"
+    }
 }
+
+
 
 group = "io.pravega"
 version = releaseVersion
@@ -17,10 +22,16 @@ targetCompatibility = 1.8
 
 configurations {
     localDeps
+    runtime.exclude group: "io.netty", module: "netty-tcnative-boringssl-static"
 }
 
+
 dependencies {
-    compile "io.pravega:pravega-client:${pravegaVersion}"
+    compile ("io.pravega:pravega-client:${pravegaVersion}"){
+        exclude group: "io.netty", module: "netty-tcnative-boringssl-static"
+    }
+    //compile "io.pravega:pravega-client:${pravegaVersion}"
+    compile "io.pravega:pravega-keycloak-client:${pravegaKeycloakVersion}"
     compile "com.jayway.jsonpath:json-path:${jsonPathVersion}"
     localDeps "com.boomi:connector-sdk-util:${boomiConnectorVersion}"
     compileOnly "com.boomi:common-sdk:${boomiCommonSdkVersion}"
@@ -35,6 +46,7 @@ dependencies {
     testCompile "ch.qos.logback:logback-core:1.2.3"
     testRuntime "ch.qos.logback:logback-classic:1.2.3"
     compile configurations.localDeps
+
 }
 
 
@@ -51,7 +63,10 @@ distributions {
             }
             into '/'
         }
+
     }
+
+
 }
 
 test {

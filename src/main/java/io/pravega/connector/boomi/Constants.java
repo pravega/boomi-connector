@@ -19,6 +19,8 @@ public class Constants {
     static final String ENABLE_AUTH_PROPERTY = "enableAuth";
     static final String USER_NAME_PROPERTY = "userName";
     static final String PASSWORD_PROPERTY = "password";
+    static final String ENABLE_NAUT_SUPPORT_PROPERTY = "enableNautilusSupport";
+    static final String NAUT_SUPPORT_PROPERTY = "nautilussupport";
 
     static final String READER_GROUP_PROPERTY = "readerGroup";
     static final String READ_TIMEOUT_PROPERTY = "readTimeout";

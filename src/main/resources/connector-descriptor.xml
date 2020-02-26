@@ -28,6 +28,13 @@
     <field id="password" label="Pravega Password" type="password">
         <helpText>The Pravega user's password.</helpText>
     </field>
+    <field id="enableNautilusSupport" label="Nautilus Support Required" type="boolean">
+        <helpText>Indicates whether nautilus support is required for Pravega.</helpText>
+        <defaultValue>false</defaultValue>
+    </field>
+    <field id="nautilussupport" label="Nautilus Support" type="string">
+        <helpText>Nautilus Support</helpText>
+    </field>
     <testConnection method="CUSTOM"/>
     <operation types="QUERY" supportsBrowse="false" customTypeLabel="Read">
         <field id="readerGroup" label="Pravega Reader Group" type="string">

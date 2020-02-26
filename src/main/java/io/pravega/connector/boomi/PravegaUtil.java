@@ -24,6 +24,8 @@ final class PravegaUtil {
         ClientConfig.ClientConfigBuilder clientBuilder = ClientConfig.builder().controllerURI(URI.create(pravegaConfig.getControllerUri().toString()));
         if (pravegaConfig.isEnableAuth())
             clientBuilder.credentials(new DefaultCredentials(pravegaConfig.getPassword(), pravegaConfig.getUserName()));
+        if (pravegaConfig.isEnableNautilusSupport())
+            clientBuilder.credentials(new BoomiPravegaKeycloakCredentials(pravegaConfig.getNautilusSupport()));
         return clientBuilder.build();
     }
 
