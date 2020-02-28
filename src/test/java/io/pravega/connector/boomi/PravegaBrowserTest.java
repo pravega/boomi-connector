@@ -13,6 +13,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -112,5 +114,48 @@ public class PravegaBrowserTest {
         } catch (ConnectorException e) {
             Assertions.fail("connection test should have succeeded", e);
         }
+    }
+
+    @Test
+    public void testTestNautilusConnector() throws Exception {
+        String home = System.getProperty("user.home");
+        String jsonData = new String(Files.readAllBytes(Paths.get(home + "/keycloak.json")));
+
+        String scope = "boomi-test-project", stream = "test";
+        PravegaConfig pravegaConfig = new PravegaConfig();
+        pravegaConfig.setControllerUri(new URI(TestUtils.PRAVEGA_CONTROLLER_URI));
+        pravegaConfig.setScope(scope);
+        pravegaConfig.setStream(stream);
+        pravegaConfig.setCreateScope(true);
+        pravegaConfig.setEnableNautilusSupport(true);
+        pravegaConfig.setNautilusSupport(jsonData);
+
+        // this will create the scope
+        EventStreamClientFactory clientFactory = PravegaUtil.createClientFactory(pravegaConfig);
+        clientFactory.close();
+
+        PravegaConnector connector = new PravegaConnector();
+        ConnectorTester tester = new ConnectorTester(connector);
+
+        Map<String, Object> connProps = new HashMap<>();
+        connProps.put(Constants.CONTROLLER_URI_PROPERTY, TestUtils.PRAVEGA_CONTROLLER_URI);
+        connProps.put(Constants.SCOPE_PROPERTY, scope);
+        connProps.put(Constants.STREAM_PROPERTY, stream);
+        connProps.put(Constants.CREATE_SCOPE_PROPERTY, true);
+        connProps.put(Constants.ENABLE_NAUT_SUPPORT_PROPERTY, true);
+        connProps.put(Constants.NAUT_SUPPORT_PROPERTY, jsonData);
+
+        Map<String, Object> opProps = new HashMap<>();
+
+        tester.setOperationContext(OperationType.QUERY, connProps, opProps, null, null);
+
+        ConnectionTester connTester = new PravegaBrowser(tester.getOperationContext());
+
+        try {
+            connTester.testConnection();
+        } catch (ConnectorException e) {
+            Assertions.fail("connection test should have succeeded", e);
+        }
+
     }
 }
