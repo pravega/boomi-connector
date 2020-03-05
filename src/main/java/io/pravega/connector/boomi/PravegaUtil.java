@@ -140,9 +140,9 @@ final class PravegaUtil {
         if (authTYpe.equals(Constants.AUTH_TYPE_PROPERTY_KEYCLOAK)) {
             if (!map.containsKey(Constants.HASHMAP_ENTRY_KEY)) {
                 String jsonData = (String) props.get(Constants.AUTH_PROPERTY_KEYCLOAK_JSON);
-                String filePath = PravegaUtil.createFile(jsonData);
-                map.put(Constants.HASHMAP_ENTRY_KEY, filePath);
-                return filePath;
+                String keycloakJsonPath = PravegaUtil.createFile(jsonData);
+                map.put(Constants.HASHMAP_ENTRY_KEY, keycloakJsonPath);
+                return keycloakJsonPath;
             }
             return map.get(Constants.HASHMAP_ENTRY_KEY);
         }

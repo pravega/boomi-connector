@@ -11,8 +11,8 @@ class WriterConfig extends PravegaConfig {
     public WriterConfig() {
     }
 
-    public WriterConfig(BrowseContext context, String filePath) {
-        super(context, filePath);
+    public WriterConfig(BrowseContext context, String keycloakJsonPath) {
+        super(context, keycloakJsonPath);
         Map<String, Object> props = context.getOperationProperties();
         String routingKeyType = (String) props.get(Constants.ROUTING_KEY_TYPE_PROPERTY);
         if (routingKeyType != null) setRoutingKeyType(RoutingKeyType.valueOf(routingKeyType));

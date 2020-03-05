@@ -16,9 +16,9 @@ public class PravegaReadOperation extends BaseQueryOperation {
 
     private ReaderConfig readerConfig;
 
-    PravegaReadOperation(OperationContext context, String filePath) {
+    PravegaReadOperation(OperationContext context, String keycloakJsonPath) {
         super(context);
-        readerConfig = new ReaderConfig(context, filePath);
+        readerConfig = new ReaderConfig(context, keycloakJsonPath);
 
         // create reader group
         PravegaUtil.createReaderGroup(readerConfig);
