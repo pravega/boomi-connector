@@ -14,13 +14,13 @@ public class PravegaConfig {
     private String authMethod;
     private String userName;
     private String password;
-    private String keycloackJson;
+    private String keycloackJsonPath;
     private boolean createScope;
 
     public PravegaConfig() {
     }
 
-    public PravegaConfig(BrowseContext context) {
+    public PravegaConfig(BrowseContext context, String filePath) {
         Map<String, Object> props = context.getConnectionProperties();
 
         // URI, scope, and stream should always be set
@@ -41,7 +41,7 @@ public class PravegaConfig {
         setAuth((String) getOrDefault(props, Constants.AUTH_TYPE_PROPERTY, Constants.AUTH_TYPE_PROPERTY_NONE));
         setUserName((String) props.get(Constants.USER_NAME_PROPERTY));
         setPassword((String) props.get(Constants.PASSWORD_PROPERTY));
-        setKeycloakJSON((String) props.get(Constants.AUTH_PROPERTY_KEYCLOAK_JSON));
+        setKeycloakJSONPath(filePath);
     }
 
     protected Object getOrDefault(Map<String, Object> map, String key, Object defaultValue) {
@@ -99,13 +99,12 @@ public class PravegaConfig {
         this.password = password;
     }
 
-
-    public String getKeycloakJSON() {
-        return keycloackJson;
+    public String getKeycloakJSONPath() {
+        return keycloackJsonPath;
     }
 
-    public void setKeycloakJSON(String keycloack) {
-        this.keycloackJson = keycloack;
+    public void setKeycloakJSONPath(String keycloackpath) {
+        this.keycloackJsonPath = keycloackpath;
     }
 
     public boolean isCreateScope() {

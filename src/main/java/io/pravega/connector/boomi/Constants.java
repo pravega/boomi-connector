@@ -32,4 +32,5 @@ public class Constants {
     static final String AUTH_TYPE_PROPERTY_NONE = "None";
     static final String AUTH_TYPE_PROPERTY_BASIC = "Basic";
     static final String AUTH_TYPE_PROPERTY_KEYCLOAK = "Keycloak";
+    static final String HASHMAP_ENTRY_KEY = "tempFile";
 }

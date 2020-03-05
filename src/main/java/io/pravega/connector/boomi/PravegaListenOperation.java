@@ -4,7 +4,6 @@ import com.boomi.connector.api.OperationContext;
 import com.boomi.connector.api.PayloadUtil;
 import com.boomi.connector.api.listen.Listener;
 import com.boomi.connector.util.listen.UnmanagedListenOperation;
-import io.pravega.client.ClientConfig;
 import io.pravega.client.EventStreamClientFactory;
 import io.pravega.client.stream.EventRead;
 import io.pravega.client.stream.EventStreamReader;
@@ -20,14 +19,11 @@ public class PravegaListenOperation extends UnmanagedListenOperation {
     private static final Logger logger = Logger.getLogger(PravegaListenOperation.class.getName());
 
     private ReaderConfig readerConfig;
-    private ClientConfig clientConfig;
     private AtomicBoolean isRunning = new AtomicBoolean(false);
 
-    protected PravegaListenOperation(OperationContext context) {
+    protected PravegaListenOperation(OperationContext context, String filepath) {
         super(context);
-        readerConfig = new ReaderConfig(context);
-        clientConfig = PravegaUtil.createClientConfig(readerConfig);
-
+        readerConfig = new ReaderConfig(context, filepath);
         // create reader group
         PravegaUtil.createReaderGroup(readerConfig);
     }
@@ -37,7 +33,7 @@ public class PravegaListenOperation extends UnmanagedListenOperation {
         isRunning.set(true);
 
         EventStreamReader<String> reader = null;
-        try (EventStreamClientFactory clientFactory = PravegaUtil.createClientFactory(readerConfig, clientConfig)) {
+        try (EventStreamClientFactory clientFactory = PravegaUtil.createClientFactory(readerConfig)) {
             reader = PravegaUtil.createReader(readerConfig, clientFactory);
 
             logger.info(String.format("Reading events from %s/%s", readerConfig.getScope(), readerConfig.getStream()));

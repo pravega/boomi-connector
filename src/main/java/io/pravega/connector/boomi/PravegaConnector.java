@@ -7,24 +7,29 @@ import com.boomi.connector.api.OperationContext;
 import com.boomi.connector.util.listen.UnmanagedListenConnector;
 import com.boomi.connector.util.listen.UnmanagedListenOperation;
 
+import java.util.WeakHashMap;
+
 public class PravegaConnector extends UnmanagedListenConnector {
+    private WeakHashMap<String, String> map = new WeakHashMap<>();
+
     @Override
     protected Operation createQueryOperation(OperationContext context) {
-        return new PravegaReadOperation(context);
+        return new PravegaReadOperation(context, PravegaUtil.checkandSetCredentials(context, map));
     }
 
     @Override
     protected Operation createCreateOperation(OperationContext context) {
-        return new PravegaWriteOperation(context);
+        return new PravegaWriteOperation(context, PravegaUtil.checkandSetCredentials(context, map));
     }
 
     @Override
     public UnmanagedListenOperation createListenOperation(OperationContext context) {
-        return new PravegaListenOperation(context);
+        return new PravegaListenOperation(context, PravegaUtil.checkandSetCredentials(context, map));
     }
 
     @Override
     public Browser createBrowser(BrowseContext context) {
         return new PravegaBrowser(context);
     }
+
 }

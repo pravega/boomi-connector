@@ -10,10 +10,12 @@ import io.pravega.client.stream.*;
 import io.pravega.client.stream.impl.DefaultCredentials;
 import io.pravega.client.stream.impl.UTF8StringSerializer;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.net.URI;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.nio.charset.Charset;
+import java.util.*;
 import java.util.concurrent.CompletionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -22,12 +24,12 @@ final class PravegaUtil {
     private static final Logger logger = Logger.getLogger(PravegaUtil.class.getName());
 
     static ClientConfig createClientConfig(PravegaConfig pravegaConfig) {
-        logger.log(Level.INFO, String.format("createClientConfig " + pravegaConfig.getAuth() + " " + pravegaConfig.getKeycloakJSON()));
+        logger.log(Level.INFO, String.format("createClientConfig " + pravegaConfig.getAuth() + " " + pravegaConfig.getKeycloakJSONPath()));
         ClientConfig.ClientConfigBuilder clientBuilder = ClientConfig.builder().controllerURI(URI.create(pravegaConfig.getControllerUri().toString()));
         if (pravegaConfig.getAuth().equals(Constants.AUTH_TYPE_PROPERTY_BASIC))
             clientBuilder.credentials(new DefaultCredentials(pravegaConfig.getPassword(), pravegaConfig.getUserName()));
         if (pravegaConfig.getAuth().equals(Constants.AUTH_TYPE_PROPERTY_KEYCLOAK))
-            clientBuilder.credentials( BoomiPravegaKeycloakCredentials.getInstance(pravegaConfig.getKeycloakJSON()));
+            clientBuilder.credentials(new BoomiPravegaKeycloakCredentials(pravegaConfig.getKeycloakJSONPath()));
         return clientBuilder.build();
     }
 
@@ -56,10 +58,6 @@ final class PravegaUtil {
     // Caller must close
     static EventStreamClientFactory createClientFactory(PravegaConfig pravegaConfig) {
         ClientConfig clientConfig = createClientConfig(pravegaConfig);
-         return createClientFactory(pravegaConfig, clientConfig);
-    }
-
-    static EventStreamClientFactory createClientFactory(PravegaConfig pravegaConfig, ClientConfig clientConfig) {
         // create stream manager
         try (StreamManager streamManager = StreamManager.create(clientConfig)) {
             // create scope
@@ -77,8 +75,8 @@ final class PravegaUtil {
         return EventStreamClientFactory.withScope(pravegaConfig.getScope(), clientConfig);
     }
 
-    static void testConnection(BrowseContext browseContext) {
-        PravegaConfig pravegaConfig = new PravegaConfig(browseContext);
+    static void testConnection(BrowseContext browseContext, String filePath) {
+        PravegaConfig pravegaConfig = new PravegaConfig(browseContext, filePath);
 
         // create stream manager
         try (StreamManager streamManager = StreamManager.create(createClientConfig(pravegaConfig))) {
@@ -112,6 +110,43 @@ final class PravegaUtil {
                 readerConfig.getScope(), readerConfig.getStream(), readerConfig.getReaderGroup(), readerId));
         return clientFactory.createReader(readerId, readerConfig.getReaderGroup(),
                 new UTF8StringSerializer(), io.pravega.client.stream.ReaderConfig.builder().build());
+    }
+
+    static String generateRandomFileName() {
+        byte[] array = new byte[7];
+        new Random().nextBytes(array);
+        String generatedString = new String(array, Charset.forName("UTF-8"));
+        return generatedString;
+    }
+
+    static String createFile(String jsonData) {
+        try {
+            File file = File.createTempFile(generateRandomFileName(), ".json");
+            //file.deleteOnExit();
+            BufferedWriter bw = new BufferedWriter(new FileWriter(file));
+            bw.write(jsonData);
+            bw.close();
+            logger.log(Level.INFO, "FILE CREATED " + jsonData);
+            return file.getAbsolutePath();
+        } catch (Exception E) {
+            logger.log(Level.INFO, "FILE WRITING PROBLEM " + jsonData, E);
+            return null;
+        }
+    }
+
+    static String checkandSetCredentials(BrowseContext context, WeakHashMap<String, String> map) {
+        Map<String, Object> props = context.getConnectionProperties();
+        String authTYpe = (String) props.get(Constants.AUTH_TYPE_PROPERTY);
+        if (authTYpe.equals(Constants.AUTH_TYPE_PROPERTY_KEYCLOAK)) {
+            if (!map.containsKey(Constants.HASHMAP_ENTRY_KEY)) {
+                String jsonData = (String) props.get(Constants.AUTH_PROPERTY_KEYCLOAK_JSON);
+                String filePath = PravegaUtil.createFile(jsonData);
+                map.put(Constants.HASHMAP_ENTRY_KEY, filePath);
+                return filePath;
+            }
+            return map.get(Constants.HASHMAP_ENTRY_KEY);
+        }
+        return null;
     }
 
     private PravegaUtil() {
