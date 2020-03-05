@@ -3,6 +3,7 @@ package io.pravega.connector.boomi;
 import com.boomi.connector.api.*;
 import com.boomi.connector.util.SizeLimitedUpdateOperation;
 import com.jayway.jsonpath.JsonPath;
+import io.pravega.client.ClientConfig;
 import io.pravega.client.EventStreamClientFactory;
 import io.pravega.client.stream.EventStreamWriter;
 import io.pravega.client.stream.EventWriterConfig;
@@ -22,11 +23,15 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class PravegaWriteOperation extends SizeLimitedUpdateOperation {
+    private static final Logger logger = Logger.getLogger(PravegaWriteOperation.class.getName());
     private WriterConfig writerConfig;
+    private ClientConfig clientConfig;
 
     PravegaWriteOperation(OperationContext context) {
         super(context);
         writerConfig = new WriterConfig(context);
+        clientConfig = PravegaUtil.createClientConfig(writerConfig);
+        logger.log(Level.INFO, String.format("TEST LOGG"));
     }
 
     // caller must close
@@ -45,7 +50,7 @@ public class PravegaWriteOperation extends SizeLimitedUpdateOperation {
     protected void executeSizeLimitedUpdate(UpdateRequest request, OperationResponse response) {
         Logger logger = response.getLogger();
 
-        try (EventStreamClientFactory clientFactory = PravegaUtil.createClientFactory(writerConfig);
+        try (EventStreamClientFactory clientFactory = PravegaUtil.createClientFactory(writerConfig, clientConfig);
              EventStreamWriter<String> writer = createWriter(clientFactory)) {
             List<Future<ObjectData>> futures = new ArrayList<>();
             for (ObjectData input : request) {

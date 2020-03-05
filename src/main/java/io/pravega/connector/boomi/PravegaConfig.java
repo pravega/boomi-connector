@@ -11,11 +11,10 @@ public class PravegaConfig {
     private URI controllerUri;
     private String scope;
     private String stream;
-    private boolean enableAuth;
+    private String authMethod;
     private String userName;
     private String password;
-    private boolean enableNautilusSupport;
-    private String keycloack;
+    private String keycloackJson;
     private boolean createScope;
 
     public PravegaConfig() {
@@ -39,11 +38,10 @@ public class PravegaConfig {
         setScope(scope);
         setStream(stream);
         setCreateScope((boolean) getOrDefault(props, Constants.CREATE_SCOPE_PROPERTY, true));
-        setEnableAuth((boolean) getOrDefault(props, Constants.ENABLE_AUTH_PROPERTY, false));
+        setAuth((String) getOrDefault(props, Constants.AUTH_TYPE_PROPERTY, Constants.AUTH_TYPE_PROPERTY_NONE));
         setUserName((String) props.get(Constants.USER_NAME_PROPERTY));
         setPassword((String) props.get(Constants.PASSWORD_PROPERTY));
-        setEnableNautilusSupport((boolean) getOrDefault(props, Constants.ENABLE_NAUT_SUPPORT_PROPERTY, false));
-        setNautilusSupport((String) props.get(Constants.NAUT_SUPPORT_PROPERTY));
+        setKeycloakJSON((String) props.get(Constants.AUTH_PROPERTY_KEYCLOAK_JSON));
     }
 
     protected Object getOrDefault(Map<String, Object> map, String key, Object defaultValue) {
@@ -77,12 +75,12 @@ public class PravegaConfig {
         this.stream = stream;
     }
 
-    public boolean isEnableAuth() {
-        return enableAuth;
+    public String getAuth() {
+        return authMethod;
     }
 
-    public void setEnableAuth(boolean enableAuth) {
-        this.enableAuth = enableAuth;
+    public void setAuth(String auth) {
+        this.authMethod = auth;
     }
 
     public String getUserName() {
@@ -101,20 +99,13 @@ public class PravegaConfig {
         this.password = password;
     }
 
-    public boolean isEnableNautilusSupport() {
-        return this.enableNautilusSupport;
+
+    public String getKeycloakJSON() {
+        return keycloackJson;
     }
 
-    public void setEnableNautilusSupport(boolean enableNautilusSupport) {
-        this.enableNautilusSupport = enableNautilusSupport;
-    }
-
-    public String getNautilusSupport() {
-        return keycloack;
-    }
-
-    public void setNautilusSupport(String keycloack) {
-        this.keycloack = keycloack;
+    public void setKeycloakJSON(String keycloack) {
+        this.keycloackJson = keycloack;
     }
 
     public boolean isCreateScope() {

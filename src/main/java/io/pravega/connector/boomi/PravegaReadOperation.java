@@ -2,6 +2,7 @@ package io.pravega.connector.boomi;
 
 import com.boomi.connector.api.*;
 import com.boomi.connector.util.BaseQueryOperation;
+import io.pravega.client.ClientConfig;
 import io.pravega.client.EventStreamClientFactory;
 import io.pravega.client.stream.EventRead;
 import io.pravega.client.stream.EventStreamReader;
@@ -15,10 +16,12 @@ public class PravegaReadOperation extends BaseQueryOperation {
     private static final Logger logger = Logger.getLogger(PravegaReadOperation.class.getName());
 
     private ReaderConfig readerConfig;
+    private ClientConfig clientConfig;
 
     PravegaReadOperation(OperationContext context) {
         super(context);
         readerConfig = new ReaderConfig(context);
+        clientConfig = PravegaUtil.createClientConfig(readerConfig);
 
         // create reader group
         PravegaUtil.createReaderGroup(readerConfig);
@@ -38,7 +41,7 @@ public class PravegaReadOperation extends BaseQueryOperation {
         long eventCounter = 0;
 
         EventStreamReader<String> reader = null;
-        try (EventStreamClientFactory clientFactory = PravegaUtil.createClientFactory(readerConfig)) {
+        try (EventStreamClientFactory clientFactory = PravegaUtil.createClientFactory(readerConfig, clientConfig)) {
             reader = PravegaUtil.createReader(readerConfig, clientFactory);
 
             logger.info(String.format("Reading events from %s/%s", readerConfig.getScope(), readerConfig.getStream()));

@@ -16,11 +16,10 @@ public class Constants {
     static final String STREAM_PROPERTY = "stream";
 
     static final String CREATE_SCOPE_PROPERTY = "createScope";
-    static final String ENABLE_AUTH_PROPERTY = "enableAuth";
+    static final String AUTH_TYPE_PROPERTY = "authentication";
     static final String USER_NAME_PROPERTY = "userName";
     static final String PASSWORD_PROPERTY = "password";
-    static final String ENABLE_NAUT_SUPPORT_PROPERTY = "enableNautilusSupport";
-    static final String NAUT_SUPPORT_PROPERTY = "nautilussupport";
+    static final String AUTH_PROPERTY_KEYCLOAK_JSON = "keycloakJson";
 
     static final String READER_GROUP_PROPERTY = "readerGroup";
     static final String READ_TIMEOUT_PROPERTY = "readTimeout";
@@ -29,4 +28,8 @@ public class Constants {
     static final String ROUTING_KEY_TYPE_PROPERTY = "routingKeyType";
     static final String ROUTING_KEY_PROPERTY = "routingKey";
     static final String INITIAL_READER_GROUP_POSITION = "initialReaderGroupPosition";
+
+    static final String AUTH_TYPE_PROPERTY_NONE = "None";
+    static final String AUTH_TYPE_PROPERTY_BASIC = "Basic";
+    static final String AUTH_TYPE_PROPERTY_KEYCLOAK = "Keycloak";
 }

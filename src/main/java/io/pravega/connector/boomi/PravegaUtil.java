@@ -15,17 +15,19 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletionException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 final class PravegaUtil {
     private static final Logger logger = Logger.getLogger(PravegaUtil.class.getName());
 
     static ClientConfig createClientConfig(PravegaConfig pravegaConfig) {
+        logger.log(Level.INFO, String.format("createClientConfig " + pravegaConfig.getAuth() + " " + pravegaConfig.getKeycloakJSON()));
         ClientConfig.ClientConfigBuilder clientBuilder = ClientConfig.builder().controllerURI(URI.create(pravegaConfig.getControllerUri().toString()));
-        if (pravegaConfig.isEnableAuth())
+        if (pravegaConfig.getAuth().equals(Constants.AUTH_TYPE_PROPERTY_BASIC))
             clientBuilder.credentials(new DefaultCredentials(pravegaConfig.getPassword(), pravegaConfig.getUserName()));
-        if (pravegaConfig.isEnableNautilusSupport())
-            clientBuilder.credentials(new BoomiPravegaKeycloakCredentials(pravegaConfig.getNautilusSupport()));
+        if (pravegaConfig.getAuth().equals(Constants.AUTH_TYPE_PROPERTY_KEYCLOAK))
+            clientBuilder.credentials( BoomiPravegaKeycloakCredentials.getInstance(pravegaConfig.getKeycloakJSON()));
         return clientBuilder.build();
     }
 
@@ -54,7 +56,10 @@ final class PravegaUtil {
     // Caller must close
     static EventStreamClientFactory createClientFactory(PravegaConfig pravegaConfig) {
         ClientConfig clientConfig = createClientConfig(pravegaConfig);
+         return createClientFactory(pravegaConfig, clientConfig);
+    }
 
+    static EventStreamClientFactory createClientFactory(PravegaConfig pravegaConfig, ClientConfig clientConfig) {
         // create stream manager
         try (StreamManager streamManager = StreamManager.create(clientConfig)) {
             // create scope

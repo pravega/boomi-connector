@@ -4,7 +4,6 @@ import com.boomi.connector.api.BrowseContext;
 import com.boomi.connector.api.Browser;
 import com.boomi.connector.api.Operation;
 import com.boomi.connector.api.OperationContext;
-import com.boomi.connector.util.BaseConnector;
 import com.boomi.connector.util.listen.UnmanagedListenConnector;
 import com.boomi.connector.util.listen.UnmanagedListenOperation;
 

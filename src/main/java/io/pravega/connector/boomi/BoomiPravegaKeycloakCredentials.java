@@ -16,13 +16,26 @@ import static io.pravega.auth.AuthConstants.BEARER;
 public class BoomiPravegaKeycloakCredentials implements Credentials {
 
     private static final Logger logger = Logger.getLogger(BoomiPravegaKeycloakCredentials.class.getName());
+    private static BoomiPravegaKeycloakCredentials instance;
 
     private transient KeycloakAuthzClient kc = null;
     private String jsonData;
 
-    public BoomiPravegaKeycloakCredentials(String jsonData) {
+    private BoomiPravegaKeycloakCredentials(String jsonData) {
         this.jsonData = jsonData;
         init();
+    }
+
+    public static BoomiPravegaKeycloakCredentials getInstance(String json)
+    {
+        if (instance == null) {
+            synchronized (BoomiPravegaKeycloakCredentials.class) {
+                if(instance == null) {
+                    instance = new BoomiPravegaKeycloakCredentials(json);
+                }
+            }
+        }
+        return instance;
     }
 
     @Override
@@ -46,18 +59,19 @@ public class BoomiPravegaKeycloakCredentials implements Credentials {
     private String createFile() {
         try {
             File file = File.createTempFile(generateRandomFileName(), ".json");
+            //file.deleteOnExit();
             BufferedWriter bw = new BufferedWriter(new FileWriter(file));
             bw.write(jsonData);
             bw.close();
-            logger.log(Level.INFO, "FILE CREATED " + file.getAbsolutePath());
+            logger.log(Level.INFO, "FILE CREATED " + jsonData);
             return file.getAbsolutePath();
         } catch (Exception E) {
-            logger.log(Level.INFO, "FILE WRITING PROBLEM", E);
+            logger.log(Level.INFO, "FILE WRITING PROBLEM " + jsonData, E);
             return null;
         }
     }
 
-    private void init() {
+    private synchronized void  init() {
         if (kc == null) {
             kc = KeycloakAuthzClient.builder().withConfigFile(createFile()).build();
         }
