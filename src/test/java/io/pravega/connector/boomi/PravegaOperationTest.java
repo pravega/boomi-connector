@@ -107,6 +107,7 @@ public class PravegaOperationTest {
         connProps.put(Constants.CONTROLLER_URI_PROPERTY, TestUtils.PRAVEGA_CONTROLLER_URI);
         connProps.put(Constants.SCOPE_PROPERTY, PRAVEGA_SCOPE);
         connProps.put(Constants.STREAM_PROPERTY, CREATE_OPERATION_STREAM);
+        connProps.put(Constants.AUTH_TYPE_PROPERTY, Constants.AUTH_TYPE_PROPERTY_NONE);
 
         Map<String, Object> opProps = new HashMap<>();
         opProps.put(Constants.ROUTING_KEY_TYPE_PROPERTY, WriterConfig.RoutingKeyType.JsonReference.toString());
@@ -142,6 +143,7 @@ public class PravegaOperationTest {
         connProps.put(Constants.CONTROLLER_URI_PROPERTY, TestUtils.PRAVEGA_CONTROLLER_URI);
         connProps.put(Constants.SCOPE_PROPERTY, PRAVEGA_SCOPE);
         connProps.put(Constants.STREAM_PROPERTY, CREATE_OPERATION_STREAM);
+        connProps.put(Constants.AUTH_TYPE_PROPERTY, Constants.AUTH_TYPE_PROPERTY_NONE);
 
         Map<String, Object> opProps = new HashMap<>();
         opProps.put(Constants.ROUTING_KEY_TYPE_PROPERTY, WriterConfig.RoutingKeyType.Fixed.toString());
@@ -175,6 +177,7 @@ public class PravegaOperationTest {
 
         Map<String, Object> connProps = new HashMap<>();
         connProps.put(Constants.CONTROLLER_URI_PROPERTY, TestUtils.PRAVEGA_CONTROLLER_URI);
+        connProps.put(Constants.AUTH_TYPE_PROPERTY, Constants.AUTH_TYPE_PROPERTY_NONE);
         connProps.put(Constants.SCOPE_PROPERTY, PRAVEGA_SCOPE);
         connProps.put(Constants.STREAM_PROPERTY, CREATE_OPERATION_STREAM);
 
@@ -208,6 +211,7 @@ public class PravegaOperationTest {
 
         Map<String, Object> connProps = new HashMap<>();
         connProps.put(Constants.CONTROLLER_URI_PROPERTY, TestUtils.PRAVEGA_CONTROLLER_URI);
+        connProps.put(Constants.AUTH_TYPE_PROPERTY, Constants.AUTH_TYPE_PROPERTY_NONE);
         connProps.put(Constants.SCOPE_PROPERTY, PRAVEGA_SCOPE);
         connProps.put(Constants.STREAM_PROPERTY, CREATE_OPERATION_STREAM);
 
@@ -241,6 +245,7 @@ public class PravegaOperationTest {
 
         Map<String, Object> connProps = new HashMap<>();
         connProps.put(Constants.CONTROLLER_URI_PROPERTY, TestUtils.PRAVEGA_CONTROLLER_URI);
+        connProps.put(Constants.AUTH_TYPE_PROPERTY, Constants.AUTH_TYPE_PROPERTY_NONE);
         connProps.put(Constants.SCOPE_PROPERTY, PRAVEGA_SCOPE);
         connProps.put(Constants.STREAM_PROPERTY, CREATE_OPERATION_STREAM);
 
@@ -280,6 +285,7 @@ public class PravegaOperationTest {
 
         Map<String, Object> connProps = new HashMap<>();
         connProps.put(Constants.CONTROLLER_URI_PROPERTY, TestUtils.PRAVEGA_CONTROLLER_URI);
+        connProps.put(Constants.AUTH_TYPE_PROPERTY, Constants.AUTH_TYPE_PROPERTY_NONE);
         connProps.put(Constants.SCOPE_PROPERTY, PRAVEGA_SCOPE);
         connProps.put(Constants.STREAM_PROPERTY, QUERY_OPERATION_STREAM);
 
@@ -313,6 +319,7 @@ public class PravegaOperationTest {
 
         Map<String, Object> connProps = new HashMap<>();
         connProps.put(Constants.CONTROLLER_URI_PROPERTY, TestUtils.PRAVEGA_CONTROLLER_URI);
+        connProps.put(Constants.AUTH_TYPE_PROPERTY, Constants.AUTH_TYPE_PROPERTY_NONE);
         connProps.put(Constants.SCOPE_PROPERTY, PRAVEGA_SCOPE);
         connProps.put(Constants.STREAM_PROPERTY, QUERY_OPERATION_STREAM);
 
@@ -361,6 +368,7 @@ public class PravegaOperationTest {
 
         Map<String, Object> connProps = new HashMap<>();
         connProps.put(Constants.CONTROLLER_URI_PROPERTY, TestUtils.PRAVEGA_CONTROLLER_URI);
+        connProps.put(Constants.AUTH_TYPE_PROPERTY, Constants.AUTH_TYPE_PROPERTY_NONE);
         connProps.put(Constants.SCOPE_PROPERTY, PRAVEGA_SCOPE);
         connProps.put(Constants.STREAM_PROPERTY, stream);
 
@@ -411,6 +419,7 @@ public class PravegaOperationTest {
 
         Map<String, Object> connProps = new HashMap<>();
         connProps.put(Constants.CONTROLLER_URI_PROPERTY, TestUtils.PRAVEGA_CONTROLLER_URI);
+        connProps.put(Constants.AUTH_TYPE_PROPERTY, Constants.AUTH_TYPE_PROPERTY_NONE);
         connProps.put(Constants.SCOPE_PROPERTY, PRAVEGA_SCOPE);
         connProps.put(Constants.STREAM_PROPERTY, stream);
 
@@ -442,6 +451,7 @@ public class PravegaOperationTest {
 
         Map<String, Object> connProps = new HashMap<>();
         connProps.put(Constants.CONTROLLER_URI_PROPERTY, TestUtils.PRAVEGA_CONTROLLER_URI);
+        connProps.put(Constants.AUTH_TYPE_PROPERTY, Constants.AUTH_TYPE_PROPERTY_NONE);
         connProps.put(Constants.SCOPE_PROPERTY, PRAVEGA_SCOPE);
         connProps.put(Constants.STREAM_PROPERTY, QUERY_OPERATION_STREAM);
 
@@ -450,7 +460,7 @@ public class PravegaOperationTest {
         opProps.put(Constants.READ_TIMEOUT_PROPERTY, 5000L);
 
         tester.setOperationContext(OperationType.LISTEN, connProps, opProps, null, null);
-        PravegaListenOperation pravegaListenOperation = new PravegaListenOperation(tester.getOperationContext());
+        PravegaListenOperation pravegaListenOperation = new PravegaListenOperation(tester.getOperationContext(), null);
         SimpleListener simpleListener = new SimpleListener();
 
         Thread thread = new Thread(() -> {

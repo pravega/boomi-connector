@@ -19,6 +19,7 @@ final class TestUtils {
     private static final Logger log = LoggerFactory.getLogger(TestUtils.class);
 
     static final String PRAVEGA_CONTROLLER_URI = "tcp://127.0.0.1:9090";
+    static final String PRAVEGA_NAUT_CONTROLLER_URI = "tcp://10.243.37.210:9090";
 
     // Caller must close
     static InProcPravegaCluster startStandalone() throws Exception {
@@ -80,10 +81,10 @@ final class TestUtils {
         }
     }
 
-    static String generate2MBmessage(){
+    static String generate2MBmessage() {
         char[] chars = new char[2000000];
         Arrays.fill(chars, 'a');
-        String randomMessage =  new String(chars);
+        String randomMessage = new String(chars);
         return "{\"name\":\"foo\",\"message\":\"" + randomMessage + "\"}";
     }
 
