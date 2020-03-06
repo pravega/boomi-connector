@@ -14,8 +14,10 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.net.URI;
-import java.nio.charset.Charset;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+import java.util.WeakHashMap;
 import java.util.concurrent.CompletionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -24,7 +26,6 @@ final class PravegaUtil {
     private static final Logger logger = Logger.getLogger(PravegaUtil.class.getName());
 
     static ClientConfig createClientConfig(PravegaConfig pravegaConfig) {
-        logger.log(Level.INFO, String.format("createClientConfig " + pravegaConfig.getAuth() + " " + pravegaConfig.getKeycloakJSONPath()));
         ClientConfig.ClientConfigBuilder clientBuilder = ClientConfig.builder().controllerURI(URI.create(pravegaConfig.getControllerUri().toString()));
         if (pravegaConfig.getAuth().equals(Constants.AUTH_TYPE_PROPERTY_BASIC))
             clientBuilder.credentials(new DefaultCredentials(pravegaConfig.getPassword(), pravegaConfig.getUserName()));
@@ -112,39 +113,37 @@ final class PravegaUtil {
                 new UTF8StringSerializer(), io.pravega.client.stream.ReaderConfig.builder().build());
     }
 
-    static String generateRandomFileName() {
-        byte[] array = new byte[7];
-        new Random().nextBytes(array);
-        String generatedString = new String(array, Charset.forName("UTF-8"));
-        return generatedString;
-    }
-
-    static String createFile(String jsonData) {
+    static String createKeycloakJSONnFile(String keycloakJSONString) {
         try {
-            File file = File.createTempFile(generateRandomFileName(), ".json");
-            //file.deleteOnExit();
+            File file = File.createTempFile("keycloak-", ".json");
             BufferedWriter bw = new BufferedWriter(new FileWriter(file));
-            bw.write(jsonData);
+            bw.write(keycloakJSONString);
             bw.close();
-            logger.log(Level.INFO, "FILE CREATED " + jsonData);
+            logger.log(Level.INFO, "File created " + keycloakJSONString);
             return file.getAbsolutePath();
         } catch (Exception E) {
-            logger.log(Level.INFO, "FILE WRITING PROBLEM " + jsonData, E);
+            logger.log(Level.SEVERE, "File writing problem" + keycloakJSONString, E);
             return null;
         }
     }
 
-    static String checkandSetCredentials(BrowseContext context, WeakHashMap<String, String> map) {
+    static String checkAndSetCredentials(BrowseContext context, WeakHashMap<String, String> map) {
         Map<String, Object> props = context.getConnectionProperties();
         String authTYpe = (String) props.get(Constants.AUTH_TYPE_PROPERTY);
         if (authTYpe.equals(Constants.AUTH_TYPE_PROPERTY_KEYCLOAK)) {
-            if (!map.containsKey(Constants.HASHMAP_ENTRY_KEY)) {
-                String jsonData = (String) props.get(Constants.AUTH_PROPERTY_KEYCLOAK_JSON);
-                String keycloakJsonPath = PravegaUtil.createFile(jsonData);
-                map.put(Constants.HASHMAP_ENTRY_KEY, keycloakJsonPath);
-                return keycloakJsonPath;
+            String keycloakJSONString = (String) props.get(Constants.AUTH_PROPERTY_KEYCLOAK_JSON);
+            if (!map.containsKey(keycloakJSONString)) {
+                synchronized (PravegaUtil.class) {
+                    if (!map.containsKey(keycloakJSONString)) {
+                        String keycloakJSONPath = PravegaUtil.createKeycloakJSONnFile(keycloakJSONString);
+                        if (keycloakJSONPath != null)
+                            map.put(keycloakJSONString, keycloakJSONPath);
+                        return keycloakJSONPath;
+                    }
+                    return map.get(keycloakJSONString);
+                }
             }
-            return map.get(Constants.HASHMAP_ENTRY_KEY);
+            return map.get(keycloakJSONString);
         }
         return null;
     }

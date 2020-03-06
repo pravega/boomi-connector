@@ -19,8 +19,8 @@ class ReaderConfig extends PravegaConfig {
     public ReaderConfig() {
     }
 
-    public ReaderConfig(OperationContext context, String keycloakJsonPath) {
-        super(context, keycloakJsonPath);
+    public ReaderConfig(OperationContext context, String keycloakJSONPath) {
+        super(context, keycloakJSONPath);
         Map<String, Object> props = context.getOperationProperties();
 
         // reader group should always be set

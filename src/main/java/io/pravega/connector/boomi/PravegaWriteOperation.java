@@ -24,9 +24,9 @@ import java.util.logging.Logger;
 public class PravegaWriteOperation extends SizeLimitedUpdateOperation {
     private WriterConfig writerConfig;
 
-    PravegaWriteOperation(OperationContext context, String keycloakJsonPath) {
+    PravegaWriteOperation(OperationContext context, String keycloakJSONPath) {
         super(context);
-        writerConfig = new WriterConfig(context, keycloakJsonPath);
+        writerConfig = new WriterConfig(context, keycloakJSONPath);
     }
 
     // caller must close

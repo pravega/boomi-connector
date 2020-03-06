@@ -21,9 +21,9 @@ public class PravegaListenOperation extends UnmanagedListenOperation {
     private ReaderConfig readerConfig;
     private AtomicBoolean isRunning = new AtomicBoolean(false);
 
-    protected PravegaListenOperation(OperationContext context, String keycloakJsonPath) {
+    protected PravegaListenOperation(OperationContext context, String keycloakJSONPath) {
         super(context);
-        readerConfig = new ReaderConfig(context, keycloakJsonPath);
+        readerConfig = new ReaderConfig(context, keycloakJSONPath);
         // create reader group
         PravegaUtil.createReaderGroup(readerConfig);
     }

@@ -25,7 +25,7 @@ public class PravegaBrowser extends BaseBrowser implements ConnectionTester {
     @Override
     public void testConnection() {
         try {
-            PravegaUtil.testConnection(getContext(), PravegaUtil.checkandSetCredentials(getContext(), map));
+            PravegaUtil.testConnection(getContext(), PravegaUtil.checkAndSetCredentials(getContext(), map));
         } catch (Throwable t) {
             throw new ConnectorException("Could not initialize connection to Pravega", t);
         }

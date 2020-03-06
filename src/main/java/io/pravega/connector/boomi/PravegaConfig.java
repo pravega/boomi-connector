@@ -14,7 +14,7 @@ public class PravegaConfig {
     private String authMethod;
     private String userName;
     private String password;
-    private String keycloackJsonPath;
+    private String keycloakJSONPath;
     private boolean createScope;
 
     public PravegaConfig() {
@@ -100,11 +100,11 @@ public class PravegaConfig {
     }
 
     public String getKeycloakJSONPath() {
-        return keycloackJsonPath;
+        return keycloakJSONPath;
     }
 
-    public void setKeycloakJSONPath(String keycloackpath) {
-        this.keycloackJsonPath = keycloackpath;
+    public void setKeycloakJSONPath(String keycloakJSONPath) {
+        this.keycloakJSONPath = keycloakJSONPath;
     }
 
     public boolean isCreateScope() {

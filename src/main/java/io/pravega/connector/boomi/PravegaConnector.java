@@ -14,17 +14,17 @@ public class PravegaConnector extends UnmanagedListenConnector {
 
     @Override
     protected Operation createQueryOperation(OperationContext context) {
-        return new PravegaReadOperation(context, PravegaUtil.checkandSetCredentials(context, map));
+        return new PravegaReadOperation(context, PravegaUtil.checkAndSetCredentials(context, map));
     }
 
     @Override
     protected Operation createCreateOperation(OperationContext context) {
-        return new PravegaWriteOperation(context, PravegaUtil.checkandSetCredentials(context, map));
+        return new PravegaWriteOperation(context, PravegaUtil.checkAndSetCredentials(context, map));
     }
 
     @Override
     public UnmanagedListenOperation createListenOperation(OperationContext context) {
-        return new PravegaListenOperation(context, PravegaUtil.checkandSetCredentials(context, map));
+        return new PravegaListenOperation(context, PravegaUtil.checkAndSetCredentials(context, map));
     }
 
     @Override
