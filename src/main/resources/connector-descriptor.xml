@@ -38,14 +38,14 @@
     </field>
 
     <field id="userName" label="Basic User Name" type="string">
-        <helpText>The Basic user</helpText>
+        <helpText>An authorized Pravega user.  Only used when Authentication Type is set to "Basic"</helpText>
     </field>
     <field id="password" label="Basic Password" type="password">
-        <helpText>The Basic user's password</helpText>
+        <helpText>The Pravega user's password.  Only used when Authentication Type is set to "Basic"</helpText>
     </field>
 
-    <field id="keycloakJson" label="Keycloak JSON" type="password">
-        <helpText>Keycloak json string</helpText>
+    <field id="keycloakJson" label="Keycloak JWT" type="password">
+        <helpText> A valid Keycloak JSON Web Token (JWT), including Keycloak endpoint and credentials.  This is obtained from the Keycloak server</helpText>
     </field>
     <testConnection method="CUSTOM"/>
     <operation types="QUERY" supportsBrowse="false" customTypeLabel="Read">
