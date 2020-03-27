@@ -150,9 +150,7 @@ public class PravegaBrowserTest {
         connProps.put(Constants.AUTH_PROPERTY_KEYCLOAK_JSON, jsonData);
 
         Map<String, Object> opProps = new HashMap<>();
-
         tester.setOperationContext(OperationType.QUERY, connProps, opProps, null, null);
-
         ConnectionTester connTester = new PravegaBrowser(tester.getOperationContext());
 
         try {
