@@ -1,11 +1,14 @@
 package io.pravega.connector.boomi;
 
 import com.boomi.connector.api.BrowseContext;
+import com.boomi.connector.api.ConnectorContext;
 import com.boomi.connector.api.ConnectorException;
+import sun.awt.geom.AreaOp;
 
 import java.net.URI;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 public class PravegaConfig {
     private URI controllerUri;
@@ -15,11 +18,13 @@ public class PravegaConfig {
     private String userName;
     private String password;
     private boolean createScope;
+    private long interval;
+    private TimeUnit unit;
 
     public PravegaConfig() {
     }
 
-    public PravegaConfig(BrowseContext context) {
+    public PravegaConfig(ConnectorContext context) {
         Map<String, Object> props = context.getConnectionProperties();
 
         // URI, scope, and stream should always be set
@@ -40,6 +45,8 @@ public class PravegaConfig {
         setEnableAuth((boolean) getOrDefault(props, Constants.ENABLE_AUTH_PROPERTY, false));
         setUserName((String) props.get(Constants.USER_NAME_PROPERTY));
         setPassword((String) props.get(Constants.PASSWORD_PROPERTY));
+        setInterval((long) props.get(Constants.INTERVAL));
+        setUnit((String) props.get(Constants.TIME_UNIT));
     }
 
     protected Object getOrDefault(Map<String, Object> map, String key, Object defaultValue) {
@@ -103,6 +110,22 @@ public class PravegaConfig {
 
     public void setCreateScope(boolean createScope) {
         this.createScope = createScope;
+    }
+
+    public long getInterval() {
+        return interval;
+    }
+
+    public void setInterval(long interval) {
+        this.interval = interval;
+    }
+
+    public TimeUnit getUnit() {
+        return unit;
+    }
+
+    public void setUnit(String timeUnit) {
+        this.unit = TimeUnit.valueOf(timeUnit);
     }
 
     @Override

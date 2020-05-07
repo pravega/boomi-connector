@@ -28,6 +28,15 @@
     <field id="password" label="Pravega Password" type="password">
         <helpText>The Pravega user's password.</helpText>
     </field>
+    <field id="interval" label="Listener Interval" type="integer">
+        <helpText>Listener Interval.</helpText>
+        <defaultValue>10</defaultValue>
+    </field>
+    <field id="unit" label="Listener Interval Time Unit" type="string">
+        <helpText>Listener Interval Time Unit.</helpText>
+        <defaultValue>SECONDS</defaultValue>
+    </field>
+
     <testConnection method="CUSTOM"/>
     <operation types="QUERY" supportsBrowse="false" customTypeLabel="Read">
         <field id="readerGroup" label="Pravega Reader Group" type="string">

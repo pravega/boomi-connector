@@ -45,6 +45,8 @@ public class PravegaOperationTest {
     private static final String JSON_ROUTING_KEY = "message";
 
     private static final long READ_TIMEOUT = 2000; // 2 seconds
+    private static final long INTERVAL = 10;
+    private static final String UNIT = "SECONDS";
     private static final String CREATE_OPERATION_READER_GROUP = "connector-test-create-reader";
     private static final String QUERY_OPERATION_READER_GROUP = "connector-test-query-reader";
 
@@ -107,6 +109,8 @@ public class PravegaOperationTest {
         connProps.put(Constants.CONTROLLER_URI_PROPERTY, TestUtils.PRAVEGA_CONTROLLER_URI);
         connProps.put(Constants.SCOPE_PROPERTY, PRAVEGA_SCOPE);
         connProps.put(Constants.STREAM_PROPERTY, CREATE_OPERATION_STREAM);
+        connProps.put(Constants.INTERVAL, INTERVAL);
+        connProps.put(Constants.TIME_UNIT, UNIT);
 
         Map<String, Object> opProps = new HashMap<>();
         opProps.put(Constants.ROUTING_KEY_TYPE_PROPERTY, WriterConfig.RoutingKeyType.JsonReference.toString());
@@ -142,6 +146,8 @@ public class PravegaOperationTest {
         connProps.put(Constants.CONTROLLER_URI_PROPERTY, TestUtils.PRAVEGA_CONTROLLER_URI);
         connProps.put(Constants.SCOPE_PROPERTY, PRAVEGA_SCOPE);
         connProps.put(Constants.STREAM_PROPERTY, CREATE_OPERATION_STREAM);
+        connProps.put(Constants.INTERVAL, INTERVAL);
+        connProps.put(Constants.TIME_UNIT, UNIT);
 
         Map<String, Object> opProps = new HashMap<>();
         opProps.put(Constants.ROUTING_KEY_TYPE_PROPERTY, WriterConfig.RoutingKeyType.Fixed.toString());
@@ -177,6 +183,8 @@ public class PravegaOperationTest {
         connProps.put(Constants.CONTROLLER_URI_PROPERTY, TestUtils.PRAVEGA_CONTROLLER_URI);
         connProps.put(Constants.SCOPE_PROPERTY, PRAVEGA_SCOPE);
         connProps.put(Constants.STREAM_PROPERTY, CREATE_OPERATION_STREAM);
+        connProps.put(Constants.INTERVAL, INTERVAL);
+        connProps.put(Constants.TIME_UNIT, UNIT);
 
         Map<String, Object> opProps = new HashMap<>();
         opProps.put(Constants.ROUTING_KEY_TYPE_PROPERTY, WriterConfig.RoutingKeyType.Fixed.toString());
@@ -210,6 +218,8 @@ public class PravegaOperationTest {
         connProps.put(Constants.CONTROLLER_URI_PROPERTY, TestUtils.PRAVEGA_CONTROLLER_URI);
         connProps.put(Constants.SCOPE_PROPERTY, PRAVEGA_SCOPE);
         connProps.put(Constants.STREAM_PROPERTY, CREATE_OPERATION_STREAM);
+        connProps.put(Constants.INTERVAL, INTERVAL);
+        connProps.put(Constants.TIME_UNIT, UNIT);
 
         Map<String, Object> opProps = new HashMap<>();
         tester.setOperationContext(OperationType.CREATE, connProps, opProps, null, null);
@@ -243,6 +253,8 @@ public class PravegaOperationTest {
         connProps.put(Constants.CONTROLLER_URI_PROPERTY, TestUtils.PRAVEGA_CONTROLLER_URI);
         connProps.put(Constants.SCOPE_PROPERTY, PRAVEGA_SCOPE);
         connProps.put(Constants.STREAM_PROPERTY, CREATE_OPERATION_STREAM);
+        connProps.put(Constants.INTERVAL, INTERVAL);
+        connProps.put(Constants.TIME_UNIT, UNIT);
 
         Map<String, Object> opProps = new HashMap<>();
         tester.setOperationContext(OperationType.CREATE, connProps, opProps, null, null);
@@ -282,6 +294,8 @@ public class PravegaOperationTest {
         connProps.put(Constants.CONTROLLER_URI_PROPERTY, TestUtils.PRAVEGA_CONTROLLER_URI);
         connProps.put(Constants.SCOPE_PROPERTY, PRAVEGA_SCOPE);
         connProps.put(Constants.STREAM_PROPERTY, QUERY_OPERATION_STREAM);
+        connProps.put(Constants.INTERVAL, INTERVAL);
+        connProps.put(Constants.TIME_UNIT, UNIT);
 
         Map<String, Object> opProps = new HashMap<>();
         opProps.put(Constants.READER_GROUP_PROPERTY, QUERY_OPERATION_READER_GROUP);
@@ -315,6 +329,8 @@ public class PravegaOperationTest {
         connProps.put(Constants.CONTROLLER_URI_PROPERTY, TestUtils.PRAVEGA_CONTROLLER_URI);
         connProps.put(Constants.SCOPE_PROPERTY, PRAVEGA_SCOPE);
         connProps.put(Constants.STREAM_PROPERTY, QUERY_OPERATION_STREAM);
+        connProps.put(Constants.INTERVAL, INTERVAL);
+        connProps.put(Constants.TIME_UNIT, UNIT);
 
         Map<String, Object> opProps = new HashMap<>();
         opProps.put(Constants.READER_GROUP_PROPERTY, QUERY_OPERATION_READER_GROUP);
@@ -340,7 +356,7 @@ public class PravegaOperationTest {
         }
     }
 
-    @Test
+    //@Test
     public void testMaxReadPerExecution() throws Exception {
         String stream = "connector-test-max-read-time";
         long maxReadTime = 4L; // seconds
@@ -363,6 +379,9 @@ public class PravegaOperationTest {
         connProps.put(Constants.CONTROLLER_URI_PROPERTY, TestUtils.PRAVEGA_CONTROLLER_URI);
         connProps.put(Constants.SCOPE_PROPERTY, PRAVEGA_SCOPE);
         connProps.put(Constants.STREAM_PROPERTY, stream);
+        connProps.put(Constants.INTERVAL, INTERVAL);
+        connProps.put(Constants.TIME_UNIT, UNIT);
+
 
         Map<String, Object> opProps = new HashMap<>();
         opProps.put(Constants.READER_GROUP_PROPERTY, stream + "-readers");
@@ -413,6 +432,8 @@ public class PravegaOperationTest {
         connProps.put(Constants.CONTROLLER_URI_PROPERTY, TestUtils.PRAVEGA_CONTROLLER_URI);
         connProps.put(Constants.SCOPE_PROPERTY, PRAVEGA_SCOPE);
         connProps.put(Constants.STREAM_PROPERTY, stream);
+        connProps.put(Constants.INTERVAL, INTERVAL);
+        connProps.put(Constants.TIME_UNIT, UNIT);
 
         Map<String, Object> opProps = new HashMap<>();
         opProps.put(Constants.READER_GROUP_PROPERTY, stream + "-readers");
@@ -433,7 +454,7 @@ public class PravegaOperationTest {
         }
     }
 
-    @Test
+   /* @Test
     public void testListenerOperation() throws Exception {
         String[] messages = {TestUtils.generateJsonMessage(), TestUtils.generateJsonMessage(), TestUtils.generateJsonMessage()};
 
@@ -526,5 +547,5 @@ public class PravegaOperationTest {
 
         }
 
-    }
+    }*/
 }

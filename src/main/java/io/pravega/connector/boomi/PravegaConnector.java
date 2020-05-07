@@ -3,12 +3,12 @@ package io.pravega.connector.boomi;
 import com.boomi.connector.api.BrowseContext;
 import com.boomi.connector.api.Browser;
 import com.boomi.connector.api.Operation;
+import com.boomi.connector.api.ConnectorContext;
 import com.boomi.connector.api.OperationContext;
-import com.boomi.connector.util.BaseConnector;
-import com.boomi.connector.util.listen.UnmanagedListenConnector;
-import com.boomi.connector.util.listen.UnmanagedListenOperation;
+import com.boomi.connector.api.listen.ListenOperation;
+import com.boomi.connector.util.listen.BaseListenConnector;
 
-public class PravegaConnector extends UnmanagedListenConnector {
+public class PravegaConnector extends BaseListenConnector {
     @Override
     protected Operation createQueryOperation(OperationContext context) {
         return new PravegaReadOperation(context);
@@ -19,9 +19,19 @@ public class PravegaConnector extends UnmanagedListenConnector {
         return new PravegaWriteOperation(context);
     }
 
-    @Override
+    /*@Override
     public UnmanagedListenOperation createListenOperation(OperationContext context) {
         return new PravegaListenOperation(context);
+    }*/
+
+    @Override
+    public ListenOperation<PollingManager> createListenOperation(OperationContext context) {
+        return new PollingOperation(new PollingOperationConnection(context));
+    }
+
+    @Override
+    public PollingManager createListenManager(ConnectorContext context) {
+        return new PollingManager(new PollingManagerConnection(context));
     }
 
     @Override

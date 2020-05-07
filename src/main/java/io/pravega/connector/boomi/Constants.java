@@ -20,6 +20,9 @@ public class Constants {
     static final String USER_NAME_PROPERTY = "userName";
     static final String PASSWORD_PROPERTY = "password";
 
+    static final String INTERVAL = "interval";
+    static final String TIME_UNIT = "unit";
+
     static final String READER_GROUP_PROPERTY = "readerGroup";
     static final String READ_TIMEOUT_PROPERTY = "readTimeout";
     static final String MAX_READ_TIME_PER_EXECUTION_PROPERTY = "maxReadTimePerExecution";
