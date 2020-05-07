@@ -42,6 +42,8 @@ public class PravegaBrowserTest {
         connProps.put(Constants.SCOPE_PROPERTY, "foo");
         connProps.put(Constants.STREAM_PROPERTY, "bar");
         connProps.put(Constants.AUTH_TYPE_PROPERTY, TestUtils.AUTH_TYPE);
+        connProps.put(Constants.INTERVAL, 10l);
+        connProps.put(Constants.TIME_UNIT, "SECONDS");
 
         Map<String, Object> opProps = new HashMap<>();
 
@@ -69,6 +71,8 @@ public class PravegaBrowserTest {
         connProps.put(Constants.SCOPE_PROPERTY, scope);
         connProps.put(Constants.STREAM_PROPERTY, stream);
         connProps.put(Constants.CREATE_SCOPE_PROPERTY, false);
+        connProps.put(Constants.INTERVAL, 10l);
+        connProps.put(Constants.TIME_UNIT, "SECONDS");
 
         Map<String, Object> opProps = new HashMap<>();
 
@@ -93,6 +97,8 @@ public class PravegaBrowserTest {
         pravegaConfig.setStream(stream);
         pravegaConfig.setCreateScope(true);
         pravegaConfig.setAuth(PravegaConfig.AuthenticationType.None);
+        pravegaConfig.setInterval(10l);
+        pravegaConfig.setUnit("SECONDS");
 
         // this will create the scope
         EventStreamClientFactory clientFactory = PravegaUtil.createClientFactory(pravegaConfig);
@@ -107,6 +113,8 @@ public class PravegaBrowserTest {
         connProps.put(Constants.SCOPE_PROPERTY, scope);
         connProps.put(Constants.STREAM_PROPERTY, stream);
         connProps.put(Constants.CREATE_SCOPE_PROPERTY, true);
+        connProps.put(Constants.INTERVAL, 10l);
+        connProps.put(Constants.TIME_UNIT, "SECONDS");
 
         Map<String, Object> opProps = new HashMap<>();
 

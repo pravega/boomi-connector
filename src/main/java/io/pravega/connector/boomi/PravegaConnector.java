@@ -3,15 +3,14 @@ package io.pravega.connector.boomi;
 import com.boomi.connector.api.BrowseContext;
 import com.boomi.connector.api.Browser;
 import com.boomi.connector.api.Operation;
+import com.boomi.connector.api.ConnectorContext;
 import com.boomi.connector.api.OperationContext;
-import com.boomi.connector.util.listen.UnmanagedListenConnector;
-import com.boomi.connector.util.listen.UnmanagedListenOperation;
-
 import java.util.WeakHashMap;
+import com.boomi.connector.api.listen.ListenOperation;
+import com.boomi.connector.util.listen.BaseListenConnector;
 
-public class PravegaConnector extends UnmanagedListenConnector {
+public class PravegaConnector extends BaseListenConnector {
 
-    //store keycloak.json contents file as key and file path as value
     private WeakHashMap<String, String> map = new WeakHashMap<>();
 
     @Override
@@ -25,8 +24,13 @@ public class PravegaConnector extends UnmanagedListenConnector {
     }
 
     @Override
-    public UnmanagedListenOperation createListenOperation(OperationContext context) {
-        return new PravegaListenOperation(context, PravegaUtil.checkAndSetCredentials(context, map));
+    public ListenOperation<PollingManager> createListenOperation(OperationContext context) {
+        return new PollingOperation(new PollingOperationConnection(context));
+    }
+
+    @Override
+    public PollingManager createListenManager(ConnectorContext context) {
+        return new PollingManager(new PollingManagerConnection(context));
     }
 
     @Override
