@@ -1,15 +1,6 @@
 // Copyright (c) 2019 Boomi, Inc.
 package io.pravega.connector.boomi;
 
-import java.io.Closeable;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import com.boomi.connector.api.OperationContext;
 import com.boomi.connector.api.Payload;
 import com.boomi.connector.api.PayloadUtil;
@@ -20,23 +11,19 @@ import io.pravega.client.stream.EventStreamReader;
 import io.pravega.client.stream.ReinitializationRequiredException;
 import io.pravega.client.stream.TruncatedDataException;
 
+import java.io.Closeable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-/**
- * Simple {@link BaseConnection} implementation that provides an abstraction for the connection and operation settings.
- * In this example, the connection classes do not represent shared connection state. i.e.,
- * {@link PollingManagerConnection} instance does not share connection state with
- * {@link PollingOperationConnection} instances. This would be similar to how {@link ListenManager} shares
- * access to it's {@link SampleConsumer} instance. This connection does not extend
- * {@link PollingManagerConnection} becase there as no shared logic.
- */
-public class PollingOperationConnection extends BaseConnection<OperationContext> implements Closeable{
+public class PollingOperationConnection extends BaseConnection<OperationContext> implements Closeable {
 
     private static final Logger logger = Logger.getLogger(PravegaListenOperation.class.getName());
 
     private ReaderConfig readerConfig;
     //private AtomicBoolean isRunning = new AtomicBoolean(false);
     private EventStreamReader<String> reader = null;
-    private List eventList = null;
 
     /**
      * Creates a new instance using the provided operation context
@@ -47,20 +34,20 @@ public class PollingOperationConnection extends BaseConnection<OperationContext>
 
         // create reader group
         PravegaUtil.createReaderGroup(readerConfig);
-
     }
 
     /**
-     * Simulates executing a request and converting the response to 1 or more {@link Payload} instances. Since this is
-     * just an example, it just returns a single payload built from an empty stream. An actual connector could make an
-     * HTTP call, read from disk, etc.
+     * Executing a request and converting the response to 1 or more {@link Payload} instances.
      *
      * @return the payloads
      */
     public Iterable<Payload> executePayloadRequest() {
-
+        List eventList = null;
         try (EventStreamClientFactory clientFactory = PravegaUtil.createClientFactory(readerConfig)) {
+
             reader = PravegaUtil.createReader(readerConfig, clientFactory);
+            long interval = readerConfig.getInterval() * 1000;
+            long executionStartTime = System.currentTimeMillis();
             EventRead<String> event = null;
             eventList = new ArrayList<Payload>();
             logger.info(String.format("Reading events from %s/%s", readerConfig.getScope(), readerConfig.getStream()));
@@ -82,7 +69,8 @@ public class PollingOperationConnection extends BaseConnection<OperationContext>
                     logger.log(Level.WARNING, "Caught TruncatedDataException", e);
                 }
                 // keep looping until we are stopped
-            } while (event.getEvent() != null || event.isCheckpoint());
+            } while ((event.getEvent() != null || event.isCheckpoint())
+                    && (System.currentTimeMillis() - executionStartTime < interval));
 
             // make sure we close the reader before the client is closed, otherwise it seems the reader is not properly
             // removed from the reader group and may starve other readers in that group (i.e. in subsequent executions)
@@ -100,16 +88,15 @@ public class PollingOperationConnection extends BaseConnection<OperationContext>
      * this is an example, it does nothing.
      */
     public void open() {
-        
+
     }
 
     /**
-     * Simulates closing the connection to the API. Any operation specific connection shut down can occur here. Since
-     * this is an example, it does nothing.
+     * Closing the connection to the API. Any operation specific connection shut down can occur here.
      */
 
     @Override
-    public void close(){
+    public void close() {
         if (reader != null) try {
             reader.close();
         } catch (Throwable t) {
