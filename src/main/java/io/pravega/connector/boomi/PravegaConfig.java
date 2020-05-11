@@ -1,9 +1,7 @@
 package io.pravega.connector.boomi;
 
-import com.boomi.connector.api.BrowseContext;
 import com.boomi.connector.api.ConnectorContext;
 import com.boomi.connector.api.ConnectorException;
-import sun.awt.geom.AreaOp;
 
 import java.net.URI;
 import java.util.Map;
