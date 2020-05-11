@@ -47,6 +47,8 @@ public class PollingOperationConnection extends BaseConnection<OperationContext>
 
             reader = PravegaUtil.createReader(readerConfig, clientFactory);
             long interval = readerConfig.getInterval() * 1000;
+            long eventCounter = 0;
+            long maxEventCounter = 100000; // Boomi can process 100k documents at a time
             long executionStartTime = System.currentTimeMillis();
             EventRead<String> event = null;
             eventList = new ArrayList<Payload>();
@@ -58,6 +60,7 @@ public class PollingOperationConnection extends BaseConnection<OperationContext>
                         logger.log(Level.FINE, String.format("Listener Read event size: %d", event.getEvent().length()));
                         //listener.submit(PayloadUtil.toPayload(event.getEvent()));
                         eventList.add(PayloadUtil.toPayload(event.getEvent()));
+                        eventCounter++;
                     } // could check for watermark or checkpoint in else block
                 } catch (ReinitializationRequiredException e) {
                     // There are certain circumstances where the reader needs to be reinitialized
@@ -70,7 +73,9 @@ public class PollingOperationConnection extends BaseConnection<OperationContext>
                 }
                 // keep looping until we are stopped
             } while ((event.getEvent() != null || event.isCheckpoint())
-                    && (System.currentTimeMillis() - executionStartTime < interval));
+                    && interval > 0
+                    && (System.currentTimeMillis() - executionStartTime < interval)
+                    && eventCounter < maxEventCounter);
 
             // make sure we close the reader before the client is closed, otherwise it seems the reader is not properly
             // removed from the reader group and may starve other readers in that group (i.e. in subsequent executions)
