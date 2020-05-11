@@ -42,7 +42,7 @@ public class PollingOperationConnection extends BaseConnection<OperationContext>
      * @return the payloads
      */
     public Iterable<Payload> executePayloadRequest() {
-        List eventList = null;
+        List eventList = new ArrayList<Payload>();
         try (EventStreamClientFactory clientFactory = PravegaUtil.createClientFactory(readerConfig)) {
 
             reader = PravegaUtil.createReader(readerConfig, clientFactory);
@@ -51,7 +51,6 @@ public class PollingOperationConnection extends BaseConnection<OperationContext>
             long maxEventCounter = 100000; // Boomi can process 100k documents at a time
             long executionStartTime = System.currentTimeMillis();
             EventRead<String> event = null;
-            eventList = new ArrayList<Payload>();
             logger.info(String.format("Reading events from %s/%s", readerConfig.getScope(), readerConfig.getStream()));
             do {
                 try {
