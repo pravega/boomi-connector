@@ -80,10 +80,10 @@ final class TestUtils {
         }
     }
 
-    static String generate2MBmessage(){
+    static String generate2MBmessage() {
         char[] chars = new char[2000000];
         Arrays.fill(chars, 'a');
-        String randomMessage =  new String(chars);
+        String randomMessage = new String(chars);
         return "{\"name\":\"foo\",\"message\":\"" + randomMessage + "\"}";
     }
 
@@ -91,6 +91,13 @@ final class TestUtils {
         // initialize test event data
         // must use random generated data to avoid false positives from previous tests
         String randomMessage = UUID.randomUUID().toString();
+        return "{\"name\":\"foo\",\"message\":\"" + randomMessage + "\"}";
+    }
+
+    static String generateJsonMessage(int i) {
+        // initialize test event data
+        // must use random generated data to avoid false positives from previous tests
+        String randomMessage = UUID.randomUUID().toString() + i;
         return "{\"name\":\"foo\",\"message\":\"" + randomMessage + "\"}";
     }
 

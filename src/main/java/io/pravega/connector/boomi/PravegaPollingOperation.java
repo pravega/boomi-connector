@@ -8,23 +8,23 @@ import com.boomi.connector.util.listen.BasePollingOperation;
  * Simple {@link BasePollingOperation} implementation. When polled, this operation executes a request and converts the
  * response to 1 or more {@link Payload} instances.
  */
-public class PollingOperation extends BasePollingOperation<PollingManager> {
+public class PravegaPollingOperation extends BasePollingOperation<PravegaPollingManager> {
 
     /**
      * Creates a new instance using the provided connection
      */
-    protected PollingOperation(PollingOperationConnection connection) {
+    protected PravegaPollingOperation(PravegaPollingOperationConnection connection) {
         super(connection);
     }
 
     /**
      * Starts the polling operation. If shared state is
      * required, the provided manager can be used to share state.
-     * 
+     *
      * @param manager the associated manager
      */
     @Override
-    protected void doStart(PollingManager manager) {
+    protected void doStart(PravegaPollingManager manager) {
         getConnection().open();
     }
 
@@ -49,8 +49,8 @@ public class PollingOperation extends BasePollingOperation<PollingManager> {
      * {@link #getConnection()} to return the proper type because it's constrained by the constructor.
      */
     @Override
-    public PollingOperationConnection getConnection() {
-        return (PollingOperationConnection) super.getConnection();
+    public PravegaPollingOperationConnection getConnection() {
+        return (PravegaPollingOperationConnection) super.getConnection();
     }
 
 }

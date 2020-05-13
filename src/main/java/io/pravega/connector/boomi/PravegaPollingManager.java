@@ -7,9 +7,9 @@ import com.boomi.connector.util.listen.BasePollingManager;
  * Simple {@link BasePollingManager} implementation. There is no additional state to manage in this example beyond
  * what's managed by {@link BasePollingManager}.
  */
-public class PollingManager extends BasePollingManager {
+public class PravegaPollingManager extends BasePollingManager {
 
-    protected PollingManager(PollingManagerConnection connection) {
+    protected PravegaPollingManager(PravegaPollingManagerConnection connection) {
         super(connection, connection.getInterval(), connection.getUnit());
     }
 

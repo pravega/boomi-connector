@@ -3,7 +3,6 @@ package io.pravega.connector.boomi;
 import com.boomi.connector.api.OperationStatus;
 import com.boomi.connector.api.OperationType;
 import com.boomi.connector.api.Payload;
-import com.boomi.connector.api.listen.*;
 import com.boomi.connector.testutil.ConnectorTester;
 import com.boomi.connector.testutil.SimpleOperationResult;
 import io.pravega.client.ClientConfig;
@@ -23,8 +22,8 @@ import java.io.InputStream;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.concurrent.Future;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -40,6 +39,7 @@ public class PravegaOperationTest {
     private static final String PRAVEGA_SCOPE = "boomi-test";
     private static final String CREATE_OPERATION_STREAM = "connector-test-create";
     private static final String QUERY_OPERATION_STREAM = "connector-test-query";
+    private static final String POLLING_LISTENER_STREAM = "connector-test-poll";
 
     private static final String FIXED_ROUTING_KEY = "test-1";
     private static final String JSON_ROUTING_KEY = "message";
@@ -49,12 +49,14 @@ public class PravegaOperationTest {
     private static final String UNIT = "SECONDS";
     private static final String CREATE_OPERATION_READER_GROUP = "connector-test-create-reader";
     private static final String QUERY_OPERATION_READER_GROUP = "connector-test-query-reader";
+    private static final String POLLING_OPERATION_READER_GROUP = "connector-test-polling-reader";
 
     private static ClientConfig clientConfig = ClientConfig.builder().controllerURI(URI.create(TestUtils.PRAVEGA_CONTROLLER_URI)).build();
     private static InProcPravegaCluster localPravega;
     private static EventStreamClientFactory pravegaClientFactory;
     private static EventStreamWriter<String> pravegaReadOperationWriter;
     private static EventStreamReader<String> pravegaWriteOperationReader;
+    private static EventStreamWriter<String> pravegaPollingListenOperationWriter;
 
     @BeforeAll
     public static void classSetup() throws Exception {
@@ -66,16 +68,19 @@ public class PravegaOperationTest {
         // init Query operation test writer
         pravegaReadOperationWriter = pravegaClientFactory.createEventWriter(QUERY_OPERATION_STREAM,
                 new UTF8StringSerializer(), EventWriterConfig.builder().build());
+        pravegaPollingListenOperationWriter = pravegaClientFactory.createEventWriter(POLLING_LISTENER_STREAM,
+                new UTF8StringSerializer(), EventWriterConfig.builder().build());
 
         // init Create operation test reader
         pravegaWriteOperationReader = pravegaClientFactory.createReader(UUID.randomUUID().toString(), CREATE_OPERATION_READER_GROUP,
                 new UTF8StringSerializer(), io.pravega.client.stream.ReaderConfig.builder().build());
+
     }
 
     private static EventStreamClientFactory initClient() {
         // NOTE: in order to have consistent positions between readers and writers, we use separate streams for testing
         // Create and Query operations
-        TestUtils.createStreams(clientConfig, PRAVEGA_SCOPE, CREATE_OPERATION_STREAM, QUERY_OPERATION_STREAM);
+        TestUtils.createStreams(clientConfig, PRAVEGA_SCOPE, CREATE_OPERATION_STREAM, QUERY_OPERATION_STREAM, POLLING_LISTENER_STREAM);
 
         // create Create operation test reader group
         ReaderGroupConfig readerGroupConfig = ReaderGroupConfig.builder()
@@ -356,7 +361,7 @@ public class PravegaOperationTest {
         }
     }
 
-    //@Test
+    @Test
     public void testMaxReadPerExecution() throws Exception {
         String stream = "connector-test-max-read-time";
         long maxReadTime = 4L; // seconds
@@ -454,8 +459,8 @@ public class PravegaOperationTest {
         }
     }
 
-   /* @Test
-    public void testListenerOperation() throws Exception {
+    @Test
+    public void testSinglePollingListenerOperation() throws Exception {
         String[] messages = {TestUtils.generateJsonMessage(), TestUtils.generateJsonMessage(), TestUtils.generateJsonMessage()};
 
         PravegaConnector connector = new PravegaConnector();
@@ -464,37 +469,109 @@ public class PravegaOperationTest {
         Map<String, Object> connProps = new HashMap<>();
         connProps.put(Constants.CONTROLLER_URI_PROPERTY, TestUtils.PRAVEGA_CONTROLLER_URI);
         connProps.put(Constants.SCOPE_PROPERTY, PRAVEGA_SCOPE);
-        connProps.put(Constants.STREAM_PROPERTY, QUERY_OPERATION_STREAM);
+        connProps.put(Constants.STREAM_PROPERTY, POLLING_LISTENER_STREAM);
+        connProps.put(Constants.INTERVAL, INTERVAL);
+        connProps.put(Constants.TIME_UNIT, UNIT);
 
         Map<String, Object> opProps = new HashMap<>();
-        opProps.put(Constants.READER_GROUP_PROPERTY, QUERY_OPERATION_READER_GROUP);
+        opProps.put(Constants.READER_GROUP_PROPERTY, POLLING_OPERATION_READER_GROUP);
         opProps.put(Constants.READ_TIMEOUT_PROPERTY, 5000L);
 
         tester.setOperationContext(OperationType.LISTEN, connProps, opProps, null, null);
-        PravegaListenOperation pravegaListenOperation = new PravegaListenOperation(tester.getOperationContext());
-        SimpleListener simpleListener = new SimpleListener();
+        PravegaPollingOperationConnection pravegaPollingOperationConnection = new PravegaPollingOperationConnection(tester.getOperationContext());
+        PravegaPollingOperation pravegaPollingOperation = new PravegaPollingOperation(pravegaPollingOperationConnection);
+        PravegaPollingManagerConnection connection = new PravegaPollingManagerConnection(tester.getOperationContext());
+        PravegaPollingManager manager = new PravegaPollingManager(connection);
 
-        Thread thread = new Thread(() -> {
-            try {
-                Thread.sleep(2000);
-                for (String message : messages) {
-                    pravegaReadOperationWriter.writeEvent(message).get();
-                }
-                //Need some delay to process the events
-                Thread.sleep(1000);
-                pravegaListenOperation.stop();
-            } catch (Exception E) {
-                logger.log(Level.INFO, String.format("Got exeption during listen operation"), E);
-            }
-        });
-        thread.start();
-
-        //blocking call, thread will stop the blocking call by calling the listener to stop
-        pravegaListenOperation.start(simpleListener);
+        pravegaPollingOperation.doStart(manager);
+        for (String message : messages) {
+            pravegaPollingListenOperationWriter.writeEvent(message).get();
+        }
+        ArrayList<Payload> list = (ArrayList<Payload>) pravegaPollingOperation.doPoll();
+        pravegaPollingOperation.doStop();
+        assertEquals(messages.length, list.size());
         for (int i = 0; i < messages.length; i++) {
             String message = messages[i];
-            String text = simpleListener.getNextDocument();
-            assertEquals(message, text);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            list.get(i).writeTo(baos);
+            String output = outputStreamToUtf8String(baos);
+            assertEquals(message, output);
+        }
+    }
+
+    @Test
+    public void testMultiplePollingListenerOperation() throws Exception {
+        String[] messages = new String[30];//{TestUtils.generateJsonMessage(), TestUtils.generateJsonMessage(), TestUtils.generateJsonMessage()};
+        for (int i = 0; i < 30; i++) {
+            messages[i] = TestUtils.generateJsonMessage(i);
+        }
+        PravegaConnector connector = new PravegaConnector();
+        ConnectorTester tester = new ConnectorTester(connector);
+
+        Map<String, Object> connProps = new HashMap<>();
+        connProps.put(Constants.CONTROLLER_URI_PROPERTY, TestUtils.PRAVEGA_CONTROLLER_URI);
+        connProps.put(Constants.SCOPE_PROPERTY, PRAVEGA_SCOPE);
+        connProps.put(Constants.STREAM_PROPERTY, POLLING_LISTENER_STREAM);
+        connProps.put(Constants.INTERVAL, INTERVAL);
+        connProps.put(Constants.TIME_UNIT, UNIT);
+
+        Map<String, Object> opProps = new HashMap<>();
+        opProps.put(Constants.READER_GROUP_PROPERTY, POLLING_OPERATION_READER_GROUP);
+        opProps.put(Constants.READ_TIMEOUT_PROPERTY, 5000L);
+
+        tester.setOperationContext(OperationType.LISTEN, connProps, opProps, null, null);
+        PravegaPollingOperationConnection pravegaPollingOperationConnection = new PravegaPollingOperationConnection(tester.getOperationContext());
+        PravegaPollingOperation pravegaPollingOperation = new PravegaPollingOperation(pravegaPollingOperationConnection);
+        PravegaPollingManagerConnection connection = new PravegaPollingManagerConnection(tester.getOperationContext());
+        PravegaPollingManager manager = new PravegaPollingManager(connection);
+
+        pravegaPollingOperation.doStart(manager);
+        AtomicBoolean isRunning = new AtomicBoolean(false);
+        Thread dataGenerator = new Thread() {
+
+            @Override
+            public void run() {
+                for (String message : messages) {
+                    try {
+                        pravegaPollingListenOperationWriter.writeEvent(message).get();
+                        //generating 1 msg per seconds
+                        Thread.sleep(1000);
+                    } catch (InterruptedException | ExecutionException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        };
+
+        ArrayList<Payload> list = (ArrayList<Payload>) pravegaPollingOperation.doPoll();
+
+        Thread dataPolling = new Thread() {
+
+            @Override
+            public void run() {
+                isRunning.set(true);
+                while (isRunning.get()) {
+                    list.addAll((ArrayList<Payload>) pravegaPollingOperation.doPoll());
+                }
+            }
+        };
+
+        dataGenerator.start();
+        // start the polling operation after a while
+        Thread.sleep(100);
+        dataPolling.start();
+        //stop the main thread to finish the data generator and polling thread
+        Thread.sleep(1000 * (INTERVAL + 1) * 3);
+        isRunning.set(false);
+        Thread.sleep(100);
+        pravegaPollingOperation.doStop();
+        assertEquals(messages.length, list.size());
+        for (int i = 0; i < messages.length; i++) {
+            String message = messages[i];
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            list.get(i).writeTo(baos);
+            String output = outputStreamToUtf8String(baos);
+            assertEquals(message, output);
         }
     }
 
@@ -502,50 +579,4 @@ public class PravegaOperationTest {
         return new String(baos.toByteArray(), StandardCharsets.UTF_8);
     }
 
-    class SimpleListener implements Listener {
-
-        private LinkedBlockingQueue<String> linkedQueue = new LinkedBlockingQueue<>();
-        private static final long READ_TIMEOUT = 2000; // 2 seconds
-
-        public PayloadBatch getBatch() {
-            return null;
-        }
-
-        public <T> IndexedPayloadBatch<T> getBatch(T index) {
-            return null;
-        }
-
-        @Override
-        public void submit(Payload payload) {
-            try {
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                payload.writeTo(baos);
-                String output = outputStreamToUtf8String(baos);
-                if (output != null) {
-                    linkedQueue.add(output);
-                    logger.log(Level.INFO, String.format("SUBMIT PAYLOAD"));
-                } else {
-                    logger.log(Level.INFO, String.format("SUBMIT PAYLOAD NULL"));
-                }
-            } catch (Exception E) {
-                logger.log(Level.INFO, String.format("Got exeption during submit paylaod"));
-            }
-        }
-
-        @Override
-        public void submit(Throwable var1) {
-
-        }
-
-        public Future<ListenerExecutionResult> submit(Payload var1, SubmitOptions var2) {
-            return null;
-        }
-
-        public String getNextDocument() {
-
-            return linkedQueue.remove();
-
-        }
-
-    }*/
 }
