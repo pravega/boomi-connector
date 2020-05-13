@@ -99,6 +99,13 @@ final class TestUtils {
         return "{\"name\":\"foo\",\"message\":\"" + randomMessage + "\"}";
     }
 
+    static String generateJsonMessage(int i) {
+        // initialize test event data
+        // must use random generated data to avoid false positives from previous tests
+        String randomMessage = UUID.randomUUID().toString() + i;
+        return "{\"name\":\"foo\",\"message\":\"" + randomMessage + "\"}";
+    }
+
     private TestUtils() {
     }
 

@@ -6,6 +6,7 @@ import com.boomi.connector.api.Operation;
 import com.boomi.connector.api.ConnectorContext;
 import com.boomi.connector.api.OperationContext;
 import java.util.WeakHashMap;
+import com.boomi.connector.api.*;
 import com.boomi.connector.api.listen.ListenOperation;
 import com.boomi.connector.util.listen.BaseListenConnector;
 
@@ -24,13 +25,13 @@ public class PravegaConnector extends BaseListenConnector {
     }
 
     @Override
-    public ListenOperation<PollingManager> createListenOperation(OperationContext context) {
-        return new PollingOperation(new PollingOperationConnection(context));
+    public ListenOperation<PravegaPollingManager> createListenOperation(OperationContext context) {
+        return new PravegaPollingOperation(new PravegaPollingOperationConnection(context));
     }
 
     @Override
-    public PollingManager createListenManager(ConnectorContext context) {
-        return new PollingManager(new PollingManagerConnection(context));
+    public PravegaPollingManager createListenManager(ConnectorContext context) {
+        return new PravegaPollingManager(new PravegaPollingManagerConnection(context));
     }
 
     @Override
