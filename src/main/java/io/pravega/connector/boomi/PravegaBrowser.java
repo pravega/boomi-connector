@@ -6,6 +6,8 @@ import com.boomi.connector.util.BaseBrowser;
 import java.util.WeakHashMap;
 
 public class PravegaBrowser extends BaseBrowser implements ConnectionTester {
+
+    //store keycloak.json contents file as key and file path as value
     private WeakHashMap<String, String> map = new WeakHashMap<>();
 
     public PravegaBrowser(BrowseContext browseContext) {

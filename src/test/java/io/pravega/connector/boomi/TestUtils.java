@@ -18,9 +18,11 @@ import java.util.UUID;
 final class TestUtils {
     private static final Logger log = LoggerFactory.getLogger(TestUtils.class);
 
-    static final String PRAVEGA_CONTROLLER_URI = "tcp://127.0.0.1:9090";
-    static final String PRAVEGA_NAUT_CONTROLLER_URI = "tcp://10.243.37.210:9090";
+    private static final String SDP_ENDPOINT_KEY = "sdp_endpoint";
+    private static final String PRAVEGA_ENDPOINT_KEY = "pravega_endpoint";
 
+    static  String PRAVEGA_CONTROLLER_URI = "";
+    static String PRAVEGA_NAUT_CONTROLLER_URI = "";
     // Caller must close
     static InProcPravegaCluster startStandalone() throws Exception {
         // start Pravega stand-alone
@@ -96,5 +98,11 @@ final class TestUtils {
     }
 
     private TestUtils() {
+    }
+
+    public static void loadPropertiesFile() throws Exception {
+        Properties props = TestConfig.getProperties();
+        PRAVEGA_CONTROLLER_URI = TestConfig.getPropertyNotEmpty(props, PRAVEGA_ENDPOINT_KEY);
+        PRAVEGA_NAUT_CONTROLLER_URI = TestConfig.getPropertyNotEmpty(props, SDP_ENDPOINT_KEY);
     }
 }

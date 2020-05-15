@@ -23,6 +23,7 @@ public class PravegaBrowserTest {
 
     @BeforeAll
     public static void beforeAll() throws Exception {
+        TestUtils.loadPropertiesFile();
         localPravega = TestUtils.startStandalone();
     }
 
@@ -119,6 +120,13 @@ public class PravegaBrowserTest {
             Assertions.fail("connection test should have succeeded", e);
         }
     }
+    /*
+    For this test cases we need the following:
+        1. Must have access to an SDP cluster
+        2. The expected scope must be created on the cluster
+        3. The pravega endpoint must be set in a properties file (see TestUtil comment)
+        4. Must have a valid Keycloak JWT in your home directory
+     */
 
     @Test
     public void testTestNautilusConnector() throws Exception {
@@ -133,10 +141,6 @@ public class PravegaBrowserTest {
         pravegaConfig.setCreateScope(false);
         pravegaConfig.setAuth(Constants.AUTH_TYPE_PROPERTY_KEYCLOAK);
         pravegaConfig.setKeycloakJSONPath(home + "/keycloak.json");
-
-        // this will create the scope
-        EventStreamClientFactory clientFactory = PravegaUtil.createClientFactory(pravegaConfig);
-        clientFactory.close();
 
         PravegaConnector connector = new PravegaConnector();
         ConnectorTester tester = new ConnectorTester(connector);

@@ -56,6 +56,7 @@ public class PravegaOperationTest {
 
     @BeforeAll
     public static void classSetup() throws Exception {
+        TestUtils.loadPropertiesFile();
         localPravega = TestUtils.startStandalone();
 
         // initialize Pravega client
