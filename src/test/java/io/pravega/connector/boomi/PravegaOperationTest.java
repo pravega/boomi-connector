@@ -527,34 +527,26 @@ public class PravegaOperationTest {
 
         pravegaPollingOperation.doStart(manager);
         AtomicBoolean isRunning = new AtomicBoolean(false);
-        Thread dataGenerator = new Thread() {
-
-            @Override
-            public void run() {
-                for (String message : messages) {
-                    try {
-                        pravegaPollingListenOperationWriter.writeEvent(message).get();
-                        //generating 1 msg per seconds
-                        Thread.sleep(1000);
-                    } catch (InterruptedException | ExecutionException e) {
-                        e.printStackTrace();
-                    }
+        Thread dataGenerator = new Thread(() -> {
+            for (String message : messages) {
+                try {
+                    pravegaPollingListenOperationWriter.writeEvent(message).get();
+                    //generating 1 msg per seconds
+                    Thread.sleep(1000);
+                } catch (InterruptedException | ExecutionException e) {
+                    e.printStackTrace();
                 }
             }
-        };
+        });
 
         ArrayList<Payload> list = (ArrayList<Payload>) pravegaPollingOperation.doPoll();
 
-        Thread dataPolling = new Thread() {
-
-            @Override
-            public void run() {
-                isRunning.set(true);
-                while (isRunning.get()) {
-                    list.addAll((ArrayList<Payload>) pravegaPollingOperation.doPoll());
-                }
+        Thread dataPolling = new Thread(() -> {
+            isRunning.set(true);
+            while (isRunning.get()) {
+                list.addAll((ArrayList<Payload>) pravegaPollingOperation.doPoll());
             }
-        };
+        });
 
         dataGenerator.start();
         // start the polling operation after a while
@@ -562,6 +554,7 @@ public class PravegaOperationTest {
         dataPolling.start();
         //stop the main thread to finish the data generator and polling thread
         Thread.sleep(1000 * (INTERVAL + 1) * 3);
+        //stop data polling
         isRunning.set(false);
         Thread.sleep(100);
         pravegaPollingOperation.doStop();
