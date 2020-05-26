@@ -28,8 +28,4 @@ public class Constants {
     static final String ROUTING_KEY_TYPE_PROPERTY = "routingKeyType";
     static final String ROUTING_KEY_PROPERTY = "routingKey";
     static final String INITIAL_READER_GROUP_POSITION = "initialReaderGroupPosition";
-
-    static final String AUTH_TYPE_PROPERTY_NONE = "None";
-    static final String AUTH_TYPE_PROPERTY_BASIC = "Basic";
-    static final String AUTH_TYPE_PROPERTY_KEYCLOAK = "Keycloak";
 }

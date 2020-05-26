@@ -20,9 +20,11 @@ final class TestUtils {
 
     private static final String SDP_ENDPOINT_KEY = "sdp_endpoint";
     private static final String PRAVEGA_ENDPOINT_KEY = "pravega_endpoint";
+    private static final String AUTH_TYPE_KEY = "auth_type";
 
-    static  String PRAVEGA_CONTROLLER_URI = "";
+    static String PRAVEGA_CONTROLLER_URI = "";
     static String PRAVEGA_NAUT_CONTROLLER_URI = "";
+    static String AUTH_TYPE = "";
     // Caller must close
     static InProcPravegaCluster startStandalone() throws Exception {
         // start Pravega stand-alone
@@ -104,5 +106,6 @@ final class TestUtils {
         Properties props = TestConfig.getProperties();
         PRAVEGA_CONTROLLER_URI = TestConfig.getPropertyNotEmpty(props, PRAVEGA_ENDPOINT_KEY);
         PRAVEGA_NAUT_CONTROLLER_URI = TestConfig.getPropertyNotEmpty(props, SDP_ENDPOINT_KEY);
+        AUTH_TYPE = TestConfig.getPropertyNotEmpty(props, AUTH_TYPE_KEY);
     }
 }

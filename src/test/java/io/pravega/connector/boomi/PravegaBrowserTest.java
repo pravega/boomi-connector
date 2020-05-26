@@ -41,7 +41,7 @@ public class PravegaBrowserTest {
         connProps.put(Constants.CONTROLLER_URI_PROPERTY, "tcp://localhost:8123");
         connProps.put(Constants.SCOPE_PROPERTY, "foo");
         connProps.put(Constants.STREAM_PROPERTY, "bar");
-        connProps.put(Constants.AUTH_TYPE_PROPERTY, Constants.AUTH_TYPE_PROPERTY_NONE);
+        connProps.put(Constants.AUTH_TYPE_PROPERTY, TestUtils.AUTH_TYPE);
 
         Map<String, Object> opProps = new HashMap<>();
 
@@ -65,7 +65,7 @@ public class PravegaBrowserTest {
 
         Map<String, Object> connProps = new HashMap<>();
         connProps.put(Constants.CONTROLLER_URI_PROPERTY, "tcp://localhost:9090");
-        connProps.put(Constants.AUTH_TYPE_PROPERTY, Constants.AUTH_TYPE_PROPERTY_NONE);
+        connProps.put(Constants.AUTH_TYPE_PROPERTY, TestUtils.AUTH_TYPE);
         connProps.put(Constants.SCOPE_PROPERTY, scope);
         connProps.put(Constants.STREAM_PROPERTY, stream);
         connProps.put(Constants.CREATE_SCOPE_PROPERTY, false);
@@ -92,7 +92,7 @@ public class PravegaBrowserTest {
         pravegaConfig.setScope(scope);
         pravegaConfig.setStream(stream);
         pravegaConfig.setCreateScope(true);
-        pravegaConfig.setAuth(Constants.AUTH_TYPE_PROPERTY_NONE);
+        pravegaConfig.setAuth(PravegaConfig.AuthenticationType.None);
 
         // this will create the scope
         EventStreamClientFactory clientFactory = PravegaUtil.createClientFactory(pravegaConfig);
@@ -103,7 +103,7 @@ public class PravegaBrowserTest {
 
         Map<String, Object> connProps = new HashMap<>();
         connProps.put(Constants.CONTROLLER_URI_PROPERTY, TestUtils.PRAVEGA_CONTROLLER_URI);
-        connProps.put(Constants.AUTH_TYPE_PROPERTY, Constants.AUTH_TYPE_PROPERTY_NONE);
+        connProps.put(Constants.AUTH_TYPE_PROPERTY, TestUtils.AUTH_TYPE);
         connProps.put(Constants.SCOPE_PROPERTY, scope);
         connProps.put(Constants.STREAM_PROPERTY, stream);
         connProps.put(Constants.CREATE_SCOPE_PROPERTY, true);
@@ -139,7 +139,7 @@ public class PravegaBrowserTest {
         pravegaConfig.setScope(scope);
         pravegaConfig.setStream(stream);
         pravegaConfig.setCreateScope(false);
-        pravegaConfig.setAuth(Constants.AUTH_TYPE_PROPERTY_KEYCLOAK);
+        pravegaConfig.setAuth(PravegaConfig.AuthenticationType.None);
         pravegaConfig.setKeycloakJSONPath(home + "/keycloak.json");
 
         PravegaConnector connector = new PravegaConnector();
@@ -150,7 +150,7 @@ public class PravegaBrowserTest {
         connProps.put(Constants.SCOPE_PROPERTY, scope);
         connProps.put(Constants.STREAM_PROPERTY, stream);
         connProps.put(Constants.CREATE_SCOPE_PROPERTY, false);
-        connProps.put(Constants.AUTH_TYPE_PROPERTY, Constants.AUTH_TYPE_PROPERTY_KEYCLOAK);
+        connProps.put(Constants.AUTH_TYPE_PROPERTY, TestUtils.AUTH_TYPE);
         connProps.put(Constants.AUTH_PROPERTY_KEYCLOAK_JSON, jsonData);
 
         Map<String, Object> opProps = new HashMap<>();

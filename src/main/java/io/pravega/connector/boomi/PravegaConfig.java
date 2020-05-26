@@ -2,6 +2,7 @@ package io.pravega.connector.boomi;
 
 import com.boomi.connector.api.BrowseContext;
 import com.boomi.connector.api.ConnectorException;
+import org.checkerframework.checker.units.qual.A;
 
 import java.net.URI;
 import java.util.Map;
@@ -11,7 +12,7 @@ public class PravegaConfig {
     private URI controllerUri;
     private String scope;
     private String stream;
-    private String authMethod;
+    private AuthenticationType authMethod;
     private String userName;
     private String password;
     private String keycloakJSONPath;
@@ -38,7 +39,9 @@ public class PravegaConfig {
         setScope(scope);
         setStream(stream);
         setCreateScope((boolean) getOrDefault(props, Constants.CREATE_SCOPE_PROPERTY, true));
-        setAuth((String) getOrDefault(props, Constants.AUTH_TYPE_PROPERTY, Constants.AUTH_TYPE_PROPERTY_NONE));
+        String auth = (String)props.get(Constants.AUTH_TYPE_PROPERTY);
+        if(auth != null)
+            setAuth(AuthenticationType.valueOf(auth));
         setUserName((String) props.get(Constants.USER_NAME_PROPERTY));
         setPassword((String) props.get(Constants.PASSWORD_PROPERTY));
         setKeycloakJSONPath(keycloakJsonPath);
@@ -75,11 +78,11 @@ public class PravegaConfig {
         this.stream = stream;
     }
 
-    public String getAuth() {
+    public AuthenticationType getAuth() {
         return authMethod;
     }
 
-    public void setAuth(String auth) {
+    public void setAuth(AuthenticationType auth) {
         this.authMethod = auth;
     }
 
@@ -129,4 +132,6 @@ public class PravegaConfig {
     public int hashCode() {
         return Objects.hash(controllerUri, scope, stream);
     }
+
+    enum AuthenticationType  {None, Basic, Keycloak};
 }

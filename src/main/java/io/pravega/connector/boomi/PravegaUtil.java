@@ -27,9 +27,9 @@ final class PravegaUtil {
 
     static ClientConfig createClientConfig(PravegaConfig pravegaConfig) {
         ClientConfig.ClientConfigBuilder clientBuilder = ClientConfig.builder().controllerURI(URI.create(pravegaConfig.getControllerUri().toString()));
-        if (pravegaConfig.getAuth().equals(Constants.AUTH_TYPE_PROPERTY_BASIC))
+        if (pravegaConfig.getAuth() == PravegaConfig.AuthenticationType.Basic)
             clientBuilder.credentials(new DefaultCredentials(pravegaConfig.getPassword(), pravegaConfig.getUserName()));
-        if (pravegaConfig.getAuth().equals(Constants.AUTH_TYPE_PROPERTY_KEYCLOAK))
+        if (pravegaConfig.getAuth() == PravegaConfig.AuthenticationType.Keycloak)
             clientBuilder.credentials(new BoomiPravegaKeycloakCredentials(pravegaConfig.getKeycloakJSONPath()));
         return clientBuilder.build();
     }
@@ -129,8 +129,9 @@ final class PravegaUtil {
 
     static String checkAndSetCredentials(BrowseContext context, WeakHashMap<String, String> map) {
         Map<String, Object> props = context.getConnectionProperties();
-        String authTYpe = (String) props.get(Constants.AUTH_TYPE_PROPERTY);
-        if (authTYpe.equals(Constants.AUTH_TYPE_PROPERTY_KEYCLOAK)) {
+        String auth = (String) props.get(Constants.AUTH_TYPE_PROPERTY);
+        PravegaConfig.AuthenticationType authType = PravegaConfig.AuthenticationType.valueOf(auth);
+        if (authType == PravegaConfig.AuthenticationType.Keycloak) {
             String keycloakJSONString = (String) props.get(Constants.AUTH_PROPERTY_KEYCLOAK_JSON);
             if (!map.containsKey(keycloakJSONString)) {
                 synchronized (PravegaUtil.class) {
