@@ -10,6 +10,8 @@ import com.boomi.connector.util.listen.UnmanagedListenOperation;
 import java.util.WeakHashMap;
 
 public class PravegaConnector extends UnmanagedListenConnector {
+
+    //store keycloak.json contents file as key and file path as value
     private WeakHashMap<String, String> map = new WeakHashMap<>();
 
     @Override

@@ -127,6 +127,7 @@ final class PravegaUtil {
         }
     }
 
+    //if not exists, then store keycloak.json contents file as key and file path as value
     static String checkAndSetCredentials(BrowseContext context, WeakHashMap<String, String> map) {
         Map<String, Object> props = context.getConnectionProperties();
         String auth = (String) props.get(Constants.AUTH_TYPE_PROPERTY);

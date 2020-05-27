@@ -22,7 +22,6 @@ dependencies {
     compile("io.pravega:pravega-client:${pravegaVersion}") {
         exclude group: "io.netty", module: "netty-tcnative-boringssl-static"
     }
-    //compile "io.pravega:pravega-client:${pravegaVersion}"
     compile "io.pravega:pravega-keycloak-client:${pravegaKeycloakVersion}"
     compile "com.jayway.jsonpath:json-path:${jsonPathVersion}"
     compile "com.boomi:connector-sdk-util:${boomiConnectorVersion}"
