@@ -1,6 +1,8 @@
+import com.github.jk1.license.render.*
 plugins {
     id 'distribution'
     id 'java'
+    id 'com.github.jk1.dependency-license-report' version '1.13'
 }
 
 repositories {
@@ -24,7 +26,6 @@ configurations {
 
 dependencies {
     compile "io.pravega:pravega-client:${pravegaVersion}"
-    //compile "io.pravega:pravega-keycloak-client:${pravegaKeycloakVersion}"
     compile "com.jayway.jsonpath:json-path:${jsonPathVersion}"
     localDeps "com.boomi:connector-sdk-util:${boomiConnectorVersion}"
     compileOnly "com.boomi:common-sdk:${boomiCommonSdkVersion}"
@@ -56,6 +57,19 @@ distributions {
             into '/'
         }
     }
+}
+
+licenseReport {
+    // Set output directory for the report data.
+    // Defaults to ${project.buildDir}/reports/dependency-license.
+    outputDir = "$projectDir/3rd-party-licenses"
+
+    // Adjust the configurations to fetch dependencies, e.g. for Android projects. Default is 'runtimeClasspath'
+    configurations = ['runtime']
+    renderers = [new TextReportRenderer(), new InventoryHtmlReportRenderer()]
+
+    // Don't include artifacts of project's own group into the report
+    excludeOwnGroup = true
 }
 
 test {
