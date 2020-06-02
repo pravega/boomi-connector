@@ -19,12 +19,18 @@ final class TestUtils {
     private static final Logger log = LoggerFactory.getLogger(TestUtils.class);
 
     private static final String SDP_ENDPOINT_KEY = "sdp_endpoint";
-    private static final String PRAVEGA_ENDPOINT_KEY = "pravega_endpoint";
-    private static final String AUTH_TYPE_KEY = "auth_type";
+    private static final String SDP_AUTH_TYPE_KEY = "sdp_auth_type";
+    private static final String LOCAL_PRAVEGA_AUTH_TYPE_KEY = "local_pravega_auth_type";
+    private static final String INTERVAL_KEY = "interval";
+    private static final String INTERVAL_UNIT_KEY = "interval_unit";
 
-    static String PRAVEGA_CONTROLLER_URI = "";
+    static String PRAVEGA_CONTROLLER_URI = "tcp://127.0.0.1:9090";
     static String PRAVEGA_NAUT_CONTROLLER_URI = "";
-    static String AUTH_TYPE = "";
+    static String SDP_AUTH_TYPE = "";
+    static String LOCAL_PRAVEGA_AUTH_TYPE = "";
+    static long INTERVAL;
+    static String INTERVAL_UNIT = "";
+
     // Caller must close
     static InProcPravegaCluster startStandalone() throws Exception {
         // start Pravega stand-alone
@@ -111,8 +117,10 @@ final class TestUtils {
 
     public static void loadPropertiesFile() throws Exception {
         Properties props = TestConfig.getProperties();
-        PRAVEGA_CONTROLLER_URI = TestConfig.getPropertyNotEmpty(props, PRAVEGA_ENDPOINT_KEY);
         PRAVEGA_NAUT_CONTROLLER_URI = TestConfig.getPropertyNotEmpty(props, SDP_ENDPOINT_KEY);
-        AUTH_TYPE = TestConfig.getPropertyNotEmpty(props, AUTH_TYPE_KEY);
+        SDP_AUTH_TYPE = TestConfig.getPropertyNotEmpty(props, SDP_AUTH_TYPE_KEY);
+        LOCAL_PRAVEGA_AUTH_TYPE = TestConfig.getPropertyNotEmpty(props, LOCAL_PRAVEGA_AUTH_TYPE_KEY);
+        INTERVAL = Long.parseLong(TestConfig.getPropertyNotEmpty(props, INTERVAL_KEY));
+        INTERVAL_UNIT = TestConfig.getPropertyNotEmpty(props, INTERVAL_UNIT_KEY);
     }
 }

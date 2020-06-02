@@ -23,7 +23,7 @@ public class PravegaConfig {
     public PravegaConfig() {
     }
 
-    public PravegaConfig(BrowseContext context, String keycloakJsonPath) {
+    public PravegaConfig(ConnectorContext context, String keycloakJsonPath) {
         Map<String, Object> props = context.getConnectionProperties();
 
         // URI, scope, and stream should always be set
@@ -41,8 +41,8 @@ public class PravegaConfig {
         setScope(scope);
         setStream(stream);
         setCreateScope((boolean) getOrDefault(props, Constants.CREATE_SCOPE_PROPERTY, true));
-        String auth = (String)props.get(Constants.AUTH_TYPE_PROPERTY);
-        if(auth != null)
+        String auth = (String) props.get(Constants.AUTH_TYPE_PROPERTY);
+        if (auth != null)
             setAuth(AuthenticationType.valueOf(auth));
         setUserName((String) props.get(Constants.USER_NAME_PROPERTY));
         setPassword((String) props.get(Constants.PASSWORD_PROPERTY));
@@ -153,5 +153,7 @@ public class PravegaConfig {
         return Objects.hash(controllerUri, scope, stream);
     }
 
-    enum AuthenticationType  {None, Basic, Keycloak};
+    enum AuthenticationType {None, Basic, Keycloak}
+
+    ;
 }

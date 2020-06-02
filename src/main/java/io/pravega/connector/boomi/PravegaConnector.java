@@ -1,14 +1,10 @@
 package io.pravega.connector.boomi;
 
-import com.boomi.connector.api.BrowseContext;
-import com.boomi.connector.api.Browser;
-import com.boomi.connector.api.Operation;
-import com.boomi.connector.api.ConnectorContext;
-import com.boomi.connector.api.OperationContext;
-import java.util.WeakHashMap;
 import com.boomi.connector.api.*;
 import com.boomi.connector.api.listen.ListenOperation;
 import com.boomi.connector.util.listen.BaseListenConnector;
+
+import java.util.WeakHashMap;
 
 public class PravegaConnector extends BaseListenConnector {
 
@@ -26,12 +22,12 @@ public class PravegaConnector extends BaseListenConnector {
 
     @Override
     public ListenOperation<PravegaPollingManager> createListenOperation(OperationContext context) {
-        return new PravegaPollingOperation(new PravegaPollingOperationConnection(context));
+        return new PravegaPollingOperation(new PravegaPollingOperationConnection(context, PravegaUtil.checkAndSetCredentials(context, map)));
     }
 
     @Override
     public PravegaPollingManager createListenManager(ConnectorContext context) {
-        return new PravegaPollingManager(new PravegaPollingManagerConnection(context));
+        return new PravegaPollingManager(new PravegaPollingManagerConnection(context, PravegaUtil.checkAndSetCredentials(context, map)));
     }
 
     @Override

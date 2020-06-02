@@ -1,6 +1,6 @@
 package io.pravega.connector.boomi;
 
-import com.boomi.connector.api.BrowseContext;
+import com.boomi.connector.api.ConnectorContext;
 import io.pravega.client.ClientConfig;
 import io.pravega.client.EventStreamClientFactory;
 import io.pravega.client.admin.ReaderGroupManager;
@@ -76,8 +76,8 @@ final class PravegaUtil {
         return EventStreamClientFactory.withScope(pravegaConfig.getScope(), clientConfig);
     }
 
-    static void testConnection(BrowseContext browseContext, String filePath) {
-        PravegaConfig pravegaConfig = new PravegaConfig(browseContext, filePath);
+    static void testConnection(ConnectorContext connectorContext, String filePath) {
+        PravegaConfig pravegaConfig = new PravegaConfig(connectorContext, filePath);
 
         // create stream manager
         try (StreamManager streamManager = StreamManager.create(createClientConfig(pravegaConfig))) {
@@ -128,7 +128,7 @@ final class PravegaUtil {
     }
 
     //if not exists, then store keycloak.json contents file as key and file path as value
-    static String checkAndSetCredentials(BrowseContext context, WeakHashMap<String, String> map) {
+    static String checkAndSetCredentials(ConnectorContext context, WeakHashMap<String, String> map) {
         Map<String, Object> props = context.getConnectionProperties();
         String auth = (String) props.get(Constants.AUTH_TYPE_PROPERTY);
         PravegaConfig.AuthenticationType authType = PravegaConfig.AuthenticationType.valueOf(auth);

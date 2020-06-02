@@ -1,11 +1,12 @@
 package io.pravega.connector.boomi;
 
+import org.junit.jupiter.api.Assumptions;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
-import org.junit.jupiter.api.Assumptions;
 
 public class TestConfig {
     public static final String DEFAULT_PROJECT_NAME = "test";

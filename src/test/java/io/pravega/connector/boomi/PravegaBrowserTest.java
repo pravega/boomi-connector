@@ -41,7 +41,7 @@ public class PravegaBrowserTest {
         connProps.put(Constants.CONTROLLER_URI_PROPERTY, "tcp://localhost:8123");
         connProps.put(Constants.SCOPE_PROPERTY, "foo");
         connProps.put(Constants.STREAM_PROPERTY, "bar");
-        connProps.put(Constants.AUTH_TYPE_PROPERTY, TestUtils.AUTH_TYPE);
+        connProps.put(Constants.AUTH_TYPE_PROPERTY, TestUtils.LOCAL_PRAVEGA_AUTH_TYPE);
         connProps.put(Constants.INTERVAL, 10l);
         connProps.put(Constants.TIME_UNIT, "SECONDS");
 
@@ -66,8 +66,8 @@ public class PravegaBrowserTest {
         ConnectorTester tester = new ConnectorTester(connector);
 
         Map<String, Object> connProps = new HashMap<>();
-        connProps.put(Constants.CONTROLLER_URI_PROPERTY, "tcp://localhost:9090");
-        connProps.put(Constants.AUTH_TYPE_PROPERTY, TestUtils.AUTH_TYPE);
+        connProps.put(Constants.CONTROLLER_URI_PROPERTY, TestUtils.PRAVEGA_CONTROLLER_URI);
+        connProps.put(Constants.AUTH_TYPE_PROPERTY, TestUtils.LOCAL_PRAVEGA_AUTH_TYPE);
         connProps.put(Constants.SCOPE_PROPERTY, scope);
         connProps.put(Constants.STREAM_PROPERTY, stream);
         connProps.put(Constants.CREATE_SCOPE_PROPERTY, false);
@@ -109,7 +109,7 @@ public class PravegaBrowserTest {
 
         Map<String, Object> connProps = new HashMap<>();
         connProps.put(Constants.CONTROLLER_URI_PROPERTY, TestUtils.PRAVEGA_CONTROLLER_URI);
-        connProps.put(Constants.AUTH_TYPE_PROPERTY, TestUtils.AUTH_TYPE);
+        connProps.put(Constants.AUTH_TYPE_PROPERTY, TestUtils.LOCAL_PRAVEGA_AUTH_TYPE);
         connProps.put(Constants.SCOPE_PROPERTY, scope);
         connProps.put(Constants.STREAM_PROPERTY, stream);
         connProps.put(Constants.CREATE_SCOPE_PROPERTY, true);
@@ -141,14 +141,7 @@ public class PravegaBrowserTest {
         String home = System.getProperty("user.home");
         String jsonData = new String(Files.readAllBytes(Paths.get(home + "/keycloak.json")));
 
-        String scope = "boomi-test-project", stream = "test-stream-1";
-        PravegaConfig pravegaConfig = new PravegaConfig();
-        pravegaConfig.setControllerUri(new URI(TestUtils.PRAVEGA_NAUT_CONTROLLER_URI));
-        pravegaConfig.setScope(scope);
-        pravegaConfig.setStream(stream);
-        pravegaConfig.setCreateScope(false);
-        pravegaConfig.setAuth(PravegaConfig.AuthenticationType.None);
-        pravegaConfig.setKeycloakJSONPath(home + "/keycloak.json");
+        String scope = "boomi-test-project", stream = "test-stream";
 
         PravegaConnector connector = new PravegaConnector();
         ConnectorTester tester = new ConnectorTester(connector);
@@ -158,8 +151,10 @@ public class PravegaBrowserTest {
         connProps.put(Constants.SCOPE_PROPERTY, scope);
         connProps.put(Constants.STREAM_PROPERTY, stream);
         connProps.put(Constants.CREATE_SCOPE_PROPERTY, false);
-        connProps.put(Constants.AUTH_TYPE_PROPERTY, TestUtils.AUTH_TYPE);
+        connProps.put(Constants.AUTH_TYPE_PROPERTY, TestUtils.SDP_AUTH_TYPE);
         connProps.put(Constants.AUTH_PROPERTY_KEYCLOAK_JSON, jsonData);
+        connProps.put(Constants.INTERVAL, TestUtils.INTERVAL);
+        connProps.put(Constants.TIME_UNIT, TestUtils.INTERVAL_UNIT);
 
         Map<String, Object> opProps = new HashMap<>();
         tester.setOperationContext(OperationType.QUERY, connProps, opProps, null, null);

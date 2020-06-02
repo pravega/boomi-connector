@@ -29,9 +29,9 @@ public class PravegaPollingOperationConnection extends BaseConnection<OperationC
     /**
      * Creates a new instance using the provided operation context
      */
-    public PravegaPollingOperationConnection(OperationContext context) {
+    public PravegaPollingOperationConnection(OperationContext context, String keycloakJSONPath) {
         super(context);
-        readerConfig = new ReaderConfig(context);
+        readerConfig = new ReaderConfig(context, keycloakJSONPath);
 
         // create reader group
         PravegaUtil.createReaderGroup(readerConfig);
