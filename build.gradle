@@ -6,9 +6,6 @@ plugins {
 repositories {
     mavenLocal()
     mavenCentral()
-    maven {
-        url "https://oss.jfrog.org/jfrog-dependencies"
-    }
 }
 
 group = "io.pravega"
@@ -24,7 +21,6 @@ configurations {
 
 dependencies {
     compile "io.pravega:pravega-client:${pravegaVersion}"
-    //compile "io.pravega:pravega-keycloak-client:${pravegaKeycloakVersion}"
     compile "com.jayway.jsonpath:json-path:${jsonPathVersion}"
     localDeps "com.boomi:connector-sdk-util:${boomiConnectorVersion}"
     compileOnly "com.boomi:common-sdk:${boomiCommonSdkVersion}"

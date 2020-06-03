@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <GenericConnectorDescriptor>
-<!--<GenericConnectorDescriptor xmlns="http://www.boomi.com/connector/descriptor"-->
-<!--                            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"-->
-<!--                            xsi:schemaLocation="http://www.boomi.com/connector/descriptor genericconnectordesc.xsd">-->
+    <!--<GenericConnectorDescriptor xmlns="http://www.boomi.com/connector/descriptor"-->
+    <!--                            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"-->
+    <!--                            xsi:schemaLocation="http://www.boomi.com/connector/descriptor genericconnectordesc.xsd">-->
     <field id="controllerUri" label="URI" type="string">
         <helpText>(Required) The URI to the Pravega controller in the form tcp://host:port</helpText>
     </field>
@@ -34,6 +34,21 @@
     </field>
     <field id="unit" label="Listener Interval Time Unit" type="string">
         <helpText>Listener Interval Time Unit.</helpText>
+        <allowedValue>
+            <value>MILLISECONDS</value>
+        </allowedValue>
+        <allowedValue>
+            <value>SECONDS</value>
+        </allowedValue>
+        <allowedValue>
+            <value>MINUTES</value>
+        </allowedValue>
+        <allowedValue>
+            <value>HOURS</value>
+        </allowedValue>
+        <allowedValue>
+            <value>DAYS</value>
+        </allowedValue>
         <defaultValue>SECONDS</defaultValue>
     </field>
 

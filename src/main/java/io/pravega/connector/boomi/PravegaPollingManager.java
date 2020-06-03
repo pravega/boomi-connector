@@ -18,7 +18,6 @@ public class PravegaPollingManager extends BasePollingManager {
      */
     @Override
     protected void doStart() {
-
     }
 
     /**
@@ -26,7 +25,6 @@ public class PravegaPollingManager extends BasePollingManager {
      */
     @Override
     protected void doStop() {
-
     }
 
 }
