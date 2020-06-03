@@ -464,8 +464,8 @@ public class PravegaOperationTest {
 
     @Test
     public void testPollingListenerOperation() throws Exception {
-        String[] messages = new String[10];//{TestUtils.generateJsonMessage(), TestUtils.generateJsonMessage(), TestUtils.generateJsonMessage()};
-        for (int i = 0; i < 10; i++) {
+        String[] messages = new String[30];//{TestUtils.generateJsonMessage(), TestUtils.generateJsonMessage(), TestUtils.generateJsonMessage()};
+        for (int i = 0; i < 30; i++) {
             messages[i] = TestUtils.generateJsonMessage(i);
         }
         PravegaConnector connector = new PravegaConnector();
@@ -490,24 +490,27 @@ public class PravegaOperationTest {
         SimpleListener simpleListener = new SimpleListener();
 
         pravegaPollingOperation.start(simpleListener, manager);
-
-        for (int i = 0; i < 3; i++) {
-            Thread dataGenerator = new Thread(() -> {
-                for (String message : messages) {
-                    try {
-                        pravegaPollingListenOperationWriter.writeEvent(message).get();
-                        //generating 1 msg per seconds
-                        Thread.sleep(1000);
-                    } catch (InterruptedException | ExecutionException e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
-            dataGenerator.start();
-            Thread.sleep(100); // poll  the event after a while
-            pravegaPollingOperation.poll();
+        Thread dataGenerator = new Thread(() -> {
             for (String message : messages) {
+                try {
+                    pravegaPollingListenOperationWriter.writeEvent(message).get();
+                    //generating 1 msg per seconds
+                    Thread.sleep(1000);
+                } catch (InterruptedException | ExecutionException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        dataGenerator.start();
+        Thread.sleep(100); // poll  the event after a while
+        int i = 0;
+        for (int j = 0; j < 3; j++) {
+            pravegaPollingOperation.poll();
+            while (true) {
                 String output = simpleListener.getNextDocument();
+                if(output == null)
+                    break;
+                String message = messages[i++];
                 assertEquals(message, output);
             }
         }
@@ -558,7 +561,9 @@ public class PravegaOperationTest {
         }
 
         public String getNextDocument() {
-            return linkedQueue.remove();
+            if(linkedQueue.size() > 0)
+                return linkedQueue.remove();
+            else return null;
         }
 
         @Override
