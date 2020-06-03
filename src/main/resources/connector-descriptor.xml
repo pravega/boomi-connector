@@ -54,6 +54,21 @@
     </field>
     <field id="unit" label="Listener Interval Time Unit" type="string">
         <helpText>Listener Interval Time Unit.</helpText>
+        <allowedValue>
+            <value>MILLISECONDS</value>
+        </allowedValue>
+        <allowedValue>
+            <value>SECONDS</value>
+        </allowedValue>
+        <allowedValue>
+            <value>MINUTES</value>
+        </allowedValue>
+        <allowedValue>
+            <value>HOURS</value>
+        </allowedValue>
+        <allowedValue>
+            <value>DAYS</value>
+        </allowedValue>
         <defaultValue>SECONDS</defaultValue>
     </field>
 

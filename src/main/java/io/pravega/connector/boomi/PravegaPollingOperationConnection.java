@@ -22,7 +22,6 @@ public class PravegaPollingOperationConnection extends BaseConnection<OperationC
     private static final Logger logger = Logger.getLogger(PravegaPollingOperationConnection.class.getName());
 
     private ReaderConfig readerConfig;
-    //private AtomicBoolean isRunning = new AtomicBoolean(false);
     private EventStreamReader<String> reader = null;
     private EventStreamClientFactory clientFactory = null;
 
@@ -57,20 +56,19 @@ public class PravegaPollingOperationConnection extends BaseConnection<OperationC
                 event = reader.readNextEvent(readerConfig.getReadTimeout());
                 if (event.getEvent() != null) {
                     logger.log(Level.FINE, String.format("Listener Read event size: %d", event.getEvent().length()));
-                    //listener.submit(PayloadUtil.toPayload(event.getEvent()));
                     eventList.add(PayloadUtil.toPayload(event.getEvent()));
                     eventCounter++;
                 } // could check for watermark or checkpoint in else block
             } catch (ReinitializationRequiredException e) {
                 // There are certain circumstances where the reader needs to be reinitialized
                 logger.log(Level.WARNING, "Caught ReinitializationRequiredException - Pravega client needs to be reinitialized", e);
-                close();
+                closeReader();
                 reader = PravegaUtil.createReader(readerConfig, clientFactory);
             } catch (TruncatedDataException e) {
                 // Assuming nothing needs to be done here and that the next call to readNextEvent() will return the next event
                 logger.log(Level.WARNING, "Caught TruncatedDataException", e);
             }
-            // keep looping until we are stopped
+            // keep looping until there is no event or checkpoint, already run longer than interval, hitting maximum number of events
         } while ((event.getEvent() != null || event.isCheckpoint())
                 && interval > 0
                 && (System.currentTimeMillis() - executionStartTime < interval)
@@ -82,10 +80,12 @@ public class PravegaPollingOperationConnection extends BaseConnection<OperationC
     /**
      * Simulates opening a connection to the API. Any operation specific connection initialization can occur here.
      */
-    public void open() {
+    public synchronized void open() {
         try {
-            clientFactory = PravegaUtil.createClientFactory(readerConfig);
-            reader = PravegaUtil.createReader(readerConfig, clientFactory);
+            if (clientFactory == null)
+                clientFactory = PravegaUtil.createClientFactory(readerConfig);
+            if (reader == null)
+                reader = PravegaUtil.createReader(readerConfig, clientFactory);
         } catch (Throwable t) {
             close();
             logger.log(Level.SEVERE, String.format("Error reading from %s/%s", readerConfig.getScope(), readerConfig.getStream()), t);
@@ -97,9 +97,17 @@ public class PravegaPollingOperationConnection extends BaseConnection<OperationC
      */
 
     @Override
-    public void close() {
+    public synchronized void close() {
+        closeReader();
+        if (clientFactory != null) try {
+            clientFactory.close();
+        } catch (Throwable t) {
+            logger.log(Level.WARNING, "Could not close Pravega clientFactory", t);
+        }
+    }
+
+    private void closeReader() {
         if (reader != null) try {
-            //logger.log(Level.INFO, String.format("READER CLOSE CALLED"));
             reader.close();
         } catch (Throwable t) {
             logger.log(Level.WARNING, "Could not close Pravega reader", t);
@@ -108,7 +116,6 @@ public class PravegaPollingOperationConnection extends BaseConnection<OperationC
 
     @Override
     public void finalize() {
-        //logger.log(Level.INFO, "finalize() called");
         close();
     }
 }

@@ -9,24 +9,44 @@
     <field id="scope" label="Scope" type="string">
         <helpText>(Required) The Pravega scope containing the data stream.</helpText>
     </field>
-    <field id="stream" label="Stream Name" type="string">
-        <helpText>(Required) The name of the data stream.</helpText>
-    </field>
     <field id="createScope" label="Create Scope" type="boolean">
         <helpText>When checked, Pravega scope will be automatically created. Only enable this if Pravega is running in
-            stand-alone mode.
+            stand-alone mode. Uncheck this box if you are connecting to Streaming Data Platform.
         </helpText>
-        <defaultValue>true</defaultValue>
-    </field>
-    <field id="enableAuth" label="Pravega Authentication Required" type="boolean">
-        <helpText>Indicates whether authentication is required for Pravega.</helpText>
         <defaultValue>false</defaultValue>
     </field>
-    <field id="userName" label="Pravega User Name" type="string">
-        <helpText>The Pravega user.</helpText>
+    <field id="stream" label="Stream Name" type="string" formatRegex="[a-zA-Z0-9|\-|\.]">
+        <helpText>(Required) The name of the data stream. Name must consist of alphanumeric character or '-' or '.'. However name cannot be a single period or double period without additional characters.</helpText>
     </field>
-    <field id="password" label="Pravega Password" type="password">
-        <helpText>The Pravega user's password.</helpText>
+
+    <field id="authentication" label="Authentication Type" type="string">
+        <helpText>Specifies the type of authentication to use with Pravega.  "None" means Pravega does not have any authentication
+            enabled (only suitable for development environments).  "Basic" means Pravega is running in an independent cluster and has
+            basic auth enabled - this option requires you specify a valid user name and password.  "Keycloak" means Pravega is integrated
+            with Keycloak (i.e. inside Streaming Data Platform) - this option requires you specify a valid Keycloak JSON Web Token (JWT), which
+            is obtained from the Keycloak server.
+        </helpText>
+        <allowedValue>
+            <value>None</value>
+        </allowedValue>
+        <allowedValue>
+            <value>Basic</value>
+        </allowedValue>
+        <allowedValue>
+            <value>Keycloak</value>
+        </allowedValue>
+        <defaultValue>None</defaultValue>
+    </field>
+
+    <field id="userName" label="Basic User Name" type="string">
+        <helpText>An authorized Pravega user.  Only used when Authentication Type is set to "Basic"</helpText>
+    </field>
+    <field id="password" label="Basic Password" type="password">
+        <helpText>The Pravega user's password.  Only used when Authentication Type is set to "Basic"</helpText>
+    </field>
+
+    <field id="keycloakJson" label="Keycloak JWT" type="password">
+        <helpText> A valid Keycloak JSON Web Token (JWT), including Keycloak endpoint and credentials.  This is obtained from the Keycloak server</helpText>
     </field>
     <field id="interval" label="Listener Interval" type="integer">
         <helpText>Listener Interval.</helpText>
@@ -34,6 +54,21 @@
     </field>
     <field id="unit" label="Listener Interval Time Unit" type="string">
         <helpText>Listener Interval Time Unit.</helpText>
+        <allowedValue>
+            <value>MILLISECONDS</value>
+        </allowedValue>
+        <allowedValue>
+            <value>SECONDS</value>
+        </allowedValue>
+        <allowedValue>
+            <value>MINUTES</value>
+        </allowedValue>
+        <allowedValue>
+            <value>HOURS</value>
+        </allowedValue>
+        <allowedValue>
+            <value>DAYS</value>
+        </allowedValue>
         <defaultValue>SECONDS</defaultValue>
     </field>
 
