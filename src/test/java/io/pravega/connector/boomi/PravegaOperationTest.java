@@ -364,7 +364,7 @@ public class PravegaOperationTest {
         }
     }
 
-    //@Test
+    @Test
     public void testMaxReadPerExecution() throws Exception {
         String stream = "connector-test-max-read-time";
         long maxReadTime = 4L; // seconds
@@ -419,7 +419,7 @@ public class PravegaOperationTest {
         assertTrue(stopTime - startTime < maxReadTime * 1000 + ReaderConfig.DEFAULT_READ_TIMEOUT + 2000);
     }
 
-    //@Test
+    @Test
     public void testMaxEventsPerExecution() throws Exception {
         String stream = "connector-test-max-events";
         int maxEvents = 50000;
@@ -462,7 +462,7 @@ public class PravegaOperationTest {
         }
     }
 
-    //@Test
+    @Test
     public void testPollingListenerOperation() throws Exception {
         String[] messages = new String[10];//{TestUtils.generateJsonMessage(), TestUtils.generateJsonMessage(), TestUtils.generateJsonMessage()};
         for (int i = 0; i < 10; i++) {
@@ -504,7 +504,7 @@ public class PravegaOperationTest {
                 }
             });
             dataGenerator.start();
-            Thread.sleep(100);
+            Thread.sleep(100); // poll  the event after a while
             pravegaPollingOperation.poll();
             for (String message : messages) {
                 String output = simpleListener.getNextDocument();
