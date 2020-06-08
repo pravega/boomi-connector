@@ -89,6 +89,7 @@ public class PravegaPollingOperationConnection extends BaseConnection<OperationC
         } catch (Throwable t) {
             close();
             logger.log(Level.SEVERE, String.format("Error reading from %s/%s", readerConfig.getScope(), readerConfig.getStream()), t);
+            throw new RuntimeException(t);
         }
     }
 
@@ -101,21 +102,24 @@ public class PravegaPollingOperationConnection extends BaseConnection<OperationC
         closeReader();
         if (clientFactory != null) try {
             clientFactory.close();
+            clientFactory = null;
         } catch (Throwable t) {
             logger.log(Level.WARNING, "Could not close Pravega clientFactory", t);
         }
     }
 
-    private void closeReader() {
+    private synchronized void closeReader() {
         if (reader != null) try {
             reader.close();
+            reader = null;
         } catch (Throwable t) {
             logger.log(Level.WARNING, "Could not close Pravega reader", t);
         }
     }
 
     @Override
-    public void finalize() {
+    public void finalize() throws Throwable {
         close();
+        super.finalize();
     }
 }

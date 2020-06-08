@@ -489,7 +489,6 @@ public class PravegaOperationTest {
         PravegaPollingManager manager = new PravegaPollingManager(connection);
         SimpleListener simpleListener = new SimpleListener();
 
-        pravegaPollingOperation.start(simpleListener, manager);
         Thread dataGenerator = new Thread(() -> {
             for (String message : messages) {
                 try {
@@ -502,19 +501,21 @@ public class PravegaOperationTest {
             }
         });
         dataGenerator.start();
-        Thread.sleep(100); // poll  the event after a while
-        int i = 0;
-        for (int j = 0; j < 3; j++) {
-            pravegaPollingOperation.poll();
-            while (true) {
-                String output = simpleListener.getNextDocument();
-                if(output == null)
-                    break;
-                String message = messages[i++];
-                assertEquals(message, output);
-            }
+        try {
+            manager.start();
+            pravegaPollingOperation.start(simpleListener, manager);
+            Thread.sleep(30000); // poll  the event after a while
+
+        }catch (Throwable t){
+
+        }finally {
+            manager.stop();
+            pravegaPollingOperation.stop();
         }
-        pravegaPollingOperation.stop();
+
+        for(int i = 0; i<30; i++){
+            assertEquals(messages[i], simpleListener.getNextDocument());
+        }
     }
 
     private static String outputStreamToUtf8String(ByteArrayOutputStream baos) throws IOException {
