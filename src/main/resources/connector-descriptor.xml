@@ -35,7 +35,6 @@
         <allowedValue>
             <value>Keycloak</value>
         </allowedValue>
-        <defaultValue>None</defaultValue>
     </field>
 
     <field id="userName" label="Basic User Name" type="string">
@@ -69,7 +68,6 @@
         <allowedValue>
             <value>DAYS</value>
         </allowedValue>
-        <defaultValue>SECONDS</defaultValue>
     </field>
 
     <testConnection method="CUSTOM"/>
