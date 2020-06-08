@@ -49,7 +49,6 @@
         <allowedValue>
             <value>DAYS</value>
         </allowedValue>
-        <defaultValue>SECONDS</defaultValue>
     </field>
 
     <testConnection method="CUSTOM"/>
