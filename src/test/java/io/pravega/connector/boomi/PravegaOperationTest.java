@@ -1,3 +1,13 @@
+/*
+ * Copyright (c) Dell Inc., or its subsidiaries. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ */
+
 package io.pravega.connector.boomi;
 
 import com.boomi.connector.api.OperationStatus;
@@ -463,8 +473,8 @@ public class PravegaOperationTest {
     }
 
     @Test
-    public void testPollingListenerOperation() throws Exception {
-        String[] messages = new String[30];//{TestUtils.generateJsonMessage(), TestUtils.generateJsonMessage(), TestUtils.generateJsonMessage()};
+    public void testPollingListenerOperation() {
+        String[] messages = new String[30];
         for (int i = 0; i < 30; i++) {
             messages[i] = TestUtils.generateJsonMessage(i);
         }
@@ -505,15 +515,14 @@ public class PravegaOperationTest {
             manager.start();
             pravegaPollingOperation.start(simpleListener, manager);
             Thread.sleep(30000); // poll  the event after a while
-
-        }catch (Throwable t){
-
-        }finally {
+        } catch (Throwable t) {
+            logger.log(Level.SEVERE, String.format("Error during manager or operation start"));
+        } finally {
             manager.stop();
             pravegaPollingOperation.stop();
         }
 
-        for(int i = 0; i<30; i++){
+        for (int i = 0; i < 30; i++) {
             assertEquals(messages[i], simpleListener.getNextDocument());
         }
     }
@@ -562,7 +571,7 @@ public class PravegaOperationTest {
         }
 
         public String getNextDocument() {
-            if(linkedQueue.size() > 0)
+            if (linkedQueue.size() > 0)
                 return linkedQueue.remove();
             else return null;
         }
