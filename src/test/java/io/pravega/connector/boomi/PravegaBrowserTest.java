@@ -1,3 +1,13 @@
+/*
+ * Copyright (c) Dell Inc., or its subsidiaries. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ */
+
 package io.pravega.connector.boomi;
 
 import com.boomi.connector.api.ConnectionTester;
@@ -38,6 +48,8 @@ public class PravegaBrowserTest {
         connProps.put(Constants.CONTROLLER_URI_PROPERTY, "tcp://localhost:8123");
         connProps.put(Constants.SCOPE_PROPERTY, "foo");
         connProps.put(Constants.STREAM_PROPERTY, "bar");
+        connProps.put(Constants.INTERVAL, 10l);
+        connProps.put(Constants.TIME_UNIT, "SECONDS");
 
         Map<String, Object> opProps = new HashMap<>();
 
@@ -64,6 +76,8 @@ public class PravegaBrowserTest {
         connProps.put(Constants.SCOPE_PROPERTY, scope);
         connProps.put(Constants.STREAM_PROPERTY, stream);
         connProps.put(Constants.CREATE_SCOPE_PROPERTY, false);
+        connProps.put(Constants.INTERVAL, 10l);
+        connProps.put(Constants.TIME_UNIT, "SECONDS");
 
         Map<String, Object> opProps = new HashMap<>();
 
@@ -87,6 +101,8 @@ public class PravegaBrowserTest {
         pravegaConfig.setScope(scope);
         pravegaConfig.setStream(stream);
         pravegaConfig.setCreateScope(true);
+        pravegaConfig.setInterval(10l);
+        pravegaConfig.setUnit("SECONDS");
 
         // this will create the scope
         EventStreamClientFactory clientFactory = PravegaUtil.createClientFactory(pravegaConfig);
@@ -100,6 +116,8 @@ public class PravegaBrowserTest {
         connProps.put(Constants.SCOPE_PROPERTY, scope);
         connProps.put(Constants.STREAM_PROPERTY, stream);
         connProps.put(Constants.CREATE_SCOPE_PROPERTY, true);
+        connProps.put(Constants.INTERVAL, 10l);
+        connProps.put(Constants.TIME_UNIT, "SECONDS");
 
         Map<String, Object> opProps = new HashMap<>();
 

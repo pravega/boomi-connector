@@ -1,14 +1,20 @@
+/*
+ * Copyright (c) Dell Inc., or its subsidiaries. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ */
+
 package io.pravega.connector.boomi;
 
-import com.boomi.connector.api.BrowseContext;
-import com.boomi.connector.api.Browser;
-import com.boomi.connector.api.Operation;
-import com.boomi.connector.api.OperationContext;
-import com.boomi.connector.util.BaseConnector;
-import com.boomi.connector.util.listen.UnmanagedListenConnector;
-import com.boomi.connector.util.listen.UnmanagedListenOperation;
+import com.boomi.connector.api.*;
+import com.boomi.connector.api.listen.ListenOperation;
+import com.boomi.connector.util.listen.BaseListenConnector;
 
-public class PravegaConnector extends UnmanagedListenConnector {
+public class PravegaConnector extends BaseListenConnector {
     @Override
     protected Operation createQueryOperation(OperationContext context) {
         return new PravegaReadOperation(context);
@@ -20,8 +26,13 @@ public class PravegaConnector extends UnmanagedListenConnector {
     }
 
     @Override
-    public UnmanagedListenOperation createListenOperation(OperationContext context) {
-        return new PravegaListenOperation(context);
+    public ListenOperation<PravegaPollingManager> createListenOperation(OperationContext context) {
+        return new PravegaPollingOperation(new PravegaPollingOperationConnection(context));
+    }
+
+    @Override
+    public PravegaPollingManager createListenManager(ConnectorContext context) {
+        return new PravegaPollingManager(new PravegaPollingManagerConnection(context));
     }
 
     @Override

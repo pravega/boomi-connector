@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <GenericConnectorDescriptor>
-<!--<GenericConnectorDescriptor xmlns="http://www.boomi.com/connector/descriptor"-->
-<!--                            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"-->
-<!--                            xsi:schemaLocation="http://www.boomi.com/connector/descriptor genericconnectordesc.xsd">-->
+    <!--<GenericConnectorDescriptor xmlns="http://www.boomi.com/connector/descriptor"-->
+    <!--                            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"-->
+    <!--                            xsi:schemaLocation="http://www.boomi.com/connector/descriptor genericconnectordesc.xsd">-->
     <field id="controllerUri" label="URI" type="string">
         <helpText>(Required) The URI to the Pravega controller in the form tcp://host:port</helpText>
     </field>
@@ -28,6 +28,26 @@
     <field id="password" label="Pravega Password" type="password">
         <helpText>The Pravega user's password.</helpText>
     </field>
+    <field id="interval" label="Listener Polling Interval" type="integer">
+        <helpText>The Listen operation uses a polling schedule.  This parameter specifies the interval between each poll.  For example, specifying 1 minute means that any Listen operations from this connector would poll for new events every.</helpText>
+        <defaultValue>10</defaultValue>
+    </field>
+    <field id="unit" label="Listener Polling Time Unit" type="string">
+        <helpText>The time unit to use for the Listener Polling Interval. For example, if the Polling Interval is 1 and the Time Unit is Minute, then the Listen operation would poll for new events every 1 Minute.</helpText>
+        <allowedValue>
+            <value>SECONDS</value>
+        </allowedValue>
+        <allowedValue>
+            <value>MINUTES</value>
+        </allowedValue>
+        <allowedValue>
+            <value>HOURS</value>
+        </allowedValue>
+        <allowedValue>
+            <value>DAYS</value>
+        </allowedValue>
+    </field>
+
     <testConnection method="CUSTOM"/>
     <operation types="QUERY" supportsBrowse="false" customTypeLabel="Read">
         <field id="readerGroup" label="Pravega Reader Group" type="string">
