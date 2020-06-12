@@ -1,3 +1,13 @@
+/*
+ * Copyright (c) Dell Inc., or its subsidiaries. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ */
+
 package io.pravega.connector.boomi;
 
 import com.boomi.connector.api.OperationStatus;
@@ -27,7 +37,6 @@ import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -49,6 +58,8 @@ public class PravegaOperationTest {
     private static final String JSON_ROUTING_KEY = "message";
 
     private static final long READ_TIMEOUT = 2000; // 2 seconds
+    private static final long INTERVAL = 10;
+    private static final String UNIT = "SECONDS";
     private static final String CREATE_OPERATION_READER_GROUP = "connector-test-create-reader";
     private static final String QUERY_OPERATION_READER_GROUP = "connector-test-query-reader";
     private static final String POLLING_OPERATION_READER_GROUP = "connector-test-polling-reader";
@@ -134,6 +145,7 @@ public class PravegaOperationTest {
         String json = TestUtils.generateJsonMessage();
         PravegaConnector connector = new PravegaConnector();
         ConnectorTester tester = new ConnectorTester(connector);
+
         Map<String, Object> connProps = getWriteConnectionProperties();
 
         Map<String, Object> opProps = new HashMap<>();
@@ -165,6 +177,7 @@ public class PravegaOperationTest {
         String json = TestUtils.generateJsonMessage();
         PravegaConnector connector = new PravegaConnector();
         ConnectorTester tester = new ConnectorTester(connector);
+
         Map<String, Object> connProps = getWriteConnectionProperties();
 
         Map<String, Object> opProps = new HashMap<>();
@@ -196,6 +209,7 @@ public class PravegaOperationTest {
         String json = TestUtils.generate2MBmessage();
         PravegaConnector connector = new PravegaConnector();
         ConnectorTester tester = new ConnectorTester(connector);
+
         Map<String, Object> connProps = getWriteConnectionProperties();
 
         Map<String, Object> opProps = new HashMap<>();
@@ -225,6 +239,7 @@ public class PravegaOperationTest {
         String json = TestUtils.generateJsonMessage();
         PravegaConnector connector = new PravegaConnector();
         ConnectorTester tester = new ConnectorTester(connector);
+
         Map<String, Object> connProps = getWriteConnectionProperties();
 
         Map<String, Object> opProps = new HashMap<>();
@@ -254,6 +269,7 @@ public class PravegaOperationTest {
         String[] messages = {TestUtils.generateJsonMessage(), TestUtils.generateJsonMessage(), TestUtils.generateJsonMessage()};
         PravegaConnector connector = new PravegaConnector();
         ConnectorTester tester = new ConnectorTester(connector);
+
         Map<String, Object> connProps = getWriteConnectionProperties();
 
         Map<String, Object> opProps = new HashMap<>();
@@ -289,6 +305,7 @@ public class PravegaOperationTest {
         String json = TestUtils.generateJsonMessage();
         PravegaConnector connector = new PravegaConnector();
         ConnectorTester tester = new ConnectorTester(connector);
+
         Map<String, Object> connProps = getReadConnectionProperties();
 
         Map<String, Object> opProps = new HashMap<>();
@@ -318,6 +335,7 @@ public class PravegaOperationTest {
         String[] messages = {TestUtils.generateJsonMessage(), TestUtils.generateJsonMessage(), TestUtils.generateJsonMessage()};
         PravegaConnector connector = new PravegaConnector();
         ConnectorTester tester = new ConnectorTester(connector);
+
         Map<String, Object> connProps = getReadConnectionProperties();
 
         Map<String, Object> opProps = new HashMap<>();
@@ -370,7 +388,6 @@ public class PravegaOperationTest {
         connProps.put(Constants.STREAM_PROPERTY, stream);
         connProps.put(Constants.INTERVAL, TestUtils.INTERVAL);
         connProps.put(Constants.TIME_UNIT, TestUtils.INTERVAL_UNIT);
-
 
         Map<String, Object> opProps = new HashMap<>();
         opProps.put(Constants.READER_GROUP_PROPERTY, stream + "-readers");
@@ -445,8 +462,8 @@ public class PravegaOperationTest {
     }
 
     @Test
-    public void testPollingListenerOperation() throws Exception {
-        String[] messages = new String[30];//{TestUtils.generateJsonMessage(), TestUtils.generateJsonMessage(), TestUtils.generateJsonMessage()};
+    public void testPollingListenerOperation() {
+        String[] messages = new String[30];
         for (int i = 0; i < 30; i++) {
             messages[i] = TestUtils.generateJsonMessage(i);
         }
@@ -484,17 +501,19 @@ public class PravegaOperationTest {
             }
         });
         dataGenerator.start();
-        Thread.sleep(100); // poll  the event after a while
-        int i = 0;
-        for (int j = 0; j < 3; j++) {
-            pravegaPollingOperation.poll();
-            while (true) {
-                String output = simpleListener.getNextDocument();
-                if(output == null)
-                    break;
-                String message = messages[i++];
-                assertEquals(message, output);
-            }
+        try {
+            manager.start();
+            pravegaPollingOperation.start(simpleListener, manager);
+            Thread.sleep(30000); // poll  the event after a while
+        } catch (Throwable t) {
+            logger.log(Level.SEVERE, String.format("Error during manager or operation start"));
+        } finally {
+            manager.stop();
+            pravegaPollingOperation.stop();
+        }
+
+        for (int i = 0; i < 30; i++) {
+            assertEquals(messages[i], simpleListener.getNextDocument());
         }
         pravegaPollingOperation.stop();
     }
@@ -543,7 +562,8 @@ public class PravegaOperationTest {
         }
 
         public String getNextDocument() {
-            if(linkedQueue.size() > 0)
+
+            if (linkedQueue.size() > 0)
                 return linkedQueue.remove();
             else return null;
         }
@@ -553,4 +573,5 @@ public class PravegaOperationTest {
             return null;
         }
     }
+
 }

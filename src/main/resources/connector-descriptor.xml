@@ -1,61 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <GenericConnectorDescriptor>
-<!--<GenericConnectorDescriptor xmlns="http://www.boomi.com/connector/descriptor"-->
-<!--                            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"-->
-<!--                            xsi:schemaLocation="http://www.boomi.com/connector/descriptor genericconnectordesc.xsd">-->
+    <!--<GenericConnectorDescriptor xmlns="http://www.boomi.com/connector/descriptor"-->
+    <!--                            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"-->
+    <!--                            xsi:schemaLocation="http://www.boomi.com/connector/descriptor genericconnectordesc.xsd">-->
     <field id="controllerUri" label="URI" type="string">
         <helpText>(Required) The URI to the Pravega controller in the form tcp://host:port</helpText>
     </field>
     <field id="scope" label="Scope" type="string">
         <helpText>(Required) The Pravega scope containing the data stream.</helpText>
     </field>
+    <field id="stream" label="Stream Name" type="string">
+        <helpText>(Required) The name of the data stream.</helpText>
+    </field>
     <field id="createScope" label="Create Scope" type="boolean">
         <helpText>When checked, Pravega scope will be automatically created. Only enable this if Pravega is running in
-            stand-alone mode. Uncheck this box if you are connecting to Streaming Data Platform.
+            stand-alone mode.
         </helpText>
+        <defaultValue>true</defaultValue>
+    </field>
+    <field id="enableAuth" label="Pravega Authentication Required" type="boolean">
+        <helpText>Indicates whether authentication is required for Pravega.</helpText>
         <defaultValue>false</defaultValue>
     </field>
-    <field id="stream" label="Stream Name" type="string" formatRegex="[a-zA-Z0-9|\-|\.]">
-        <helpText>(Required) The name of the data stream. Name must consist of alphanumeric character or '-' or '.'. However name cannot be a single period or double period without additional characters.</helpText>
+    <field id="userName" label="Pravega User Name" type="string">
+        <helpText>The Pravega user.</helpText>
     </field>
-
-    <field id="authentication" label="Authentication Type" type="string">
-        <helpText>Specifies the type of authentication to use with Pravega.  "None" means Pravega does not have any authentication
-            enabled (only suitable for development environments).  "Basic" means Pravega is running in an independent cluster and has
-            basic auth enabled - this option requires you specify a valid user name and password.  "Keycloak" means Pravega is integrated
-            with Keycloak (i.e. inside Streaming Data Platform) - this option requires you specify a valid Keycloak JSON Web Token (JWT), which
-            is obtained from the Keycloak server.
-        </helpText>
-        <allowedValue>
-            <value>None</value>
-        </allowedValue>
-        <allowedValue>
-            <value>Basic</value>
-        </allowedValue>
-        <allowedValue>
-            <value>Keycloak</value>
-        </allowedValue>
+    <field id="password" label="Pravega Password" type="password">
+        <helpText>The Pravega user's password.</helpText>
     </field>
-
-    <field id="userName" label="Basic User Name" type="string">
-        <helpText>An authorized Pravega user.  Only used when Authentication Type is set to "Basic"</helpText>
-    </field>
-    <field id="password" label="Basic Password" type="password">
-        <helpText>The Pravega user's password.  Only used when Authentication Type is set to "Basic"</helpText>
-    </field>
-
-    <field id="keycloakJson" label="Keycloak JWT" type="password">
-        <helpText> A valid Keycloak JSON Web Token (JWT), including Keycloak endpoint and credentials.  This is obtained from the Keycloak server</helpText>
-    </field>
-    <field id="interval" label="Listener Interval" type="integer">
-        <helpText>Listener Interval.</helpText>
+    <field id="interval" label="Listener Polling Interval" type="integer">
+        <helpText>The Listen operation uses a polling schedule.  This parameter specifies the interval between each poll.  For example, specifying 1 minute means that any Listen operations from this connector would poll for new events every.</helpText>
         <defaultValue>10</defaultValue>
     </field>
-    <field id="unit" label="Listener Interval Time Unit" type="string">
-        <helpText>Listener Interval Time Unit.</helpText>
-        <allowedValue>
-            <value>MILLISECONDS</value>
-        </allowedValue>
+    <field id="unit" label="Listener Polling Time Unit" type="string">
+        <helpText>The time unit to use for the Listener Polling Interval. For example, if the Polling Interval is 1 and the Time Unit is Minute, then the Listen operation would poll for new events every 1 Minute.</helpText>
         <allowedValue>
             <value>SECONDS</value>
         </allowedValue>
