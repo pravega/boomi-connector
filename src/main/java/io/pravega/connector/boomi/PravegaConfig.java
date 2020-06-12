@@ -164,6 +164,4 @@ public class PravegaConfig {
     }
 
     enum AuthenticationType {None, Basic, Keycloak}
-
-    ;
 }
