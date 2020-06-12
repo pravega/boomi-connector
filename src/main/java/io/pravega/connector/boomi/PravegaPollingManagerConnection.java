@@ -1,4 +1,4 @@
-// Copyright (c) 2019 Boomi, Inc.
+
 package io.pravega.connector.boomi;
 
 import com.boomi.connector.api.ConnectorContext;
