@@ -41,14 +41,14 @@
     </field>
 
     <field id="userName" label="Basic User Name" type="string">
-        <helpText>The Basic user</helpText>
+        <helpText>An authorized Pravega user.  Only used when Authentication Type is set to "Basic"</helpText>
     </field>
     <field id="password" label="Basic Password" type="password">
-        <helpText>The Basic user's password</helpText>
+        <helpText>The Pravega user's password.  Only used when Authentication Type is set to "Basic"</helpText>
     </field>
 
-    <field id="keycloakJson" label="Keycloak JSON" type="password">
-        <helpText>Keycloak json string</helpText>
+    <field id="keycloakJson" label="Keycloak JWT" type="password">
+        <helpText> A valid Keycloak JSON Web Token (JWT), including Keycloak endpoint and credentials.  This is obtained from the Keycloak server</helpText>
     </field>
     <field id="interval" label="Listener Polling Interval" type="integer">
         <helpText>The Listen operation uses a polling schedule.  This parameter specifies the interval between each poll.  For example, specifying 1 minute means that any Listen operations from this connector would poll for new events every.</helpText>
