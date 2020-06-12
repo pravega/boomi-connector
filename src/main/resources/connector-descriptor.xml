@@ -18,10 +18,6 @@
         </helpText>
         <defaultValue>true</defaultValue>
     </field>
-    <field id="enableAuth" label="Pravega Authentication Required" type="boolean">
-        <helpText>Indicates whether authentication is required for Pravega.</helpText>
-        <defaultValue>false</defaultValue>
-    </field>
     <field id="authentication" label="Authentication Type" type="string">
         <helpText>Specifies the type of authentication to use with Pravega.  "None" means Pravega does not have any authentication
             enabled (only suitable for development environments).  "Basic" means Pravega is running in an independent cluster and has
