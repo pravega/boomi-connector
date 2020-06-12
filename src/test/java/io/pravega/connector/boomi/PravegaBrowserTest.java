@@ -138,6 +138,7 @@ public class PravegaBrowserTest {
             Assertions.fail("connection test should have succeeded", e);
         }
     }
+
     /*
     For this test cases we need the following:
         1. Must have access to an SDP cluster
@@ -145,7 +146,6 @@ public class PravegaBrowserTest {
         3. The pravega endpoint must be set in a properties file (see TestUtil comment)
         4. Must have a valid Keycloak JWT in your home directory
      */
-
     @Test
     public void testTestNautilusConnector() throws Exception {
         String home = System.getProperty("user.home");

@@ -31,16 +31,13 @@ public class TestConfig {
                 in = new FileInputStream(homeProps);
             }
         }
-
         if (in == null) {
             Assumptions.assumeFalse(failIfMissing, projectName + ".properties missing (look in src/test/resources for template)");
             return null;
         }
-
         Properties props = new Properties();
         props.load(in);
         in.close();
-
         return props;
     }
 

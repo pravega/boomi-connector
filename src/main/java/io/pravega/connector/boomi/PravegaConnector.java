@@ -18,6 +18,7 @@ import java.util.WeakHashMap;
 
 public class PravegaConnector extends BaseListenConnector {
 
+    //store keycloak.json contents file as key and file path as value
     private WeakHashMap<String, String> map = new WeakHashMap<>();
 
     @Override
