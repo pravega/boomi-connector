@@ -60,7 +60,6 @@ public class PravegaPollingOperationConnection extends BaseConnection<OperationC
         long executionStartTime = System.currentTimeMillis();
         EventRead<String> event = null;
         logger.log(Level.FINE, String.format("Reading events from %s/%s", readerConfig.getScope(), readerConfig.getStream()));
-
         do {
             try {
                 event = reader.readNextEvent(readerConfig.getReadTimeout());
