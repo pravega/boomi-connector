@@ -22,11 +22,33 @@
         <helpText>Indicates whether authentication is required for Pravega.</helpText>
         <defaultValue>false</defaultValue>
     </field>
-    <field id="userName" label="Pravega User Name" type="string">
-        <helpText>The Pravega user.</helpText>
+    <field id="authentication" label="Authentication Type" type="string">
+        <helpText>Specifies the type of authentication to use with Pravega.  "None" means Pravega does not have any authentication
+            enabled (only suitable for development environments).  "Basic" means Pravega is running in an independent cluster and has
+            basic auth enabled - this option requires you specify a valid user name and password.  "Keycloak" means Pravega is integrated
+            with Keycloak (i.e. inside Streaming Data Platform) - this option requires you specify a valid Keycloak JSON Web Token (JWT), which
+            is obtained from the Keycloak server.
+        </helpText>
+        <allowedValue>
+            <value>None</value>
+        </allowedValue>
+        <allowedValue>
+            <value>Basic</value>
+        </allowedValue>
+        <allowedValue>
+            <value>Keycloak</value>
+        </allowedValue>
     </field>
-    <field id="password" label="Pravega Password" type="password">
-        <helpText>The Pravega user's password.</helpText>
+
+    <field id="userName" label="Basic User Name" type="string">
+        <helpText>The Basic user</helpText>
+    </field>
+    <field id="password" label="Basic Password" type="password">
+        <helpText>The Basic user's password</helpText>
+    </field>
+
+    <field id="keycloakJson" label="Keycloak JSON" type="password">
+        <helpText>Keycloak json string</helpText>
     </field>
     <field id="interval" label="Listener Polling Interval" type="integer">
         <helpText>The Listen operation uses a polling schedule.  This parameter specifies the interval between each poll.  For example, specifying 1 minute means that any Listen operations from this connector would poll for new events every.</helpText>
