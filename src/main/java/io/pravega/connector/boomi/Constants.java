@@ -24,8 +24,6 @@ public class Constants {
     static final String INTERVAL = "interval";
     static final String TIME_UNIT = "unit";
 
-    static final String INTERVAL = "interval";
-    static final String TIME_UNIT = "unit";
 
     static final String READER_GROUP_PROPERTY = "readerGroup";
     static final String READ_TIMEOUT_PROPERTY = "readTimeout";
