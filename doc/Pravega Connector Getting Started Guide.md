@@ -2,15 +2,21 @@
 
 **Overview**
 
-Pravega is a storage system that exposes Stream as the main primitive for continuous and unbounded data. A Pravega stream is a durable, elastic, append-only, unbounded sequence of bytes having good performance and strong consistency.
+Pravega is a storage system that exposes Stream as the main primitive for continuous and 
+unbounded data. A Pravega stream is a durable, elastic, append-only, unbounded sequence of 
+bytes having good performance and strong consistency.
 
 **Configure the Pravega Connector**
 
-The Pravega connection represents and contains all the information that is needed to connect to and log in to a
- specific Pravega server. In this example we will create a new Pravega Connection. 
- At first, we need to start Pravega. [Here](http://pravega.io/docs/latest/deployment/run-local/) is 
- the documentation about how to run Pravega locally. We need to provide a URI endpoint of the Pravega controller
-  in the form tcp://host:port, scope and stream name. If authentication required, then Pravega username and password. Then we need to provide listener time interval and time unit. We can check the connection using the Test Connection button.
+The Pravega connection represents and contains all the information that is needed to connect 
+to and log in to a specific Pravega server. In this example we will create a new Pravega 
+Connection. First, we need a running instance of Pravega. You can obtain this from the Project 
+page in the SDP UI (if you are using SDP), or from your Pravega cluster. For testing, you can 
+start a local Pravega cluster. [Here](http://pravega.io/docs/latest/deployment/run-local/) is 
+the documentation about how to run Pravega locally. We need to provide a URI endpoint of the 
+Pravega controller in the form tcp://host:port, scope and stream name. If authentication 
+required, then Pravega username and password. Then we need to provide listener time interval 
+and time unit. We can check the connection using the Test Connection button.
 
 ![](pravega_connection.png)
 Here we start a Pravega stand-alone in 9090 port. We provide a scope, stream name and check the option to create this scope. We also provide Listener polling interval and time unit.
