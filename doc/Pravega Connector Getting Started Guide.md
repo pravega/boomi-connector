@@ -9,17 +9,19 @@ bytes having good performance and strong consistency.
 **Configure the Pravega Connector**
 
 The Pravega connection represents and contains all the information that is needed to connect 
-to and log in to a specific Pravega server. In this example we will create a new Pravega 
+to and log in to a specific Pravega cluster. In this example we will create a new Pravega 
 Connection. First, we need a running instance of Pravega. You can obtain this from the Project 
-page in the SDP UI (if you are using SDP), or from your Pravega cluster. For testing, you can 
+page in the SDP UI (if you are using SDP), or from your Pravega cluster configuration. For testing, you can 
 start a local Pravega cluster. [Here](http://pravega.io/docs/latest/deployment/run-local/) is 
 the documentation about how to run Pravega locally. We need to provide a URI endpoint of the 
-Pravega controller in the form tcp://host:port, scope and stream name. If authentication 
-required, then Pravega username and password. Then we need to provide listener time interval 
-and time unit. We can check the connection using the Test Connection button.
+Pravega controller in the form tcp://host:port, scope and stream name. If authentication is
+required, then provide the Pravega username and password. If you will use any Listener operations
+with this connector, then you need to provide the desired listener time interval 
+and time unit. When finished with the settings, we can check the connection using the Test Connection button.
 
 ![](pravega_connection.png)
-Here we start a Pravega stand-alone in 9090 port. We provide a scope, stream name and check the option to create this scope. We also provide Listener polling interval and time unit.
+
+In this example, we are running a Pravega stand-alone server locally on port 9090. We provide a scope, stream name and check the option to create this scope (the connector will automatically create the scope if it doesn't already exist) - note that this option cannot be used with SDP. We also provide a Listener polling interval and time unit for Listener operations that belong to this connector.  The polling interval will be 10 seconds.  This means that any Listener operations will read batches of events from the stream every 10 seconds.
 
 **Create a Write Operation**
 
