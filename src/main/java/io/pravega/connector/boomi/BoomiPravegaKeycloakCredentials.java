@@ -36,9 +36,13 @@ public class BoomiPravegaKeycloakCredentials implements Credentials {
         return kc.getRPT();
     }
 
-    private synchronized void init() {
+    private void init() {
         if (kc == null) {
-            kc = KeycloakAuthzClient.builder().withConfigFile(this.keycloakJSONPath).build();
+            synchronized (BoomiPravegaKeycloakCredentials.class) {
+                if (kc == null) {
+                    kc = KeycloakAuthzClient.builder().withConfigFile(this.keycloakJSONPath).build();
+                }
+            }
         }
     }
 }

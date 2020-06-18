@@ -131,14 +131,14 @@ final class PravegaUtil {
             bw.close();
             logger.log(Level.INFO, "File created " + keycloakJSONString);
             return file.getAbsolutePath();
-        } catch (Exception E) {
-            logger.log(Level.SEVERE, "File writing problem" + keycloakJSONString, E);
-            return null;
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "File writing problem" + keycloakJSONString, e);
+            throw new RuntimeException(e);
         }
     }
 
     //if not exists, then store keycloak.json contents file as key and file path as value
-    static String checkAndSetCredentials(ConnectorContext context, WeakHashMap<String, String> map) {
+    static String checkAndSetCredentials(ConnectorContext context, Map<String, String> map) {
         Map<String, Object> props = context.getConnectionProperties();
         String auth = (String) props.get(Constants.AUTH_TYPE_PROPERTY);
         PravegaConfig.AuthenticationType authType = PravegaConfig.AuthenticationType.valueOf(auth);
@@ -150,7 +150,6 @@ final class PravegaUtil {
                         String keycloakJSONPath = PravegaUtil.createKeycloakJSONnFile(keycloakJSONString);
                         if (keycloakJSONPath != null)
                             map.put(keycloakJSONString, keycloakJSONPath);
-                        return keycloakJSONPath;
                     }
                     return map.get(keycloakJSONString);
                 }

@@ -417,7 +417,7 @@ public class PravegaOperationTest {
         assertTrue(stopTime - startTime < maxReadTime * 1000 + ReaderConfig.DEFAULT_READ_TIMEOUT + 2000);
     }
 
-    //@Test
+    @Test
     public void testMaxEventsPerExecution() throws Exception {
         String stream = "connector-test-max-events";
         int maxEvents = 50000;

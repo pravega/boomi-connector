@@ -143,7 +143,7 @@ public class PravegaBrowserTest {
     For this test cases we need the following:
         1. Must have access to an SDP cluster
         2. The expected scope must be created on the cluster
-        3. The pravega endpoint must be set in a properties file (see TestUtil comment)
+        3. The Pravega endpoint must be set in a properties file
         4. Must have a valid Keycloak JWT in your home directory
      */
     @Test
