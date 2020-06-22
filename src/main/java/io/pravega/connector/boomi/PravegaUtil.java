@@ -39,7 +39,7 @@ final class PravegaUtil {
         ClientConfig.ClientConfigBuilder clientBuilder = ClientConfig.builder().controllerURI(URI.create(pravegaConfig.getControllerUri().toString()));
         if (pravegaConfig.getAuth() == PravegaConfig.AuthenticationType.Basic)
             clientBuilder.credentials(new DefaultCredentials(pravegaConfig.getPassword(), pravegaConfig.getUserName()));
-        if (pravegaConfig.getAuth() == PravegaConfig.AuthenticationType.Keycloak)
+        else if (pravegaConfig.getAuth() == PravegaConfig.AuthenticationType.Keycloak)
             clientBuilder.credentials(new BoomiPravegaKeycloakCredentials(pravegaConfig.getKeycloakJSONPath()));
         return clientBuilder.build();
     }
@@ -151,7 +151,6 @@ final class PravegaUtil {
                         if (keycloakJSONPath != null)
                             map.put(keycloakJSONString, keycloakJSONPath);
                     }
-                    return map.get(keycloakJSONString);
                 }
             }
             return map.get(keycloakJSONString);

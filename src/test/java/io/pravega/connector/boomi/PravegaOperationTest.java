@@ -488,7 +488,6 @@ public class PravegaOperationTest {
         PravegaPollingManager manager = new PravegaPollingManager(connection);
         SimpleListener simpleListener = new SimpleListener();
 
-        pravegaPollingOperation.start(simpleListener, manager);
         Thread dataGenerator = new Thread(() -> {
             for (String message : messages) {
                 try {
@@ -515,7 +514,6 @@ public class PravegaOperationTest {
         for (int i = 0; i < 30; i++) {
             assertEquals(messages[i], simpleListener.getNextDocument());
         }
-        pravegaPollingOperation.stop();
     }
 
     private static String outputStreamToUtf8String(ByteArrayOutputStream baos) throws IOException {

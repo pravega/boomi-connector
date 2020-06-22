@@ -38,7 +38,7 @@ public class BoomiPravegaKeycloakCredentials implements Credentials {
 
     private void init() {
         if (kc == null) {
-            synchronized (BoomiPravegaKeycloakCredentials.class) {
+            synchronized (this) {
                 if (kc == null) {
                     kc = KeycloakAuthzClient.builder().withConfigFile(this.keycloakJSONPath).build();
                 }
