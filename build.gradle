@@ -29,7 +29,7 @@ dependencies {
     compileOnly "com.boomi:connector-sdk-api:${boomiConnectorVersion}"
     testImplementation "org.junit.jupiter:junit-jupiter:5.5.2"
     testCompile "io.pravega:pravega-standalone:${pravegaVersion}"
-    testCompile "com.boomi:boomi-util:${boomiUtilVersion}"
+    compile "com.boomi:boomi-util:${boomiUtilVersion}"
     testCompile "com.boomi:common-sdk:${boomiCommonSdkVersion}"
     testCompile "com.boomi:connector-sdk-api:${boomiConnectorVersion}"
     testCompile "com.boomi:connector-sdk-test-util:${boomiConnectorVersion}"

@@ -32,7 +32,7 @@
             <value>Basic</value>
         </allowedValue>
         <allowedValue>
-            <value>Keycloak</value>
+            <value>keycloak OIDC Json Installation</value>
         </allowedValue>
     </field>
 

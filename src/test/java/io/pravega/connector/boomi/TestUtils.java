@@ -101,6 +101,13 @@ final class TestUtils {
         }
     }
 
+    static String generate9MBmessage() {
+        char[] chars = new char[9000000];
+        Arrays.fill(chars, 'a');
+        String randomMessage = new String(chars);
+        return "{\"name\":\"foo\",\"message\":\"" + randomMessage + "\"}";
+    }
+
     static String generate2MBmessage() {
         char[] chars = new char[2000000];
         Arrays.fill(chars, 'a');

@@ -205,8 +205,41 @@ public class PravegaOperationTest {
     }
 
     @Test
-    public void testBigMessageWriteOperation() {
+    public void test2MBWriteOperation() {
         String json = TestUtils.generate2MBmessage();
+        PravegaConnector connector = new PravegaConnector();
+        ConnectorTester tester = new ConnectorTester(connector);
+
+        Map<String, Object> connProps = getWriteConnectionProperties();
+
+        Map<String, Object> opProps = new HashMap<>();
+        opProps.put(Constants.ROUTING_KEY_TYPE_PROPERTY, WriterConfig.RoutingKeyType.Fixed.toString());
+        opProps.put(Constants.ROUTING_KEY_PROPERTY, FIXED_ROUTING_KEY);
+        tester.setOperationContext(OperationType.CREATE, connProps, opProps, null, null);
+
+        // prep test message
+        List<InputStream> inputs = new ArrayList<>();
+        inputs.add(new ByteArrayInputStream(json.getBytes()));
+
+        // send the test message through the connector
+        List<SimpleOperationResult> actual = tester.executeCreateOperation(inputs);
+        assertEquals("OK", actual.get(0).getStatusCode());
+
+        // read from stream and verify event data
+        EventRead<String> event;
+        do {
+            event = pravegaWriteOperationReader.readNextEvent(READ_TIMEOUT);
+        } while (event.isCheckpoint());
+
+        // validate message data
+        assertNotNull(event.getEvent());
+        assertEquals(json, event.getEvent());
+    }
+
+
+    @Test
+    public void testBigMessageWriteOperation() {
+        String json = TestUtils.generate9MBmessage();
         PravegaConnector connector = new PravegaConnector();
         ConnectorTester tester = new ConnectorTester(connector);
 

@@ -11,7 +11,8 @@
 package io.pravega.connector.boomi;
 
 import com.boomi.connector.api.*;
-import com.boomi.connector.util.SizeLimitedUpdateOperation;
+import com.boomi.connector.util.BaseUpdateOperation;
+import com.boomi.util.ByteUnit;
 import com.jayway.jsonpath.JsonPath;
 import io.pravega.client.EventStreamClientFactory;
 import io.pravega.client.stream.EventStreamWriter;
@@ -31,8 +32,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class PravegaWriteOperation extends SizeLimitedUpdateOperation {
+public class PravegaWriteOperation extends BaseUpdateOperation {
     private WriterConfig writerConfig;
+
+    //Pravega(0.7.0) Supports upto 8MB eventsize
+    private static final long PRAVEGA_MAX_EVENTSIZE = 8 * ByteUnit.MB.getByteUnitSize();
+    private static final String STATUS_MESSAGE = "size limit exceeded";
+    private static final String STATUS_CODE = "413";
 
     PravegaWriteOperation(OperationContext context, String keycloakJSONPath) {
         super(context);
@@ -52,7 +58,7 @@ public class PravegaWriteOperation extends SizeLimitedUpdateOperation {
      * after every execution (we have no other choice).
      */
     @Override
-    protected void executeSizeLimitedUpdate(UpdateRequest request, OperationResponse response) {
+    protected void executeUpdate(UpdateRequest request, OperationResponse response) {
         Logger logger = response.getLogger();
 
         try (EventStreamClientFactory clientFactory = PravegaUtil.createClientFactory(writerConfig);
@@ -68,7 +74,14 @@ public class PravegaWriteOperation extends SizeLimitedUpdateOperation {
 
                     // write the event
                     // note: this is an async call, so we will collect the futures and process the results later
-                    if (routingKey != null && routingKey.length() > 0) {
+                    if (input.getDataSize() > PRAVEGA_MAX_EVENTSIZE) {
+                        try {
+                            response.addResult(input, OperationStatus.APPLICATION_ERROR, STATUS_CODE, STATUS_MESSAGE, null);
+                        } catch (ResultException e) {
+                            logger.log(Level.SEVERE, String.format("Error writing result %s", ((ObjectData) e.getValue()).getTrackingId()), e.getCause());
+                            ResponseUtil.addExceptionFailure(response, (ObjectData) e.getValue(), e.getCause());
+                        }
+                    } else if (routingKey != null && routingKey.length() > 0) {
                         futures.add(new ResultFuture<>(writer.writeEvent(routingKey, message), input));
                     } else {
                         futures.add(new ResultFuture<>(writer.writeEvent(message), input));

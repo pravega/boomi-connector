@@ -18,7 +18,11 @@ import static io.pravega.auth.AuthConstants.BEARER;
 public class BoomiPravegaKeycloakCredentials implements Credentials {
 
     private transient KeycloakAuthzClient kc = null;
-    private String keycloakJSONPath;
+    private String keycloakJSONPath = null;
+
+    public BoomiPravegaKeycloakCredentials() {
+        init();
+    }
 
     public BoomiPravegaKeycloakCredentials(String path) {
         this.keycloakJSONPath = path;
@@ -40,7 +44,11 @@ public class BoomiPravegaKeycloakCredentials implements Credentials {
         if (kc == null) {
             synchronized (this) {
                 if (kc == null) {
-                    kc = KeycloakAuthzClient.builder().withConfigFile(this.keycloakJSONPath).build();
+                    if (keycloakJSONPath == null) {
+                        KeycloakAuthzClient.builder().build();
+                    } else {
+                        kc = KeycloakAuthzClient.builder().withConfigFile(this.keycloakJSONPath).build();
+                    }
                 }
             }
         }
