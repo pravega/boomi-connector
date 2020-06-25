@@ -22,7 +22,7 @@
         <helpText>Specifies the type of authentication to use with Pravega.  "None" means Pravega does not have any authentication
             enabled (only suitable for development environments).  "Basic" means Pravega is running in an independent cluster and has
             basic auth enabled - this option requires you specify a valid user name and password.  "Keycloak" means Pravega is integrated
-            with Keycloak (i.e. inside Streaming Data Platform) - this option requires you specify a valid Keycloak JSON Web Token (JWT), which
+            with Keycloak (i.e. inside Streaming Data Platform) - this option requires you specify a valid Keycloak OIDC JSON installation file, which
             is obtained from the Keycloak server.
         </helpText>
         <allowedValue>
@@ -32,7 +32,7 @@
             <value>Basic</value>
         </allowedValue>
         <allowedValue>
-            <value>keycloak OIDC Json Installation</value>
+            <value>keycloak</value>
         </allowedValue>
     </field>
 

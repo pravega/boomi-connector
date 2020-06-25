@@ -236,7 +236,6 @@ public class PravegaOperationTest {
         assertEquals(json, event.getEvent());
     }
 
-
     @Test
     public void testBigMessageWriteOperation() {
         String json = TestUtils.generate9MBmessage();

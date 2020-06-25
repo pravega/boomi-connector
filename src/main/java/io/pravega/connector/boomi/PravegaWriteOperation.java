@@ -35,7 +35,7 @@ import java.util.logging.Logger;
 public class PravegaWriteOperation extends BaseUpdateOperation {
     private WriterConfig writerConfig;
 
-    //Pravega(0.7.0) Supports upto 8MB eventsize
+    // Pravega (as of 0.7.0) supports event sizes up to 8MB
     private static final long PRAVEGA_MAX_EVENTSIZE = 8 * ByteUnit.MB.getByteUnitSize();
     private static final String STATUS_MESSAGE = "size limit exceeded";
     private static final String STATUS_CODE = "413";
@@ -70,13 +70,14 @@ public class PravegaWriteOperation extends BaseUpdateOperation {
                     String routingKey = getRoutingKey(message, logger);
 
                     logger.log(Level.FINE, String.format("Writing message size: '%d' with routing-key: '%s' to stream '%s / %s'",
-                            input.getDataSize(), routingKey, writerConfig.getScope(), writerConfig.getStream()));
+                            this.getDataSize(input), routingKey, writerConfig.getScope(), writerConfig.getStream()));
 
                     // write the event
                     // note: this is an async call, so we will collect the futures and process the results later
-                    if (input.getDataSize() > PRAVEGA_MAX_EVENTSIZE) {
+                    if (this.getDataSize(input) > PRAVEGA_MAX_EVENTSIZE) {
                         try {
                             response.addResult(input, OperationStatus.APPLICATION_ERROR, STATUS_CODE, STATUS_MESSAGE, null);
+                            logger.log(Level.SEVERE, String.format("Input data size lime exceeded, input data size is:  " + this.getDataSize(input)));
                         } catch (ResultException e) {
                             logger.log(Level.SEVERE, String.format("Error writing result %s", ((ObjectData) e.getValue()).getTrackingId()), e.getCause());
                             ResponseUtil.addExceptionFailure(response, (ObjectData) e.getValue(), e.getCause());
@@ -143,6 +144,15 @@ public class PravegaWriteOperation extends BaseUpdateOperation {
                 baos.write(buffer, 0, c);
             }
             return new String(baos.toByteArray(), StandardCharsets.UTF_8);
+        }
+    }
+
+    private long getDataSize(ObjectData data) {
+        try {
+            return data.getDataSize();
+        } catch (IOException var3) {
+            data.getLogger().log(Level.WARNING, "unknown size: " + data.getUniqueId(), var3);
+            return Long.MAX_VALUE;
         }
     }
 
