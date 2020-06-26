@@ -68,20 +68,15 @@ public class PravegaWriteOperation extends BaseUpdateOperation {
                 try {
                     String message = inputStreamToUtf8String(input.getData());
                     String routingKey = getRoutingKey(message, logger);
-                    long dataSize = this.getDataSize(input);
+                    long dataSize = getDataSize(input);
                     logger.log(Level.FINE, String.format("Writing message size: '%d' with routing-key: '%s' to stream '%s / %s'",
                             dataSize, routingKey, writerConfig.getScope(), writerConfig.getStream()));
 
                     // write the event
                     // note: this is an async call, so we will collect the futures and process the results later
                     if (dataSize > PRAVEGA_MAX_EVENTSIZE) {
-                        try {
-                            response.addResult(input, OperationStatus.APPLICATION_ERROR, STATUS_CODE, STATUS_MESSAGE, null);
-                            logger.log(Level.SEVERE, String.format("Input data size lime exceeded, input data size is:  " + dataSize));
-                        } catch (ResultException e) {
-                            logger.log(Level.SEVERE, String.format("Error writing result %s", ((ObjectData) e.getValue()).getTrackingId()), e.getCause());
-                            ResponseUtil.addExceptionFailure(response, (ObjectData) e.getValue(), e.getCause());
-                        }
+                        logger.log(Level.SEVERE, String.format("Input data size lime exceeded, input data size is:  " + dataSize));
+                        response.addResult(input, OperationStatus.APPLICATION_ERROR, STATUS_CODE, STATUS_MESSAGE, null);
                     } else if (routingKey != null && routingKey.length() > 0) {
                         futures.add(new ResultFuture<>(writer.writeEvent(routingKey, message), input));
                     } else {
