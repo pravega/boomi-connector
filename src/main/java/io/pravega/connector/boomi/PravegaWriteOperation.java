@@ -68,16 +68,16 @@ public class PravegaWriteOperation extends BaseUpdateOperation {
                 try {
                     String message = inputStreamToUtf8String(input.getData());
                     String routingKey = getRoutingKey(message, logger);
-
+                    long dataSize = this.getDataSize(input);
                     logger.log(Level.FINE, String.format("Writing message size: '%d' with routing-key: '%s' to stream '%s / %s'",
-                            this.getDataSize(input), routingKey, writerConfig.getScope(), writerConfig.getStream()));
+                            dataSize, routingKey, writerConfig.getScope(), writerConfig.getStream()));
 
                     // write the event
                     // note: this is an async call, so we will collect the futures and process the results later
-                    if (this.getDataSize(input) > PRAVEGA_MAX_EVENTSIZE) {
+                    if (dataSize > PRAVEGA_MAX_EVENTSIZE) {
                         try {
                             response.addResult(input, OperationStatus.APPLICATION_ERROR, STATUS_CODE, STATUS_MESSAGE, null);
-                            logger.log(Level.SEVERE, String.format("Input data size lime exceeded, input data size is:  " + this.getDataSize(input)));
+                            logger.log(Level.SEVERE, String.format("Input data size lime exceeded, input data size is:  " + dataSize));
                         } catch (ResultException e) {
                             logger.log(Level.SEVERE, String.format("Error writing result %s", ((ObjectData) e.getValue()).getTrackingId()), e.getCause());
                             ResponseUtil.addExceptionFailure(response, (ObjectData) e.getValue(), e.getCause());
@@ -151,8 +151,8 @@ public class PravegaWriteOperation extends BaseUpdateOperation {
         try {
             return data.getDataSize();
         } catch (IOException var3) {
-            data.getLogger().log(Level.WARNING, "unknown size: " + data.getUniqueId(), var3);
-            return Long.MAX_VALUE;
+            data.getLogger().log(Level.WARNING, "unknown event size: " + data.getUniqueId(), var3);
+            return -1;
         }
     }
 
