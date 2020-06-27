@@ -75,7 +75,7 @@ public class PravegaWriteOperation extends BaseUpdateOperation {
                     // write the event
                     // note: this is an async call, so we will collect the futures and process the results later
                     if (dataSize > PRAVEGA_MAX_EVENTSIZE) {
-                        logger.log(Level.SEVERE, String.format("Input data size lime exceeded, input data size is:  " + dataSize));
+                        logger.log(Level.WARNING, String.format("Input data size limit (%d) exceeded, input size is: %d", PRAVEGA_MAX_EVENTSIZE, dataSize));
                         response.addResult(input, OperationStatus.APPLICATION_ERROR, STATUS_CODE, STATUS_MESSAGE, null);
                     } else if (routingKey != null && routingKey.length() > 0) {
                         futures.add(new ResultFuture<>(writer.writeEvent(routingKey, message), input));
@@ -145,8 +145,8 @@ public class PravegaWriteOperation extends BaseUpdateOperation {
     private long getDataSize(ObjectData data) {
         try {
             return data.getDataSize();
-        } catch (IOException var3) {
-            data.getLogger().log(Level.WARNING, "unknown event size: " + data.getUniqueId(), var3);
+        } catch (IOException e) {
+            data.getLogger().log(Level.WARNING, "unable to get size for document ID " + data.getUniqueId() + ", returning -1 as size", e);
             return -1;
         }
     }
