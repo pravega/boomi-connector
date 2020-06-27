@@ -44,7 +44,7 @@
     </field>
 
     <field id="keycloakJson" label="Keycloak JWT" type="password">
-        <helpText> A valid Keycloak JSON Web Token (JWT), including Keycloak endpoint and credentials.  This is obtained from the Keycloak server</helpText>
+        <helpText>A valid Keycloak OIDC JSON installation file, including Keycloak endpoint and credentials.  This is obtained from the Keycloak server</helpText>
     </field>
     <field id="interval" label="Listener Polling Interval" type="integer">
         <helpText>The Listen operation uses a polling schedule.  This parameter specifies the interval between each poll.  For example, specifying 1 minute means that any Listen operations from this connector would poll for new events every.</helpText>
