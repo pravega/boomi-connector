@@ -28,7 +28,18 @@ import java.util.UUID;
 final class TestUtils {
     private static final Logger log = LoggerFactory.getLogger(TestUtils.class);
 
-    static final String PRAVEGA_CONTROLLER_URI = "tcp://127.0.0.1:9090";
+    private static final String SDP_ENDPOINT_KEY = "sdp_endpoint";
+    private static final String SDP_AUTH_TYPE_KEY = "sdp_auth_type";
+    private static final String LOCAL_PRAVEGA_AUTH_TYPE_KEY = "local_pravega_auth_type";
+    private static final String INTERVAL_KEY = "interval";
+    private static final String INTERVAL_UNIT_KEY = "interval_unit";
+
+    static String PRAVEGA_CONTROLLER_URI = "tcp://127.0.0.1:9090";
+    static String PRAVEGA_NAUT_CONTROLLER_URI = "";
+    static String SDP_AUTH_TYPE = "";
+    static String LOCAL_PRAVEGA_AUTH_TYPE = "";
+    static long INTERVAL;
+    static String INTERVAL_UNIT = "";
 
     // Caller must close
     static InProcPravegaCluster startStandalone() throws Exception {
@@ -90,6 +101,13 @@ final class TestUtils {
         }
     }
 
+    static String generate9MBmessage() {
+        char[] chars = new char[9000000];
+        Arrays.fill(chars, 'a');
+        String randomMessage = new String(chars);
+        return "{\"name\":\"foo\",\"message\":\"" + randomMessage + "\"}";
+    }
+
     static String generate2MBmessage() {
         char[] chars = new char[2000000];
         Arrays.fill(chars, 'a');
@@ -112,5 +130,14 @@ final class TestUtils {
     }
 
     private TestUtils() {
+    }
+
+    public static void loadPropertiesFile() throws Exception {
+        Properties props = TestConfig.getProperties();
+        PRAVEGA_NAUT_CONTROLLER_URI = TestConfig.getPropertyNotEmpty(props, SDP_ENDPOINT_KEY);
+        SDP_AUTH_TYPE = TestConfig.getPropertyNotEmpty(props, SDP_AUTH_TYPE_KEY);
+        LOCAL_PRAVEGA_AUTH_TYPE = TestConfig.getPropertyNotEmpty(props, LOCAL_PRAVEGA_AUTH_TYPE_KEY);
+        INTERVAL = Long.parseLong(TestConfig.getPropertyNotEmpty(props, INTERVAL_KEY));
+        INTERVAL_UNIT = TestConfig.getPropertyNotEmpty(props, INTERVAL_UNIT_KEY);
     }
 }

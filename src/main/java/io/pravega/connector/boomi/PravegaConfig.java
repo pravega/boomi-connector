@@ -22,9 +22,10 @@ public class PravegaConfig {
     private URI controllerUri;
     private String scope;
     private String stream;
-    private boolean enableAuth;
+    private AuthenticationType authMethod;
     private String userName;
     private String password;
+    private String keycloakJSONPath;
     private boolean createScope;
     private long interval;
     private TimeUnit unit;
@@ -32,7 +33,7 @@ public class PravegaConfig {
     public PravegaConfig() {
     }
 
-    public PravegaConfig(ConnectorContext context) {
+    public PravegaConfig(ConnectorContext context, String keycloakJsonPath) {
         Map<String, Object> props = context.getConnectionProperties();
 
         // URI, scope, and stream should always be set
@@ -50,9 +51,12 @@ public class PravegaConfig {
         setScope(scope);
         setStream(stream);
         setCreateScope((boolean) getOrDefault(props, Constants.CREATE_SCOPE_PROPERTY, true));
-        setEnableAuth((boolean) getOrDefault(props, Constants.ENABLE_AUTH_PROPERTY, false));
+        String auth = (String) props.get(Constants.AUTH_TYPE_PROPERTY);
+        if (auth != null)
+            setAuth(AuthenticationType.valueOf(auth));
         setUserName((String) props.get(Constants.USER_NAME_PROPERTY));
         setPassword((String) props.get(Constants.PASSWORD_PROPERTY));
+        setKeycloakJSONPath(keycloakJsonPath);
         setInterval((long) props.get(Constants.INTERVAL));
         setUnit((String) props.get(Constants.TIME_UNIT));
     }
@@ -88,12 +92,12 @@ public class PravegaConfig {
         this.stream = stream;
     }
 
-    public boolean isEnableAuth() {
-        return enableAuth;
+    public AuthenticationType getAuth() {
+        return authMethod;
     }
 
-    public void setEnableAuth(boolean enableAuth) {
-        this.enableAuth = enableAuth;
+    public void setAuth(AuthenticationType auth) {
+        this.authMethod = auth;
     }
 
     public String getUserName() {
@@ -110,6 +114,14 @@ public class PravegaConfig {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getKeycloakJSONPath() {
+        return keycloakJSONPath;
+    }
+
+    public void setKeycloakJSONPath(String keycloakJSONPath) {
+        this.keycloakJSONPath = keycloakJSONPath;
     }
 
     public boolean isCreateScope() {
@@ -150,4 +162,6 @@ public class PravegaConfig {
     public int hashCode() {
         return Objects.hash(controllerUri, scope, stream);
     }
+
+    enum AuthenticationType {None, Basic, Keycloak}
 }

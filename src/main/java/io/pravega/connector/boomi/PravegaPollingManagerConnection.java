@@ -27,9 +27,9 @@ public class PravegaPollingManagerConnection extends BaseConnection<ConnectorCon
     /**
      * Creates a new instance using the provided connector context
      */
-    public PravegaPollingManagerConnection(ConnectorContext context) {
+    public PravegaPollingManagerConnection(ConnectorContext context, String keycloakJSONPath) {
         super(context);
-        pravegaConfig = new PravegaConfig(context);
+        pravegaConfig = new PravegaConfig(context, keycloakJSONPath);
     }
 
     /**

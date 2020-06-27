@@ -11,7 +11,8 @@
 package io.pravega.connector.boomi;
 
 import com.boomi.connector.api.*;
-import com.boomi.connector.util.SizeLimitedUpdateOperation;
+import com.boomi.connector.util.BaseUpdateOperation;
+import com.boomi.util.ByteUnit;
 import com.jayway.jsonpath.JsonPath;
 import io.pravega.client.EventStreamClientFactory;
 import io.pravega.client.stream.EventStreamWriter;
@@ -31,12 +32,17 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class PravegaWriteOperation extends SizeLimitedUpdateOperation {
+public class PravegaWriteOperation extends BaseUpdateOperation {
     private WriterConfig writerConfig;
 
-    PravegaWriteOperation(OperationContext context) {
+    // Pravega (as of 0.7.0) supports event sizes up to 8MB
+    private static final long PRAVEGA_MAX_EVENTSIZE = 8 * ByteUnit.MB.getByteUnitSize();
+    private static final String STATUS_MESSAGE = "size limit exceeded";
+    private static final String STATUS_CODE = "413";
+
+    PravegaWriteOperation(OperationContext context, String keycloakJSONPath) {
         super(context);
-        writerConfig = new WriterConfig(context);
+        writerConfig = new WriterConfig(context, keycloakJSONPath);
     }
 
     // caller must close
@@ -52,7 +58,7 @@ public class PravegaWriteOperation extends SizeLimitedUpdateOperation {
      * after every execution (we have no other choice).
      */
     @Override
-    protected void executeSizeLimitedUpdate(UpdateRequest request, OperationResponse response) {
+    protected void executeUpdate(UpdateRequest request, OperationResponse response) {
         Logger logger = response.getLogger();
 
         try (EventStreamClientFactory clientFactory = PravegaUtil.createClientFactory(writerConfig);
@@ -62,13 +68,16 @@ public class PravegaWriteOperation extends SizeLimitedUpdateOperation {
                 try {
                     String message = inputStreamToUtf8String(input.getData());
                     String routingKey = getRoutingKey(message, logger);
-
+                    long dataSize = getDataSize(input);
                     logger.log(Level.FINE, String.format("Writing message size: '%d' with routing-key: '%s' to stream '%s / %s'",
-                            input.getDataSize(), routingKey, writerConfig.getScope(), writerConfig.getStream()));
+                            dataSize, routingKey, writerConfig.getScope(), writerConfig.getStream()));
 
                     // write the event
                     // note: this is an async call, so we will collect the futures and process the results later
-                    if (routingKey != null && routingKey.length() > 0) {
+                    if (dataSize > PRAVEGA_MAX_EVENTSIZE) {
+                        logger.log(Level.WARNING, String.format("Input data size limit (%d) exceeded, input size is: %d", PRAVEGA_MAX_EVENTSIZE, dataSize));
+                        response.addResult(input, OperationStatus.APPLICATION_ERROR, STATUS_CODE, STATUS_MESSAGE, null);
+                    } else if (routingKey != null && routingKey.length() > 0) {
                         futures.add(new ResultFuture<>(writer.writeEvent(routingKey, message), input));
                     } else {
                         futures.add(new ResultFuture<>(writer.writeEvent(message), input));
@@ -130,6 +139,15 @@ public class PravegaWriteOperation extends SizeLimitedUpdateOperation {
                 baos.write(buffer, 0, c);
             }
             return new String(baos.toByteArray(), StandardCharsets.UTF_8);
+        }
+    }
+
+    private long getDataSize(ObjectData data) {
+        try {
+            return data.getDataSize();
+        } catch (IOException e) {
+            data.getLogger().log(Level.WARNING, "unable to get size for document ID " + data.getUniqueId() + ", returning -1 as size", e);
+            return -1;
         }
     }
 

@@ -73,6 +73,7 @@ public class PravegaOperationTest {
 
     @BeforeAll
     public static void classSetup() throws Exception {
+        TestUtils.loadPropertiesFile();
         localPravega = TestUtils.startStandalone();
 
         // initialize Pravega client
@@ -117,18 +118,35 @@ public class PravegaOperationTest {
         if (localPravega != null) localPravega.close();
     }
 
+    private Map<String, Object> getWriteConnectionProperties() {
+        Map<String, Object> connProps = new HashMap<>();
+        connProps.put(Constants.CONTROLLER_URI_PROPERTY, TestUtils.PRAVEGA_CONTROLLER_URI);
+        connProps.put(Constants.SCOPE_PROPERTY, PRAVEGA_SCOPE);
+        connProps.put(Constants.STREAM_PROPERTY, CREATE_OPERATION_STREAM);
+        connProps.put(Constants.AUTH_TYPE_PROPERTY, TestUtils.LOCAL_PRAVEGA_AUTH_TYPE);
+        connProps.put(Constants.INTERVAL, TestUtils.INTERVAL);
+        connProps.put(Constants.TIME_UNIT, TestUtils.INTERVAL_UNIT);
+        return connProps;
+    }
+
+    private Map<String, Object> getReadConnectionProperties() {
+        Map<String, Object> connProps = new HashMap<>();
+        connProps.put(Constants.CONTROLLER_URI_PROPERTY, TestUtils.PRAVEGA_CONTROLLER_URI);
+        connProps.put(Constants.SCOPE_PROPERTY, PRAVEGA_SCOPE);
+        connProps.put(Constants.STREAM_PROPERTY, QUERY_OPERATION_STREAM);
+        connProps.put(Constants.AUTH_TYPE_PROPERTY, TestUtils.LOCAL_PRAVEGA_AUTH_TYPE);
+        connProps.put(Constants.INTERVAL, TestUtils.INTERVAL);
+        connProps.put(Constants.TIME_UNIT, TestUtils.INTERVAL_UNIT);
+        return connProps;
+    }
+
     @Test
     public void testWriteWithJsonRoutingKey() {
         String json = TestUtils.generateJsonMessage();
         PravegaConnector connector = new PravegaConnector();
         ConnectorTester tester = new ConnectorTester(connector);
 
-        Map<String, Object> connProps = new HashMap<>();
-        connProps.put(Constants.CONTROLLER_URI_PROPERTY, TestUtils.PRAVEGA_CONTROLLER_URI);
-        connProps.put(Constants.SCOPE_PROPERTY, PRAVEGA_SCOPE);
-        connProps.put(Constants.STREAM_PROPERTY, CREATE_OPERATION_STREAM);
-        connProps.put(Constants.INTERVAL, INTERVAL);
-        connProps.put(Constants.TIME_UNIT, UNIT);
+        Map<String, Object> connProps = getWriteConnectionProperties();
 
         Map<String, Object> opProps = new HashMap<>();
         opProps.put(Constants.ROUTING_KEY_TYPE_PROPERTY, WriterConfig.RoutingKeyType.JsonReference.toString());
@@ -160,12 +178,39 @@ public class PravegaOperationTest {
         PravegaConnector connector = new PravegaConnector();
         ConnectorTester tester = new ConnectorTester(connector);
 
-        Map<String, Object> connProps = new HashMap<>();
-        connProps.put(Constants.CONTROLLER_URI_PROPERTY, TestUtils.PRAVEGA_CONTROLLER_URI);
-        connProps.put(Constants.SCOPE_PROPERTY, PRAVEGA_SCOPE);
-        connProps.put(Constants.STREAM_PROPERTY, CREATE_OPERATION_STREAM);
-        connProps.put(Constants.INTERVAL, INTERVAL);
-        connProps.put(Constants.TIME_UNIT, UNIT);
+        Map<String, Object> connProps = getWriteConnectionProperties();
+
+        Map<String, Object> opProps = new HashMap<>();
+        opProps.put(Constants.ROUTING_KEY_TYPE_PROPERTY, WriterConfig.RoutingKeyType.Fixed.toString());
+        opProps.put(Constants.ROUTING_KEY_PROPERTY, FIXED_ROUTING_KEY);
+        tester.setOperationContext(OperationType.CREATE, connProps, opProps, null, null);
+
+        // prep test message
+        List<InputStream> inputs = new ArrayList<>();
+        inputs.add(new ByteArrayInputStream(json.getBytes()));
+
+        // send the test message through the connector
+        List<SimpleOperationResult> actual = tester.executeCreateOperation(inputs);
+        assertEquals("OK", actual.get(0).getStatusCode());
+
+        // read from stream and verify event data
+        EventRead<String> event;
+        do {
+            event = pravegaWriteOperationReader.readNextEvent(READ_TIMEOUT);
+        } while (event.isCheckpoint());
+
+        // validate message data
+        assertNotNull(event.getEvent());
+        assertEquals(json, event.getEvent());
+    }
+
+    @Test
+    public void test2MBWriteOperation() {
+        String json = TestUtils.generate2MBmessage();
+        PravegaConnector connector = new PravegaConnector();
+        ConnectorTester tester = new ConnectorTester(connector);
+
+        Map<String, Object> connProps = getWriteConnectionProperties();
 
         Map<String, Object> opProps = new HashMap<>();
         opProps.put(Constants.ROUTING_KEY_TYPE_PROPERTY, WriterConfig.RoutingKeyType.Fixed.toString());
@@ -193,16 +238,11 @@ public class PravegaOperationTest {
 
     @Test
     public void testBigMessageWriteOperation() {
-        String json = TestUtils.generate2MBmessage();
+        String json = TestUtils.generate9MBmessage();
         PravegaConnector connector = new PravegaConnector();
         ConnectorTester tester = new ConnectorTester(connector);
 
-        Map<String, Object> connProps = new HashMap<>();
-        connProps.put(Constants.CONTROLLER_URI_PROPERTY, TestUtils.PRAVEGA_CONTROLLER_URI);
-        connProps.put(Constants.SCOPE_PROPERTY, PRAVEGA_SCOPE);
-        connProps.put(Constants.STREAM_PROPERTY, CREATE_OPERATION_STREAM);
-        connProps.put(Constants.INTERVAL, INTERVAL);
-        connProps.put(Constants.TIME_UNIT, UNIT);
+        Map<String, Object> connProps = getWriteConnectionProperties();
 
         Map<String, Object> opProps = new HashMap<>();
         opProps.put(Constants.ROUTING_KEY_TYPE_PROPERTY, WriterConfig.RoutingKeyType.Fixed.toString());
@@ -232,12 +272,7 @@ public class PravegaOperationTest {
         PravegaConnector connector = new PravegaConnector();
         ConnectorTester tester = new ConnectorTester(connector);
 
-        Map<String, Object> connProps = new HashMap<>();
-        connProps.put(Constants.CONTROLLER_URI_PROPERTY, TestUtils.PRAVEGA_CONTROLLER_URI);
-        connProps.put(Constants.SCOPE_PROPERTY, PRAVEGA_SCOPE);
-        connProps.put(Constants.STREAM_PROPERTY, CREATE_OPERATION_STREAM);
-        connProps.put(Constants.INTERVAL, INTERVAL);
-        connProps.put(Constants.TIME_UNIT, UNIT);
+        Map<String, Object> connProps = getWriteConnectionProperties();
 
         Map<String, Object> opProps = new HashMap<>();
         tester.setOperationContext(OperationType.CREATE, connProps, opProps, null, null);
@@ -267,12 +302,7 @@ public class PravegaOperationTest {
         PravegaConnector connector = new PravegaConnector();
         ConnectorTester tester = new ConnectorTester(connector);
 
-        Map<String, Object> connProps = new HashMap<>();
-        connProps.put(Constants.CONTROLLER_URI_PROPERTY, TestUtils.PRAVEGA_CONTROLLER_URI);
-        connProps.put(Constants.SCOPE_PROPERTY, PRAVEGA_SCOPE);
-        connProps.put(Constants.STREAM_PROPERTY, CREATE_OPERATION_STREAM);
-        connProps.put(Constants.INTERVAL, INTERVAL);
-        connProps.put(Constants.TIME_UNIT, UNIT);
+        Map<String, Object> connProps = getWriteConnectionProperties();
 
         Map<String, Object> opProps = new HashMap<>();
         tester.setOperationContext(OperationType.CREATE, connProps, opProps, null, null);
@@ -308,12 +338,7 @@ public class PravegaOperationTest {
         PravegaConnector connector = new PravegaConnector();
         ConnectorTester tester = new ConnectorTester(connector);
 
-        Map<String, Object> connProps = new HashMap<>();
-        connProps.put(Constants.CONTROLLER_URI_PROPERTY, TestUtils.PRAVEGA_CONTROLLER_URI);
-        connProps.put(Constants.SCOPE_PROPERTY, PRAVEGA_SCOPE);
-        connProps.put(Constants.STREAM_PROPERTY, QUERY_OPERATION_STREAM);
-        connProps.put(Constants.INTERVAL, INTERVAL);
-        connProps.put(Constants.TIME_UNIT, UNIT);
+        Map<String, Object> connProps = getReadConnectionProperties();
 
         Map<String, Object> opProps = new HashMap<>();
         opProps.put(Constants.READER_GROUP_PROPERTY, QUERY_OPERATION_READER_GROUP);
@@ -343,12 +368,7 @@ public class PravegaOperationTest {
         PravegaConnector connector = new PravegaConnector();
         ConnectorTester tester = new ConnectorTester(connector);
 
-        Map<String, Object> connProps = new HashMap<>();
-        connProps.put(Constants.CONTROLLER_URI_PROPERTY, TestUtils.PRAVEGA_CONTROLLER_URI);
-        connProps.put(Constants.SCOPE_PROPERTY, PRAVEGA_SCOPE);
-        connProps.put(Constants.STREAM_PROPERTY, QUERY_OPERATION_STREAM);
-        connProps.put(Constants.INTERVAL, INTERVAL);
-        connProps.put(Constants.TIME_UNIT, UNIT);
+        Map<String, Object> connProps = getReadConnectionProperties();
 
         Map<String, Object> opProps = new HashMap<>();
         opProps.put(Constants.READER_GROUP_PROPERTY, QUERY_OPERATION_READER_GROUP);
@@ -395,11 +415,11 @@ public class PravegaOperationTest {
 
         Map<String, Object> connProps = new HashMap<>();
         connProps.put(Constants.CONTROLLER_URI_PROPERTY, TestUtils.PRAVEGA_CONTROLLER_URI);
+        connProps.put(Constants.AUTH_TYPE_PROPERTY, TestUtils.LOCAL_PRAVEGA_AUTH_TYPE);
         connProps.put(Constants.SCOPE_PROPERTY, PRAVEGA_SCOPE);
         connProps.put(Constants.STREAM_PROPERTY, stream);
-        connProps.put(Constants.INTERVAL, INTERVAL);
-        connProps.put(Constants.TIME_UNIT, UNIT);
-
+        connProps.put(Constants.INTERVAL, TestUtils.INTERVAL);
+        connProps.put(Constants.TIME_UNIT, TestUtils.INTERVAL_UNIT);
 
         Map<String, Object> opProps = new HashMap<>();
         opProps.put(Constants.READER_GROUP_PROPERTY, stream + "-readers");
@@ -448,10 +468,11 @@ public class PravegaOperationTest {
 
         Map<String, Object> connProps = new HashMap<>();
         connProps.put(Constants.CONTROLLER_URI_PROPERTY, TestUtils.PRAVEGA_CONTROLLER_URI);
+        connProps.put(Constants.AUTH_TYPE_PROPERTY, TestUtils.LOCAL_PRAVEGA_AUTH_TYPE);
         connProps.put(Constants.SCOPE_PROPERTY, PRAVEGA_SCOPE);
         connProps.put(Constants.STREAM_PROPERTY, stream);
-        connProps.put(Constants.INTERVAL, INTERVAL);
-        connProps.put(Constants.TIME_UNIT, UNIT);
+        connProps.put(Constants.INTERVAL, TestUtils.INTERVAL);
+        connProps.put(Constants.TIME_UNIT, TestUtils.INTERVAL_UNIT);
 
         Map<String, Object> opProps = new HashMap<>();
         opProps.put(Constants.READER_GROUP_PROPERTY, stream + "-readers");
@@ -485,17 +506,17 @@ public class PravegaOperationTest {
         connProps.put(Constants.CONTROLLER_URI_PROPERTY, TestUtils.PRAVEGA_CONTROLLER_URI);
         connProps.put(Constants.SCOPE_PROPERTY, PRAVEGA_SCOPE);
         connProps.put(Constants.STREAM_PROPERTY, POLLING_LISTENER_STREAM);
-        connProps.put(Constants.INTERVAL, INTERVAL);
-        connProps.put(Constants.TIME_UNIT, UNIT);
+        connProps.put(Constants.INTERVAL, TestUtils.INTERVAL);
+        connProps.put(Constants.TIME_UNIT, TestUtils.INTERVAL_UNIT);
 
         Map<String, Object> opProps = new HashMap<>();
         opProps.put(Constants.READER_GROUP_PROPERTY, POLLING_OPERATION_READER_GROUP);
         opProps.put(Constants.READ_TIMEOUT_PROPERTY, 5000L);
 
         tester.setOperationContext(OperationType.LISTEN, connProps, opProps, null, null);
-        PravegaPollingOperationConnection pravegaPollingOperationConnection = new PravegaPollingOperationConnection(tester.getOperationContext());
+        PravegaPollingOperationConnection pravegaPollingOperationConnection = new PravegaPollingOperationConnection(tester.getOperationContext(), null);
         PravegaPollingOperation pravegaPollingOperation = new PravegaPollingOperation(pravegaPollingOperationConnection);
-        PravegaPollingManagerConnection connection = new PravegaPollingManagerConnection(tester.getOperationContext());
+        PravegaPollingManagerConnection connection = new PravegaPollingManagerConnection(tester.getOperationContext(), null);
         PravegaPollingManager manager = new PravegaPollingManager(connection);
         SimpleListener simpleListener = new SimpleListener();
 
@@ -571,6 +592,7 @@ public class PravegaOperationTest {
         }
 
         public String getNextDocument() {
+
             if (linkedQueue.size() > 0)
                 return linkedQueue.remove();
             else return null;
