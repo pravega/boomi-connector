@@ -17,6 +17,7 @@ Here we start a Pravega stand-alone in 9090 port. We provide a scope, stream nam
 
 ![](SDP_connection.png)
 Here we start a SDP Pravega  in 9090 port. We provide a scope, stream name and uncheck the option to create this scope. We provide the Keycloak OIDC JSON installation file content. We also provide Listener polling interval and time unit.
+
 **Create a Write Operation**
 
 Write is an outbound action to write streaming data in Pravega. Here is an example to create a write operation. We need to specify which routing key type we will use. &quot;Fixed&quot; means to use the literal value of the Routing Key. For example if we provide &quot;foo&quot; as a fixed Routing key, then &quot;foo&quot; will be used for every event.&quot;JsonReference&quot; means the event data is JSON and the value will be extracted from the body using the Routing Key as a JSON reference (i.e. a value of &quot;myVar&quot; will look for the &quot;myVar&quot; key in the JSON of each event, and use its corresponding value as the routing key for that event).
