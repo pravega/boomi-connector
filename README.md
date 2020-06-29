@@ -25,7 +25,7 @@ mvn install:install-file -Dfile=connector-sdk-test-util-1.3.2.jar -DgroupId=com.
 ```
 ./gradlew distZip
 ```
-This will build a connector package which you can upload to your Boomi account. Note that this jar only includes the connector classes and no dependencies. This is because there is a 10MB size limitation on connector package uploads in the Boomi platform site and the connector dependencies total more than that (about 13MB). You will need to upload and create a custom library for the connector in your Boomi account before it will function properly.
+This will build a connector package which you can upload to your Boomi account(Only for 1.0.0 release). Note that this jar only includes the connector classes and no dependencies. This is because there is a 10MB size limitation on connector package uploads in the Boomi platform site and the connector dependencies total more than that (about 13MB). You will need to upload and create a custom library for the connector in your Boomi account before it will function properly.
 ```
 ./gradlew dependencyJar
 ```
@@ -85,3 +85,4 @@ If you require a custom connector library to deploy the Pravega connector (read 
 |Github Release Version|Boomi Platform Version|Download Link|Checksums|
 |---:|---:|---|---|
 |1.0.0|2|[boomi-pravega-connector-1.0.0-dependencies.jar](https://132173853047869709.public.ecstestdrive.com/pravega-boomi/boomi-pravega-connector-1.0.0-dependencies.jar)|MD5: c604f50683d8df50c38f480bc8ae0fbd<br>SHA1: 845aa1a9c792553d42a01b59587a45f7d279febe<br>SHA256: 35c4e5e8b4ad0ba66d7b2d52218cd77ebd2208952ab22a69a1245fcc5c7e895b|
+|2.0.1|2|[netty-tcnative-boringssl-static-2.0.17.Final.jar](https://repo1.maven.org/maven2/io/netty/netty-tcnative-boringssl-static/2.0.17.Final/netty-tcnative-boringssl-static-2.0.17.Final.jar)
