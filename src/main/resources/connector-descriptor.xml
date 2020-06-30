@@ -32,7 +32,7 @@
             <value>Basic</value>
         </allowedValue>
         <allowedValue>
-            <value>keycloak</value>
+            <value>Keycloak</value>
         </allowedValue>
     </field>
 
