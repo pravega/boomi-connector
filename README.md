@@ -29,7 +29,7 @@ This will build a connector package which you can upload to your Boomi account. 
 ```
 ./gradlew dependencyJar
 ```
-This will build a fat jar with all of the dependencies required for the connector to work. Upload this as an account library and create a custom library for the Pravega connector and deploy it to any environment that will run the connector.
+This will build (only for version 1.0.0) a fat jar with all of the dependencies required for the connector to work. Upload this as an account library and create a custom library for the Pravega connector and deploy it to any environment that will run the connector.
 
 # Create a Custom Connector
 _Note: once the connector is published, it will be available to everyone in the Boomi Platform, and you can skip to the [Custom Connector Library](#custom-connector-library) section._
@@ -85,3 +85,5 @@ If you require a custom connector library to deploy the Pravega connector (read 
 |Github Release Version|Boomi Platform Version|Download Link|Checksums|
 |---:|---:|---|---|
 |1.0.0|2|[boomi-pravega-connector-1.0.0-dependencies.jar](https://132173853047869709.public.ecstestdrive.com/pravega-boomi/boomi-pravega-connector-1.0.0-dependencies.jar)|MD5: c604f50683d8df50c38f480bc8ae0fbd<br>SHA1: 845aa1a9c792553d42a01b59587a45f7d279febe<br>SHA256: 35c4e5e8b4ad0ba66d7b2d52218cd77ebd2208952ab22a69a1245fcc5c7e895b|
+2.0.0|2| No dependency jar needed.
+|2.1.0|2|[netty-tcnative-boringssl-static-2.0.17.Final.jar](https://repo1.maven.org/maven2/io/netty/netty-tcnative-boringssl-static/2.0.17.Final/netty-tcnative-boringssl-static-2.0.17.Final.jar)
