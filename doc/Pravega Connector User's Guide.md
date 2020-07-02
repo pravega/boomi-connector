@@ -56,9 +56,10 @@ _Connector Options_
 - **Scope** : (Required) The Pravega scope containing the data stream.
 - **Stream Name** : (Required) The name of the data stream to read or write.
 - **Create Scope** : When checked, Pravega scope will be automatically created. Only enable this if Pravega is running in stand-alone mode.
-- **Pravega Authentication Required** : Indicates whether authentication is required for Pravega.
-- **Pravega Username** : Used when Pravega authentication is required.
-- **Pravega Password** : Used when Pravega authentication is required.
+- **Pravega Authentication Type**: Specifies the type of authentication to use with Pravega. "None" means Pravega does not have any authentication enabled (only suitable for development environments). "Basic" means Pravega is running in an independent cluster and has basic auth enabled - this option requires you specify a valid username and password. "Keycloak" means Pravega is integrated with Keycloak (i.e. inside Streaming Data Platform) - this option requires you specify a valid Keycloak OIDC JSON installation file, including Keycloak endpoint and credentials. This is obtained from the Keycloak server.
+- **Basic Username**: An authorized Pravega user. Only used when Authentication Type is set to "Basic".
+- **Basic Password**: The Pravega user's password. Only used when Authentication Type is set to "Basic".
+- **Keycloak OIDC**: A valid Keycloak OIDC JSON installation file, including Keycloak endpoint and credentials. This is obtained from the Keycloak server.
 - **Listener Polling Interval** : The Listen operation uses a polling schedule.  This parameter specifies the interval between each poll.  For example, specifying 1 minute means that any Listen operations from this connector would poll for new events every minute.
 - **Listener Polling Time Unit** : The time unit to use for the Listener Polling Interval.  For example, if the Polling Interval is 1 and the Time Unit is Minute, then the Listen operation would poll for new events every 1 Minute.
 

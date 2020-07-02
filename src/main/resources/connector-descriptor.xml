@@ -32,7 +32,7 @@
             <value>Basic</value>
         </allowedValue>
         <allowedValue>
-            <value>keycloak</value>
+            <value>Keycloak</value>
         </allowedValue>
     </field>
 
@@ -43,7 +43,7 @@
         <helpText>The Pravega user's password.  Only used when Authentication Type is set to "Basic"</helpText>
     </field>
 
-    <field id="keycloakJson" label="Keycloak JWT" type="password">
+    <field id="keycloakJson" label="Keycloak OIDC" type="password">
         <helpText>A valid Keycloak OIDC JSON installation file, including Keycloak endpoint and credentials.  This is obtained from the Keycloak server</helpText>
     </field>
     <field id="interval" label="Listener Polling Interval" type="integer">
