@@ -23,6 +23,11 @@ and time unit. When finished with the settings, we can check the connection usin
 
 In this example, we are running a Pravega stand-alone server locally on port 9090. We provide a scope, stream name and check the option to create this scope (the connector will automatically create the scope if it doesn't already exist) - note that this option cannot be used with SDP. We also provide a listener polling interval and time unit for listener operations that belong to this connector.  The polling interval will be 10 seconds.  This means that any listener operations will read batches of events from the stream every 10 seconds.
 
+![](SDP_connection.png)
+
+In this example, we are running a Pravega in SDP on port 9090. We provide a scope, stream name and uncheck the option to create this scope (the connector will not automatically create the scope if it doesn't already exist. We need to create scope in SDP UI before creating this connection). We also provide a listener polling interval and time unit for listener operations that belong to this connector.  The polling interval will be 10 seconds.  This means that any listener operations will read batches of events from the stream every 10 seconds. For SDP support, we need to provide keycloak as a authentication type and a valid Keycloak OIDC JSON installation file, including Keycloak endpoint and credentials. This is obtained from the Keycloak server.
+
+
 **Create a Write Operation**
 
 Write is an outbound action to write streaming data in Pravega. Here is an example to create a write operation. We need to specify, which routing key type we will use. &quot;Fixed&quot; means to use the literal value of the Routing Key. For example if we provide &quot;foo&quot; as a fixed Routing key, then &quot;foo&quot; will be used for every event. &quot;JsonReference&quot; means the event data is JSON and the value will be extracted from the body using the Routing Key as a JSON reference (i.e. a value of &quot;myVar&quot; will look for the &quot;myVar&quot; key in the JSON of each event, and use its corresponding value as the routing key for that event).
