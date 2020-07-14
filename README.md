@@ -87,3 +87,7 @@ If you require a custom connector library to deploy the Pravega connector (read 
 |1.0.0|2|[boomi-pravega-connector-1.0.0-dependencies.jar](https://132173853047869709.public.ecstestdrive.com/pravega-boomi/boomi-pravega-connector-1.0.0-dependencies.jar)|MD5: c604f50683d8df50c38f480bc8ae0fbd<br>SHA1: 845aa1a9c792553d42a01b59587a45f7d279febe<br>SHA256: 35c4e5e8b4ad0ba66d7b2d52218cd77ebd2208952ab22a69a1245fcc5c7e895b|
 |2.0.0|2| No dependency jar needed.||
 |2.1.0|2|[netty-tcnative-boringssl-static-2.0.17.Final.jar](https://repo1.maven.org/maven2/io/netty/netty-tcnative-boringssl-static/2.0.17.Final/netty-tcnative-boringssl-static-2.0.17.Final.jar)|MD5: 60f88be0fa76bc2d1b89f71725910441<br>SHA1: b1e5acbde8c444c656131238ac6ab9e73f694300<br>SHA256: a71bf392a955bbde8665fc5d44abff8e3fef3dcee74c2821aa5690d7e65bc2be|
+
+# Using the Connector
+
+For more details about how to use the Pravega connector, please refer to the [Boomi documentation](https://help.boomi.com/), and the [User's Guide](doc/Pravega%20Connector%20User's%20Guide.md) and [Getting Started Guide](doc/Pravega%20Connector%20Getting%20Started%20Guide.md) located in this repository.
