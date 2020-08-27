@@ -6,10 +6,14 @@ plugins {
 }
 
 repositories {
-    mavenLocal()
+
     mavenCentral()
     maven {
         url "https://oss.jfrog.org/jfrog-dependencies"
+    }
+    maven {
+        name = "Connector SDK Repository"
+        url = "https://boomisdk.s3.amazonaws.com/releases"
     }
 }
 
@@ -21,20 +25,18 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 dependencies {
-    compile("io.pravega:pravega-client:${pravegaVersion}") {
-        exclude group: "io.netty", module: "netty-tcnative-boringssl-static"
-    }
+    compile("io.pravega:pravega-client:${pravegaVersion}")
     compile "io.pravega:pravega-keycloak-client:${pravegaKeycloakVersion}"
     compile "com.jayway.jsonpath:json-path:${jsonPathVersion}"
-    compile "com.boomi:connector-sdk-util:${boomiConnectorVersion}"
-    compileOnly "com.boomi:common-sdk:${boomiCommonSdkVersion}"
-    compileOnly "com.boomi:connector-sdk-api:${boomiConnectorVersion}"
+    compile "com.boomi.connsdk:connector-sdk-util:${boomiConnectorVersion}"
+    compileOnly "com.boomi.commonsdk:common-sdk:${boomiCommonSdkVersion}"
+    compileOnly "com.boomi.connsdk:connector-sdk-api:${boomiConnectorVersion}"
     testImplementation "org.junit.jupiter:junit-jupiter:5.5.2"
     testCompile "io.pravega:pravega-standalone:${pravegaVersion}"
-    compile "com.boomi:boomi-util:${boomiUtilVersion}"
-    testCompile "com.boomi:common-sdk:${boomiCommonSdkVersion}"
-    testCompile "com.boomi:connector-sdk-api:${boomiConnectorVersion}"
-    testCompile "com.boomi:connector-sdk-test-util:${boomiConnectorVersion}"
+    compile "com.boomi.util:boomi-util:${boomiUtilVersion}"
+    testCompile "com.boomi.commonsdk:common-sdk:${boomiCommonSdkVersion}"
+    testCompile "com.boomi.connsdk:connector-sdk-api:${boomiConnectorVersion}"
+    testCompile "com.boomi.connsdk:connector-sdk-test-util:${boomiConnectorVersion}"
     testCompile "org.slf4j:slf4j-api:1.7.9"
     testCompile "ch.qos.logback:logback-core:1.2.3"
     testRuntime "ch.qos.logback:logback-classic:1.2.3"
