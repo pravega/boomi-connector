@@ -2,19 +2,18 @@
 A Pravega connector for the [Boomi Atomsphere](https://boomi.com/platform/integration/applications/)
 
 # Building
-_Note: once the connector is published, it will be available to everyone in the Boomi Platform, and you can skip to the [Custom Connector Library](#custom-connector-library) section._
+_Note: once the connector is published, it will be available to everyone in the Boomi Platform, and you can use it without building or creating a custom connector._
 
 ## Pre-requisites
 * Java JDK
-* Gradle
 
 ## Build artifacts
 ```
 ./gradlew distZip
 ```
-
+This will build a connector package which you can upload to your Boomi account (see the [Create a Custom Connector](#custom-connector-library) section below).
 # Create a Custom Connector
-_Note: once the connector is published, it will be available to everyone in the Boomi Platform, and you can skip to the [Custom Connector Library](#custom-connector-library) section._
+_Note: once the connector is published, it will be available to everyone in the Boomi Platform, and and you can use it without building or creating a custom connector._
 
 If you have just built the Pravega connector above, you must install it in your Boomi account as a custom connector type.  More details about this process can be found [here](https://help.boomi.com/bundle/connectors/page/c-atm-Connector_versioning_and_releasing_4ef53f03-4e3d-4637-9046-aa5f8b9506ba.html).  The basic steps are:
 
