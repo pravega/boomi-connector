@@ -19,17 +19,13 @@ import io.pravega.client.admin.StreamManager;
 import io.pravega.client.stream.*;
 import io.pravega.client.stream.impl.DefaultCredentials;
 import io.pravega.client.stream.impl.UTF8StringSerializer;
+import io.pravega.keycloak.client.PravegaKeycloakCredentials;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.WeakHashMap;
 import java.util.concurrent.CompletionException;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 final class PravegaUtil {
@@ -40,7 +36,7 @@ final class PravegaUtil {
         if (pravegaConfig.getAuth() == PravegaConfig.AuthenticationType.Basic)
             clientBuilder.credentials(new DefaultCredentials(pravegaConfig.getPassword(), pravegaConfig.getUserName()));
         else if (pravegaConfig.getAuth() == PravegaConfig.AuthenticationType.Keycloak)
-            clientBuilder.credentials(new BoomiPravegaKeycloakCredentials(pravegaConfig.getKeycloakJSONPath()));
+            clientBuilder.credentials(new PravegaKeycloakCredentials(pravegaConfig.getKeycloakJSONString()));
         return clientBuilder.build();
     }
 
@@ -86,8 +82,8 @@ final class PravegaUtil {
         return EventStreamClientFactory.withScope(pravegaConfig.getScope(), clientConfig);
     }
 
-    static void testConnection(ConnectorContext connectorContext, String filePath) {
-        PravegaConfig pravegaConfig = new PravegaConfig(connectorContext, filePath);
+    static void testConnection(ConnectorContext connectorContext, String keycloakJSONString) {
+        PravegaConfig pravegaConfig = new PravegaConfig(connectorContext, keycloakJSONString);
 
         // create stream manager
         try (StreamManager streamManager = StreamManager.create(createClientConfig(pravegaConfig))) {
@@ -123,37 +119,13 @@ final class PravegaUtil {
                 new UTF8StringSerializer(), io.pravega.client.stream.ReaderConfig.builder().build());
     }
 
-    static String createKeycloakJSONnFile(String keycloakJSONString) {
-        try {
-            File file = File.createTempFile("keycloak-", ".json");
-            BufferedWriter bw = new BufferedWriter(new FileWriter(file));
-            bw.write(keycloakJSONString);
-            bw.close();
-            logger.log(Level.INFO, "File created " + keycloakJSONString);
-            return file.getAbsolutePath();
-        } catch (Exception e) {
-            logger.log(Level.SEVERE, "File writing problem" + keycloakJSONString, e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    //if not exists, then store keycloak.json contents file as key and file path as value
-    static String checkAndSetCredentials(ConnectorContext context, Map<String, String> map) {
+    static String getKeycloakCredentialsString(ConnectorContext context) {
         Map<String, Object> props = context.getConnectionProperties();
         String auth = (String) props.get(Constants.AUTH_TYPE_PROPERTY);
         PravegaConfig.AuthenticationType authType = PravegaConfig.AuthenticationType.valueOf(auth);
         if (authType == PravegaConfig.AuthenticationType.Keycloak) {
             String keycloakJSONString = (String) props.get(Constants.AUTH_PROPERTY_KEYCLOAK_JSON);
-            if (!map.containsKey(keycloakJSONString)) {
-                synchronized (PravegaUtil.class) {
-                    if (!map.containsKey(keycloakJSONString)) {
-                        String keycloakJSONPath = PravegaUtil.createKeycloakJSONnFile(keycloakJSONString);
-                        if (keycloakJSONPath != null)
-                            map.put(keycloakJSONString, keycloakJSONPath);
-                    }
-                }
-            }
-            return map.get(keycloakJSONString);
+            return keycloakJSONString;
         }
         return null;
     }

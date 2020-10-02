@@ -149,9 +149,9 @@ public class PravegaBrowserTest {
     @Test
     public void testTestNautilusConnector() throws Exception {
         String home = System.getProperty("user.home");
-        String jsonData = new String(Files.readAllBytes(Paths.get(home + "/keycloak.json")));
+        String jsonData = new String(Files.readAllBytes(Paths.get(home + "/keycloak-shield.json")));
 
-        String scope = "boomi-test-project", stream = "test-stream";
+        String scope = "examples", stream = "stream-2";
 
         PravegaConnector connector = new PravegaConnector();
         ConnectorTester tester = new ConnectorTester(connector);

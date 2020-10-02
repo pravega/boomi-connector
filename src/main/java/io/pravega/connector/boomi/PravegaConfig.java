@@ -25,7 +25,7 @@ public class PravegaConfig {
     private AuthenticationType authMethod;
     private String userName;
     private String password;
-    private String keycloakJSONPath;
+    private String keycloakJSONString;
     private boolean createScope;
     private long interval;
     private TimeUnit unit;
@@ -33,7 +33,7 @@ public class PravegaConfig {
     public PravegaConfig() {
     }
 
-    public PravegaConfig(ConnectorContext context, String keycloakJsonPath) {
+    public PravegaConfig(ConnectorContext context, String keycloakJsonString) {
         Map<String, Object> props = context.getConnectionProperties();
 
         // URI, scope, and stream should always be set
@@ -56,7 +56,7 @@ public class PravegaConfig {
             setAuth(AuthenticationType.valueOf(auth));
         setUserName((String) props.get(Constants.USER_NAME_PROPERTY));
         setPassword((String) props.get(Constants.PASSWORD_PROPERTY));
-        setKeycloakJSONPath(keycloakJsonPath);
+        setKeycloakJSONString(keycloakJsonString);
         setInterval((long) props.get(Constants.INTERVAL));
         setUnit((String) props.get(Constants.TIME_UNIT));
     }
@@ -116,12 +116,12 @@ public class PravegaConfig {
         this.password = password;
     }
 
-    public String getKeycloakJSONPath() {
-        return keycloakJSONPath;
+    public String getKeycloakJSONString() {
+        return keycloakJSONString;
     }
 
-    public void setKeycloakJSONPath(String keycloakJSONPath) {
-        this.keycloakJSONPath = keycloakJSONPath;
+    public void setKeycloakJSONString(String keycloakJSONString) {
+        this.keycloakJSONString = keycloakJSONString;
     }
 
     public boolean isCreateScope() {
