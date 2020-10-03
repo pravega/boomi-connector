@@ -143,23 +143,20 @@ public class PravegaBrowserTest {
     For this test cases we need the following:
         1. Must have access to an SDP cluster
         2. The expected scope must be created on the cluster
-        3. The Pravega endpoint must be set in a properties file
+        3. The Pravega endpoint, scope, stream and keyclaok.json file path must be set in a properties file
         4. Must have a valid Keycloak JWT in your home directory
      */
     @Test
     public void testTestNautilusConnector() throws Exception {
-        String home = System.getProperty("user.home");
-        String jsonData = new String(Files.readAllBytes(Paths.get(home + "/keycloak-shield.json")));
-
-        String scope = "examples", stream = "stream-2";
+        String jsonData = new String(Files.readAllBytes(Paths.get(TestUtils.KEYCLOAK_FILE_PATH)));
 
         PravegaConnector connector = new PravegaConnector();
         ConnectorTester tester = new ConnectorTester(connector);
 
         Map<String, Object> connProps = new HashMap<>();
         connProps.put(Constants.CONTROLLER_URI_PROPERTY, TestUtils.PRAVEGA_NAUT_CONTROLLER_URI);
-        connProps.put(Constants.SCOPE_PROPERTY, scope);
-        connProps.put(Constants.STREAM_PROPERTY, stream);
+        connProps.put(Constants.SCOPE_PROPERTY, TestUtils.SDP_SCOPE);
+        connProps.put(Constants.STREAM_PROPERTY, TestUtils.SDP_STREAM);
         connProps.put(Constants.CREATE_SCOPE_PROPERTY, false);
         connProps.put(Constants.AUTH_TYPE_PROPERTY, TestUtils.SDP_AUTH_TYPE);
         connProps.put(Constants.AUTH_PROPERTY_KEYCLOAK_JSON, jsonData);
