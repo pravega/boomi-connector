@@ -12,6 +12,7 @@ _Note: once the connector is published, it will be available to everyone in the 
 ./gradlew distZip
 ```
 This will build a connector package which you can upload to your Boomi account (see the [Create a Custom Connector](#custom-connector-library) section below).
+
 # Create a Custom Connector
 _Note: once the connector is published, it will be available to everyone in the Boomi Platform, and and you can use it without building or creating a custom connector._
 
@@ -32,6 +33,7 @@ If you have just built the Pravega connector above, you must install it in your 
     * Click `OK`
     
 Now you should have a Pravega connector for your account that you can insert into any process.
+
 # Using the Connector
 
 For more details about how to use the Pravega connector, please refer to the [Boomi documentation](https://help.boomi.com/), and the [User's Guide](doc/Pravega%20Connector%20User's%20Guide.md) and [Getting Started Guide](doc/Pravega%20Connector%20Getting%20Started%20Guide.md) located in this repository.
