@@ -544,7 +544,7 @@ public class PravegaOperationTest {
         }
 
         for (int i = 0; i < 30; i++) {
-            assertEquals(messages[i], simpleListener.getNextDocument());
+            assertEquals(messages[i], simpleListener.getSimplePayloadBatch().getNextDocument());
         }
     }
 
@@ -552,21 +552,12 @@ public class PravegaOperationTest {
         return new String(baos.toByteArray(), StandardCharsets.UTF_8);
     }
 
-    class SimpleListener implements Listener {
+    class SimplePayloadBatch implements PayloadBatch {
 
         private LinkedBlockingQueue<String> linkedQueue = new LinkedBlockingQueue<>();
 
         @Override
-        public PayloadBatch getBatch() {
-            return null;
-        }
-
-        public <T> IndexedPayloadBatch<T> getBatch(T index) {
-            return null;
-        }
-
-        @Override
-        public void submit(Payload payload) {
+        public void add(Payload payload) {
             try {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 payload.writeTo(baos);
@@ -582,20 +573,66 @@ public class PravegaOperationTest {
             }
         }
 
+        public String getNextDocument() {
+            logger.log(Level.INFO, String.format("GOT EVENT " + linkedQueue.size()));
+            if (linkedQueue.size() > 0)
+                return linkedQueue.remove();
+            else return null;
+        }
+
+        @Override
+        public void submit() {
+
+        }
+
+        @Override
+        public void submit(Throwable error) {
+
+        }
+
+        @Override
+        public Future<ListenerExecutionResult> submit(SubmitOptions options) {
+            return null;
+        }
+
+        @Override
+        public int getCount() {
+            return linkedQueue.size();
+        }
+
+        @Override
+        public long getSize() {
+            return 0;
+        }
+    }
+
+    class SimpleListener implements Listener {
+
+        private SimplePayloadBatch simplePayloadBatch = new SimplePayloadBatch();
+
+        @Override
+        public PayloadBatch getBatch() {
+            return simplePayloadBatch;
+        }
+
+        public SimplePayloadBatch getSimplePayloadBatch() {
+            return simplePayloadBatch;
+        }
+
+        public <T> IndexedPayloadBatch<T> getBatch(T index) {
+            return null;
+        }
+
+        @Override
+        public void submit(Payload payload) {
+        }
+
         @Override
         public void submit(Throwable var1) {
-
         }
 
         public Future<ListenerExecutionResult> submit(Payload var1, SubmitOptions var2) {
             return null;
-        }
-
-        public String getNextDocument() {
-
-            if (linkedQueue.size() > 0)
-                return linkedQueue.remove();
-            else return null;
         }
 
         @Override

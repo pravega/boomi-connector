@@ -78,9 +78,9 @@
         </field>
         <field id="initialReaderGroupPosition" label="Initial Reader Group Position" type="string">
             <helpText>The initial position from which to start reading from the stream. A value of "Head" means the
-                first time the listener runs, it will read from the head (beginning) of the stream. NOTE: this will read
+                first time the reader runs, it will read from the head (beginning) of the stream. NOTE: this will read
                 the entire stream from start to finish and may cause a very high load while doing so. A value of "Tail"
-                means the first time the listener runs, it will start reading from the tail (end) of the stream. Use
+                means the first time the reader runs, it will start reading from the tail (end) of the stream. Use
                 this option to start reading real-time events, but be aware that all events that were written before the
                 first process execution will be ignored.
             </helpText>

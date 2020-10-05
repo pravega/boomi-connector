@@ -33,6 +33,9 @@ final class TestUtils {
     private static final String LOCAL_PRAVEGA_AUTH_TYPE_KEY = "local_pravega_auth_type";
     private static final String INTERVAL_KEY = "interval";
     private static final String INTERVAL_UNIT_KEY = "interval_unit";
+    private static final String SDP_SCOPE_KEY = "sdp_scope";
+    private static final String SDP_STREAM_KEY = "sdp_stream";
+    private static final String KEYCLOAK_FILE_PATH_KEY = "keyclaok_file_path";
 
     static String PRAVEGA_CONTROLLER_URI = "tcp://127.0.0.1:9090";
     static String PRAVEGA_NAUT_CONTROLLER_URI = "";
@@ -40,6 +43,9 @@ final class TestUtils {
     static String LOCAL_PRAVEGA_AUTH_TYPE = "";
     static long INTERVAL;
     static String INTERVAL_UNIT = "";
+    static String SDP_SCOPE = "";
+    static String SDP_STREAM = "";
+    static String KEYCLOAK_FILE_PATH = "";
 
     // Caller must close
     static InProcPravegaCluster startStandalone() throws Exception {
@@ -139,5 +145,8 @@ final class TestUtils {
         LOCAL_PRAVEGA_AUTH_TYPE = TestConfig.getPropertyNotEmpty(props, LOCAL_PRAVEGA_AUTH_TYPE_KEY);
         INTERVAL = Long.parseLong(TestConfig.getPropertyNotEmpty(props, INTERVAL_KEY));
         INTERVAL_UNIT = TestConfig.getPropertyNotEmpty(props, INTERVAL_UNIT_KEY);
+        SDP_SCOPE = TestConfig.getPropertyNotEmpty(props, SDP_SCOPE_KEY);
+        SDP_STREAM = TestConfig.getPropertyNotEmpty(props, SDP_STREAM_KEY);
+        KEYCLOAK_FILE_PATH = TestConfig.getPropertyNotEmpty(props, KEYCLOAK_FILE_PATH_KEY);
     }
 }
