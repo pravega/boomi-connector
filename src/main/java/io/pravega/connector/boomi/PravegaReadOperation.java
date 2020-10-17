@@ -48,7 +48,9 @@ public class PravegaReadOperation extends BaseQueryOperation {
         long eventCounter = 0;
 
         EventStreamReader<String> reader = null;
-        try (EventStreamClientFactory clientFactory = PravegaUtil.createClientFactory(readerConfig)) {
+        EventStreamClientFactory clientFactory = null;
+        try {
+            clientFactory = PravegaUtil.createClientFactory(readerConfig);
             reader = PravegaUtil.createReader(readerConfig, clientFactory);
 
             logger.info(String.format("Reading events from %s/%s", readerConfig.getScope(), readerConfig.getStream()));
@@ -95,14 +97,11 @@ public class PravegaReadOperation extends BaseQueryOperation {
 
             if (eventCounter > 0) response.finishPartialResult(input);
             else response.addEmptyResult(input, OperationStatus.SUCCESS, "OK", null);
-
+        } finally {
             // make sure we close the reader before the client is closed, otherwise it seems the reader is not properly
             // removed from the reader group and may starve other readers in that group (i.e. in subsequent executions)
             close(reader);
-        } catch (Throwable t) {
-            close(reader);
-            logger.log(Level.SEVERE, String.format("Error reading from %s/%s", readerConfig.getScope(), readerConfig.getStream()), t);
-            ResponseUtil.addExceptionFailure(response, input, t);
+            clientFactory.close();
         }
     }
 

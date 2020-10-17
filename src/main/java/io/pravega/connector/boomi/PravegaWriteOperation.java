@@ -66,22 +66,28 @@ public class PravegaWriteOperation extends BaseUpdateOperation {
             List<Future<ObjectData>> futures = new ArrayList<>();
             for (ObjectData input : request) {
                 try {
-                    String message = inputStreamToUtf8String(input.getData());
-                    String routingKey = getRoutingKey(message, logger);
                     long dataSize = getDataSize(input);
-                    logger.log(Level.FINE, String.format("Writing message size: '%d' with routing-key: '%s' to stream '%s / %s'",
-                            dataSize, routingKey, writerConfig.getScope(), writerConfig.getStream()));
-
-                    // write the event
-                    // note: this is an async call, so we will collect the futures and process the results later
+                    /**
+                     * Note: Since there is no way to set the container properties file, we can't use SizeLimitedUpdateOperation. So we filter the events that has exceeds
+                     * the size
+                     */
                     if (dataSize > PRAVEGA_MAX_EVENTSIZE) {
                         logger.log(Level.WARNING, String.format("Input data size limit (%d) exceeded, input size is: %d", PRAVEGA_MAX_EVENTSIZE, dataSize));
                         response.addResult(input, OperationStatus.APPLICATION_ERROR, STATUS_CODE, STATUS_MESSAGE, null);
-                    } else if (routingKey != null && routingKey.length() > 0) {
-                        futures.add(new ResultFuture<>(writer.writeEvent(routingKey, message), input));
                     } else {
-                        futures.add(new ResultFuture<>(writer.writeEvent(message), input));
+                        String message = inputStreamToUtf8String(input.getData());
+                        String routingKey = getRoutingKey(message, logger);
+                        logger.log(Level.FINE, String.format("Writing message size: '%d' with routing-key: '%s' to stream '%s / %s'",
+                                dataSize, routingKey, writerConfig.getScope(), writerConfig.getStream()));
+                        // write the event
+                        // note: this is an async call, so we will collect the futures and process the results later
+                        if (routingKey != null && routingKey.length() > 0) {
+                            futures.add(new ResultFuture<>(writer.writeEvent(routingKey, message), input));
+                        } else {
+                            futures.add(new ResultFuture<>(writer.writeEvent(message), input));
+                        }
                     }
+
                 } catch (Throwable t) {
 
                     // make best effort to process every input
