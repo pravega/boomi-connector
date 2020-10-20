@@ -101,7 +101,13 @@ public class PravegaReadOperation extends BaseQueryOperation {
             // make sure we close the reader before the client is closed, otherwise it seems the reader is not properly
             // removed from the reader group and may starve other readers in that group (i.e. in subsequent executions)
             close(reader);
-            clientFactory.close();
+            if (clientFactory != null) {
+                try {
+                    clientFactory.close();
+                } catch (Throwable t) {
+                    logger.log(Level.WARNING, "Could not close Pravega client", t);
+                }
+            }
         }
     }
 

@@ -33,6 +33,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class PravegaWriteOperation extends BaseUpdateOperation {
+    private static final Logger logger = Logger.getLogger(PravegaWriteOperation.class.getName());
     private WriterConfig writerConfig;
 
     // Pravega (as of 0.7.0) supports event sizes up to 8MB
@@ -65,37 +66,27 @@ public class PravegaWriteOperation extends BaseUpdateOperation {
              EventStreamWriter<String> writer = createWriter(clientFactory)) {
             List<Future<ObjectData>> futures = new ArrayList<>();
             for (ObjectData input : request) {
-                try {
-                    long dataSize = getDataSize(input);
-                    /**
-                     * Note: Since there is no way to set the container properties file, we can't use SizeLimitedUpdateOperation. So we filter the events that has exceeds
-                     * the size
-                     */
-                    if (dataSize > PRAVEGA_MAX_EVENTSIZE) {
-                        logger.log(Level.WARNING, String.format("Input data size limit (%d) exceeded, input size is: %d", PRAVEGA_MAX_EVENTSIZE, dataSize));
-                        response.addResult(input, OperationStatus.APPLICATION_ERROR, STATUS_CODE, STATUS_MESSAGE, null);
+                long dataSize = getDataSize(input);
+                /**
+                 * Note: We have a fixed size limit. There is no way to override the size limit in code(it must be a user defined parameter)and, we can't use SizeLimitedUpdateOperation. So we filter the events that has exceeds
+                 * the size.
+                 */
+                if (dataSize > PRAVEGA_MAX_EVENTSIZE) {
+                    logger.log(Level.WARNING, String.format("Input data size limit (%d) exceeded, input size is: %d", PRAVEGA_MAX_EVENTSIZE, dataSize));
+                    response.addResult(input, OperationStatus.APPLICATION_ERROR, STATUS_CODE, STATUS_MESSAGE, null);
+                } else {
+                    //Pravega only support to write event as a string. So we have to convert input stream to string
+                    String message = inputStreamToUtf8String(input.getData());
+                    String routingKey = getRoutingKey(message, logger);
+                    logger.log(Level.FINE, String.format("Writing message size: '%d' with routing-key: '%s' to stream '%s / %s'",
+                            dataSize, routingKey, writerConfig.getScope(), writerConfig.getStream()));
+                    // write the event
+                    // note: this is an async call, so we will collect the futures and process the results later
+                    if (routingKey != null && routingKey.length() > 0) {
+                        futures.add(new ResultFuture<>(writer.writeEvent(routingKey, message), input));
                     } else {
-                        String message = inputStreamToUtf8String(input.getData());
-                        String routingKey = getRoutingKey(message, logger);
-                        logger.log(Level.FINE, String.format("Writing message size: '%d' with routing-key: '%s' to stream '%s / %s'",
-                                dataSize, routingKey, writerConfig.getScope(), writerConfig.getStream()));
-                        // write the event
-                        // note: this is an async call, so we will collect the futures and process the results later
-                        if (routingKey != null && routingKey.length() > 0) {
-                            futures.add(new ResultFuture<>(writer.writeEvent(routingKey, message), input));
-                        } else {
-                            futures.add(new ResultFuture<>(writer.writeEvent(message), input));
-                        }
+                        futures.add(new ResultFuture<>(writer.writeEvent(message), input));
                     }
-
-                } catch (Throwable t) {
-
-                    // make best effort to process every input
-                    // note: if we get here, something is very wrong and likely fatal, but we don't seem to have any control
-                    //   over the overarching Boomi process; it's debatable whether to bubble an exception or continue
-                    //   processing documents
-                    ResponseUtil.addExceptionFailure(response, input, t);
-                    logger.log(Level.SEVERE, "Unexpected error", t);
                 }
             }
 
@@ -136,7 +127,7 @@ public class PravegaWriteOperation extends BaseUpdateOperation {
         }
     }
 
-    private static String inputStreamToUtf8String(InputStream is) throws IOException {
+    private static String inputStreamToUtf8String(InputStream is) {
         try (InputStream dataStream = is) {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             byte[] buffer = new byte[16 * 1024];
@@ -145,6 +136,9 @@ public class PravegaWriteOperation extends BaseUpdateOperation {
                 baos.write(buffer, 0, c);
             }
             return new String(baos.toByteArray(), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            logger.log(Level.WARNING, "unable to convert input stream to string ", e);
+            return null;
         }
     }
 
