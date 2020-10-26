@@ -105,7 +105,7 @@ public class PravegaReadOperation extends BaseQueryOperation {
                 try {
                     clientFactory.close();
                 } catch (Throwable t) {
-                    logger.log(Level.WARNING, "Could not close Pravega client", t);
+                    logger.log(Level.WARNING, "Could not close Pravega client factory", t);
                 }
             }
         }
