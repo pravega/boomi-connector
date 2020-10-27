@@ -137,8 +137,7 @@ public class PravegaWriteOperation extends BaseUpdateOperation {
             }
             return new String(baos.toByteArray(), StandardCharsets.UTF_8);
         } catch (IOException e) {
-            logger.log(Level.WARNING, "unable to convert input stream to string ", e);
-            return null;
+            throw new RuntimeException("Unable to read document input stream", e);
         }
     }
 
