@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?><?Inspire CreateDate="2019-02-11T18:33:24" ModifiedDate="2020-09-10T13:10:52"?><!DOCTYPE reference PUBLIC "-//OASIS//DTD DITA Reference//EN" "reference.dtd"><reference id="NAME">
+<title>Pravega Connector connection</title>
+<shortdesc>
+
+The Pravega connector allows you to read from or write to an enterprise data stream within Praveaga, taking advantage of Boomi's unique capability to provide a broad range of data source connectors and point them at Pravega for ingestion, or exposing stream data to the wealth of controls and outputs within the Boomi platform.
+
+Pravega is a storage system that exposes Stream as the main primitive for continuous and unbounded data. A Pravega stream is a durable, elastic, append-only, unbounded sequence of bytes having good performance and strong consistency.
+
+</shortdesc>
+<prolog><resourceid id="GUID-3457aa7b-a593-4b5e-ac26-586ffca6393c" /></prolog>
+<refbody>
+    <section id="section_ac8e3ea9-199a-4973-ade5-d5e4c0315662">
+      <title>Connection tab</title>
+      <p>
+        <dl>
+			<dlhead>
+				<dthd>Name</dthd>
+				<ddhd>Description</ddhd>
+			 </dlhead>
+			 <dlentry>
+				<dt>URI </dt>
+				<dd>The URI endpoint(required) of the Pravega controller in the form tcp://host:port or tls://host:port.</dd>
+			 </dlentry>
+			 <dlentry>
+				<dt>Scope</dt>
+				<dd>The Pravega scope(required) containing the data stream.</dd>
+			 </dlentry>
+			  <dlentry>
+				<dt>Stream Name</dt>
+				<dd>The name of the data stream(required) to read or write.</dd>
+			 </dlentry>
+			 <dlentry>
+				<dt>Create Scope</dt>
+				<dd>When checked, Pravega scope will be automatically created. Only enable this if Pravega is running in stand-alone mode.</dd>
+			 </dlentry>
+			 <dlentry>
+				<dt>Pravega Authentication Type</dt>
+				<dd>Specifies the type of authentication to use with Pravega. "None" means Pravega does not have any authentication enabled (only suitable for development environments). "Basic" means Pravega is running in an independent cluster and has basic auth enabled - this option requires you specify a valid username and password. "Keycloak" means Pravega is integrated with Keycloak (i.e. inside Streaming Data Platform) - this option requires you specify a valid Keycloak OIDC JSON installation file, including Keycloak endpoint and credentials. This is obtained from the Keycloak server.</dd>
+			 </dlentry>
+			 <dlentry>
+				<dt>Basic Username</dt>
+				<dd>The Pravega scope containing the data stream.</dd>
+			 </dlentry>
+			<dlentry>
+				<dt>Basic Password</dt>
+				<dd>The Pravega user's password. Only used when Authentication Type is set to "Basic".</dd>
+			 </dlentry>
+			 <dlentry>
+				<dt>Keycloak OIDC</dt>
+				<dd>A valid Keycloak OIDC JSON installation file, including Keycloak endpoint and credentials. This is obtained from the Keycloak server.</dd>
+			 </dlentry>
+			 <dlentry>
+				<dt>Listener Polling Interval </dt>
+				<dd>The Listen operation uses a polling schedule. This parameter specifies the interval between each poll. For example, specifying 1 minute means that any Listen operations from this connector would poll for new events every minute.</dd>
+			 </dlentry>
+			 <dlentry>
+				<dt>Listener Polling Time Unit</dt>
+				<dd>The time unit to use for the Listener Polling Interval. For example, if the Polling Interval is 1 and the Time Unit is Minute, then the Listen operation would poll for new events every 1 Minute.</dd>
+			 </dlentry>
+		 </dl>
+      </p>
+    </section>
+    <section id="GUID-8E01E104-3B7F-4DF1-9E21-278DF98BD399" conref="lib-AtomSphere_Connectors_f248eae7-7da3-46f7-8c6f-34df3b09e289.xml#GUID-B2941CF8-5082-4DAF-AD15-08B0FD05D306/SECTION_4FF5EFDA2C6646A3AB0B29DA1C95A21F" />
+    </refbody></reference>
