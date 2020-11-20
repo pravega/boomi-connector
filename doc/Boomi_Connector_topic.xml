@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?><?Inspire CreateDate="2019-02-11T18:33:23" ModifiedDate="2020-09-10T13:10:52"?><!DOCTYPE reference PUBLIC "-//OASIS//DTD DITA Reference//EN" "reference.dtd">
+<reference id="name"><title>Pravega Connector</title>
+<shortdesc>
+The Pravega connector allows you to read from or write to an enterprise data stream within Praveaga, taking advantage of Boomi's unique capability to provide a broad range of data source connectors and point them at Pravega for ingestion, or exposing stream data to the wealth of controls and outputs within the Boomi platform.
+
+Pravega is a storage system that exposes Stream as the main primitive for continuous and unbounded data. A Pravega stream is a durable, elastic, append-only, unbounded sequence of bytes having good performance and strong consistency.
+</shortdesc>
+<prolog><resourceid id="GUID-28307837-d39d-4035-be80-0651194b4b48" /></prolog>
+<refbody>
+<section id="section_8857c155-fb92-4cda-a4ef-c6d338cb69d0">
+      <title>Pravega Terms</title>
+      <p>The glossary of terms related to Pravega is given below, and also located here. Understanding these terms is necessary to configure the Pravega connector.</p>
+	  <p>
+		  <ul id="ul_zrg_51f_ymb">
+			  <li id="li_1d978da3-0f7d-4438-9a0a-44a6b9275ffd">Stream: Pravega organizes data into Streams. A Stream is a durable, elastic, append-only, unbounded sequence of bytes having good performance and strong consistency. A Pravega Stream is similar to but more flexible than a "topic" in popular message oriented middleware such as RabbitMQ or ApacheKafka.A Stream is unbounded in size – Pravega itself does not impose any limits on how many Events (i.e., bytes) are stored in a Stream. Pravega's design horizontally scales from few machines to a whole datacenter's capacity.</li>
+			  <li id="li_a8c88025-0684-4abd-bc6c-7b4e2c100cb7">Events: Pravega's client API allows applications to write and read data to/from Pravega in the form of Events. An Event is represented as a set of bytes within a Stream. For example, an Event could be as simple as a small number of bytes containing a temperature reading from an IoT sensor composed of a timestamp, a metric identifier and a value.</li>
+			  <li id="li_405f555b-12a0-4f5f-a07c-1c3c7c34b5bc">Routing Key: A Routing Key is a string used by developers to group similar Events. A Routing Key is often derived from data naturally occurring in the Event, like "customer-id" or "machine-id" or a declared/user-defined string. For example, a Routing Key could be a date (to group Events together by time) or it could be a IoT sensor id (to group Events by machine). A Routing Key is important in defining the read and write semantics that Pravega guarantees.</li>
+			  <li id="li_405f555b-12a0-4f5f-a07c-1c3c7c34b5ba">Pravega Writer: An application that creates Events and writes them into a Stream. All data is written by appending to the tail of a Stream. </li>
+			  <li id="li_405f555b-12a0-4f5f-a07c-1c3c7c34b5bd"> Pravega Reader: An application that reads Events from one or more Streams. An example of a basic Pravega reader and writer application is located here.</li>
+			  <p>Pravega Modes: There are two modes for running Pravega. </p>
+				  <ul>			
+					<li id="li_405f555b-12a0-4f5f-a07c-1c3c7c34b5bf">Standalone - Standalone mode is suitable for development and testing Pravega applications. It can either be run from the source code, from the distribution package or as a docker container.</li>
+					<li id="li_405f555b-12a0-4f5f-a07c-1c3c7c34b5bg">Distributed - Distributed mode runs each component separately on a single or multiple nodes. This is suitable for production in addition for development and testing. The deployment options in this mode include a manual installation, running in a docker swarm or DC/OS. </li>
+				  </ul>		  
+		  </ul>
+	  </p>
+      
+</section>
+<section id="section_kdb_wb2_ymb">
+      <title>Connector configuration</title>
+      <p>To configure a connector to communicate with Pravega, you can provide the following options. The terminology for these options is described in more detail above.</p>
+	  <p>Connector Options:</p>
+		  <ul id="ul_gtb_yb2_ymb">
+			  <li id="li_0b542be2-9797-404c-b9f6-5cfdac196efc">URI: The URI endpoint of the Pravega controller in the form tcp://host:port or tls://host:port</li>
+			  <li id="li_0b542be2-9797-404c-b9f6-5cfdac196efa">Scope: The Pravega scope containing the data stream.</li>
+			  <li id="li_0b542be2-9797-404c-b9f6-5cfdac196efb">Stream Name: The name of the data stream to read or write.</li>	
+		  </ul>
+		  
+      <p>This design provides reusable components which contain connection settings and operation
+        settings. After building your connection and operation, set up your connector within a
+        process. When the process is defined properly, Boomi Integration can map to and from
+        virtually any system using the Pravega connector.</p>
+</section>
+	
+<section id="section_9db0285a-7e50-488f-adff-6a7fc099e96e">
+      <title>Supported Versions</title>
+      <p>The Pravega connector supports the following versions:</p>
+	  <ul>
+		  <li id="li_a06800f4-d5b4-48b5-908f-634db0f2db45">Pravega v0.6</li>
+		  <li id="li_2128af80-aee2-4846-8b66-36578f4e53a4">Pravega v0.7</li>
+		  <li id="li_2128af80-aee2-4846-8b66-36578f4e53a4">Pravega v0.8</li>
+	  </ul>
+</section>
+<section id="section_82238412-3f12-4e87-a4fd-c4946d4523a8">
+      <title>Prerequisites</title>
+      
+      <p>To use the Pravega connector, you must first have a running Pravega storage cluster. For more information on how to obtain and deploy Pravega, you can visit the Pravega website (https://pravega.io).</p>
+</section>
+	
+<section id="section_3e54818f-9cfd-47e3-a828-7959fe71f92a">
+      <title>Supported objects</title>
+      <p>The current version of Pravega Boomi connector supports only JSON documents. </p>
+</section>
+<section id="section_5367ee12-590c-4860-bffb-28f9063bb575">
+      <title>Tracked properties</title>
+      
+      <p>This connector has the following tracked properties that you can set or reference in
+        various shape parameters:
+		<dl>
+			<dthd>Name</dthd>
+            <ddhd>Description</ddhd>
+			<dlentry>
+				<dt>Stream Name</dt>
+				<dd>The name of the stream to read and write. A stream name must be unique within a scope.</dd>
+			</dlentry>
+			<dlentry>
+				<dt>Scope</dt>
+				<dd>A namespace for Streams</dd>
+			</dlentry>
+		</dl>
+	  </p>
+</section>
+<section id="GUID-83B0E78D-BCCC-41B1-B75B-F36DC47CA6B8" conref="lib-AtomSphere_Connectors_f248eae7-7da3-46f7-8c6f-34df3b09e289.xml#GUID-B2941CF8-5082-4DAF-AD15-08B0FD05D306/GUID-36DDA63B-FE31-442D-B827-CA7CDDC8DDC8">
+</section>
+</refbody>
+</reference><?xml version="1.0" encoding="utf-8"?><?Inspire CreateDate="2019-02-11T18:33:23" ModifiedDate="2020-09-10T13:10:52"?><!DOCTYPE reference PUBLIC "-//OASIS//DTD DITA Reference//EN" "reference.dtd">
+<reference id="name"><title>Pravega Connector</title>
+<shortdesc>
+The Pravega connector allows you to read from or write to an enterprise data stream within Praveaga, taking advantage of Boomi's unique capability to provide a broad range of data source connectors and point them at Pravega for ingestion, or exposing stream data to the wealth of controls and outputs within the Boomi platform.
+
+Pravega is a storage system that exposes Stream as the main primitive for continuous and unbounded data. A Pravega stream is a durable, elastic, append-only, unbounded sequence of bytes having good performance and strong consistency.
+</shortdesc>
+<prolog><resourceid id="GUID-28307837-d39d-4035-be80-0651194b4b48" /></prolog>
+<refbody>
+<section id="section_8857c155-fb92-4cda-a4ef-c6d338cb69d0">
+      <title>Pravega Terms</title>
+      <p>The glossary of terms related to Pravega is given below, and also located here. Understanding these terms is necessary to configure the Pravega connector.</p>
+	  <p>
+		  <ul id="ul_zrg_51f_ymb">
+			  <li id="li_1d978da3-0f7d-4438-9a0a-44a6b9275ffd">Stream: Pravega organizes data into Streams. A Stream is a durable, elastic, append-only, unbounded sequence of bytes having good performance and strong consistency. A Pravega Stream is similar to but more flexible than a "topic" in popular message oriented middleware such as RabbitMQ or ApacheKafka.A Stream is unbounded in size – Pravega itself does not impose any limits on how many Events (i.e., bytes) are stored in a Stream. Pravega's design horizontally scales from few machines to a whole datacenter's capacity.</li>
+			  <li id="li_a8c88025-0684-4abd-bc6c-7b4e2c100cb7">Events: Pravega's client API allows applications to write and read data to/from Pravega in the form of Events. An Event is represented as a set of bytes within a Stream. For example, an Event could be as simple as a small number of bytes containing a temperature reading from an IoT sensor composed of a timestamp, a metric identifier and a value.</li>
+			  <li id="li_405f555b-12a0-4f5f-a07c-1c3c7c34b5bc">Routing Key: A Routing Key is a string used by developers to group similar Events. A Routing Key is often derived from data naturally occurring in the Event, like "customer-id" or "machine-id" or a declared/user-defined string. For example, a Routing Key could be a date (to group Events together by time) or it could be a IoT sensor id (to group Events by machine). A Routing Key is important in defining the read and write semantics that Pravega guarantees.</li>
+			  <li id="li_405f555b-12a0-4f5f-a07c-1c3c7c34b5ba">Pravega Writer: An application that creates Events and writes them into a Stream. All data is written by appending to the tail of a Stream. </li>
+			  <li id="li_405f555b-12a0-4f5f-a07c-1c3c7c34b5bd"> Pravega Reader: An application that reads Events from one or more Streams. An example of a basic Pravega reader and writer application is located here.</li>
+			  <p>Pravega Modes: There are two modes for running Pravega. </p>
+				  <ul>			
+					<li id="li_405f555b-12a0-4f5f-a07c-1c3c7c34b5bf">Standalone - Standalone mode is suitable for development and testing Pravega applications. It can either be run from the source code, from the distribution package or as a docker container.</li>
+					<li id="li_405f555b-12a0-4f5f-a07c-1c3c7c34b5bg">Distributed - Distributed mode runs each component separately on a single or multiple nodes. This is suitable for production in addition for development and testing. The deployment options in this mode include a manual installation, running in a docker swarm or DC/OS. </li>
+				  </ul>		  
+		  </ul>
+	  </p>
+      
+</section>
+<section id="section_kdb_wb2_ymb">
+      <title>Connector configuration</title>
+      <p>To configure a connector to communicate with Pravega, you can provide the following options. The terminology for these options is described in more detail above.</p>
+	  <p>Connector Options:</p>
+		  <ul id="ul_gtb_yb2_ymb">
+			  <li id="li_0b542be2-9797-404c-b9f6-5cfdac196efc">URI: The URI endpoint of the Pravega controller in the form tcp://host:port or tls://host:port</li>
+			  <li id="li_0b542be2-9797-404c-b9f6-5cfdac196efa">Scope: The Pravega scope containing the data stream.</li>
+			  <li id="li_0b542be2-9797-404c-b9f6-5cfdac196efb">Stream Name: The name of the data stream to read or write.</li>	
+		  </ul>
+		  
+      <p>This design provides reusable components which contain connection settings and operation
+        settings. After building your connection and operation, set up your connector within a
+        process. When the process is defined properly, Boomi Integration can map to and from
+        virtually any system using the Pravega connector.</p>
+</section>
+	
+<section id="section_9db0285a-7e50-488f-adff-6a7fc099e96e">
+      <title>Supported Versions</title>
+      <p>The Pravega connector supports the following versions:</p>
+	  <ul>
+		  <li id="li_a06800f4-d5b4-48b5-908f-634db0f2db45">Pravega v0.6</li>
+		  <li id="li_2128af80-aee2-4846-8b66-36578f4e53a4">Pravega v0.7</li>
+		  <li id="li_2128af80-aee2-4846-8b66-36578f4e53a4">Pravega v0.8</li>
+	  </ul>
+</section>
+<section id="section_82238412-3f12-4e87-a4fd-c4946d4523a8">
+      <title>Prerequisites</title>
+      
+      <p>To use the Pravega connector, you must first have a running Pravega storage cluster. For more information on how to obtain and deploy Pravega, you can visit the Pravega website (https://pravega.io).</p>
+</section>
+	
+<section id="section_3e54818f-9cfd-47e3-a828-7959fe71f92a">
+      <title>Supported objects</title>
+      <p>The current version of Pravega Boomi connector supports only JSON documents. </p>
+</section>
+<section id="section_5367ee12-590c-4860-bffb-28f9063bb575">
+      <title>Tracked properties</title>
+      
+      <p>This connector has the following tracked properties that you can set or reference in
+        various shape parameters:
+		<dl>
+			<dthd>Name</dthd>
+            <ddhd>Description</ddhd>
+			<dlentry>
+				<dt>Stream Name</dt>
+				<dd>The name of the stream to read and write. A stream name must be unique within a scope.</dd>
+			</dlentry>
+			<dlentry>
+				<dt>Scope</dt>
+				<dd>A namespace for Streams</dd>
+			</dlentry>
+		</dl>
+	  </p>
+</section>
+<section id="GUID-83B0E78D-BCCC-41B1-B75B-F36DC47CA6B8" conref="lib-AtomSphere_Connectors_f248eae7-7da3-46f7-8c6f-34df3b09e289.xml#GUID-B2941CF8-5082-4DAF-AD15-08B0FD05D306/GUID-36DDA63B-FE31-442D-B827-CA7CDDC8DDC8">
+</section>
+</refbody>
+</reference>
