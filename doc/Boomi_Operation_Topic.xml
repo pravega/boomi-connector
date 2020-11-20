@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?><?Inspire CreateDate="2019-02-11T19:18:26" ModifiedDate="2020-09-10T13:10:52"?><!DOCTYPE reference PUBLIC "-//OASIS//DTD DITA Reference//EN" "reference.dtd"><reference id="NAME"><title>Pravega Connector operation</title>
+<shortdesc>
+The Pravega connector allows you to read from or write to an enterprise data stream within Praveaga, taking advantage of Boomi's unique capability to provide a broad range of data source connectors and point them at Pravega for ingestion, or exposing stream data to the wealth of controls and outputs within the Boomi platform.
+
+Pravega is a storage system that exposes Stream as the main primitive for continuous and unbounded data. A Pravega stream is a durable, elastic, append-only, unbounded sequence of bytes having good performance and strong consistency.
+</shortdesc>
+<prolog><resourceid id="GUID-22c82a3e-b3c2-49a5-aa54-6fc413245a3f" /></prolog>
+<refbody>
+    <section id="section_c78741b5-faa0-4972-9bc3-ed624fb1b9ce">
+      
+      <p>The Pravega connector operations define how to interact with Pravega. An operation represents a specific action, such as Read and Write to be performed against a data stream in a Pravega system. The Pravega Connector operations uses JSON format and support the following actions:
+	  <ul id="ul_mwx_p52_ymb">
+          <li id="li_4a796ff5-b7b0-41c9-8490-4c4f33f99363">Outbound: Write</li>
+          <li id="li_3f7a6eb8-679a-489f-be0d-72e7a589ebdb">Inbound: Read</li>
+          <li id="li_2a92b980-9b69-41f4-8aea-7125b59749a9">Inbound: Listen</li>
+        </ul></p>
+    </section>
+    <section id="section_f3h_r52_ymb">
+      <title>Options tab</title>
+      <dl>
+        <dlhead>
+          <dthd>Name</dthd>
+          <ddhd>Description</ddhd>
+        </dlhead>
+		<dlentry>
+          <dt>Routing Key Type (Write)</dt>
+          <dd>The type of routing key to use for each event. "Fixed" means to use the literal value of the Routing Key below. "JsonReference" means the event data is JSON and the value will be extracted from the body using the Routing Key below as a JSON reference (i.e. a value of "myVar" will look for the "myVar" key in the JSON of each event, and use its corresponding value as the routing key for that event).</dd>
+        </dlentry>
+        <dlentry>
+          <dt>Routing Key (Write)</dt>
+          <dd>The routing key to use for each event written to the stream. If the Routing Key Type is "Fixed", this value will be used literally and will be the same for every event. If the Routing Key Type is "JsonReference", the routing key for each event will be evaluated from the JSON body, using the reference provided here.</dd>
+        </dlentry>
+        <dlentry>
+          <dt>Pravega Reader Group (Read and Listen)</dt>
+          <dd> (Required) The name of the reader group for this reader within Pravega. Each reader group will maintain its position in the stream between executions. Note: a reader group will distribute events between its readers. Be careful when naming your reader group so that you do not mistakenly share events with another reader. If different readers each need to process all events in the stream, they should use different reader groups.</dd>
+        </dlentry>
+		<dlentry>
+          <dt>Read Timeout (Read)</dt>
+          <dd>The maximum amount of time the reader will wait for the next event from Pravega (in milliseconds).</dd>
+        </dlentry>
+		<dlentry>
+          <dt>Max Events per Execution (Read)</dt>
+          <dd>For each execution of the operation, the maximum number of events the reader will read before moving to the next component in the process. For example, if this is set to 100000 events, the operation will read a maximum of 100000 events. If it hits the tail of the stream (no more events), or this limit (100000 events), it will exit execution and the collection of events will be sent to the next component in the process flow. If this is set to 0, the operation will continue reading from the stream until it hits the tail (there are no more events). Note that if there are a lot of events, this may overload the Boomi document cache.</dd>
+        </dlentry>
+		<dlentry>
+          <dt>Max Read Time per Execution (Read)</dt>
+          <dd>For each execution of the operation, the maximum number of seconds the reader will read and collect events from the stream before moving to the next component in the process. For example, if this is set to 30 seconds, the operation will spend a maximum of 30 seconds reading events from the stream. If it hits the tail of the stream (no more events), or this time (30 seconds), it will exit execution and the collection of events will be sent to the next component in the process flow. If this is set to 0, the operation will continue reading from the stream until it hits the tail (there are no more events). Note that if there are a lot of events, this may overload the Boomi document cache.</dd>
+        </dlentry>
+		<dlentry>
+          <dt>Initial Reader Group Position (Read and Listen) </dt>
+          <dd>The initial position from which to start reading from the stream. A value of "Head" means the first time the reader runs, it will read from the head (beginning) of the stream. NOTE: this will read the entire stream from start to finish and may cause a very high load while doing so. A value of "Tail" means the first time the reader runs, it will start reading from the tail (end) of the stream. Use this option to start reading real-time events, but be aware that all events that were written before the first process execution will be ignored.</dd>
+        </dlentry>
+        <dlentry id="GUID-6AE366A4-9A1F-497B-A8A5-1D25A06F0F94" conref="lib-AtomSphere_Connectors_f248eae7-7da3-46f7-8c6f-34df3b09e289.xml#GUID-B2941CF8-5082-4DAF-AD15-08B0FD05D306/GUID-DE14C1D0-2EAC-4FB7-9DD0-8817E19E5331">
+          <dt />
+          <dd />
+        </dlentry>
+        <dlentry conref="lib-AtomSphere_Connectors_f248eae7-7da3-46f7-8c6f-34df3b09e289.xml#GUID-B2941CF8-5082-4DAF-AD15-08B0FD05D306/dlentry_jbj_mwn_pkb">
+          <dt />
+          <dd />
+        </dlentry>
+        <dlentry conref="lib-AtomSphere_Connectors_f248eae7-7da3-46f7-8c6f-34df3b09e289.xml#GUID-B2941CF8-5082-4DAF-AD15-08B0FD05D306/GUID-8B8C718B-9C8A-4E63-8667-9541F8896AF9">
+          <dt />
+          <dd />
+        </dlentry>
+      </dl>
+    </section>
+	<section id="section_787af3a6-a129-4ca6-b935-fbefa1171693">
+      <title>Write</title>
+      <p>Write is an outbound action to write streaming data in Pravega. All the options are discussed in the Connector Configuration section.</p>
+      <ul id="ul_zrg_51f_ymb">
+        <li id="li_ba8114f3-33a4-4849-8a03-5b8cec18ac8e">The user can specify the Stream name and, Scope name in a Pravega Connection.</li>
+        <li id="li_ec604c4c-fb47-46ac-826f-1f08cd090f7e">User needs to specify which routing key types they will use.</li>
+        <li id="li_a0bc3364-9aea-466d-8f7d-042bfe0f6133">For each document process, the data will be written as an event.</li>
+      </ul>
+    </section>
+	<section id="section_787af3a6-a129-4ca6-b935-fbefa1171694">
+      <title>Read</title>
+      <p>Read is an inbound action to read the streaming data from Pravega. Each event that is read from the stream is passed on as a data document.</p>
+    </section>
+	<section id="section_787af3a6-a129-4ca6-b935-fbefa1171695">
+      <title>Listen</title>
+      <p>Listen operation is also an inbound action to read the streaming data from Pravega. Each event that is listen from the stream will be passed on as a data document submitted to the listener.</p>
+    </section>
+    </refbody></reference>
