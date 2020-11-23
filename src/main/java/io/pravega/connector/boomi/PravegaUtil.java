@@ -90,21 +90,14 @@ final class PravegaUtil {
             // check connection and scope
             try {
                 streamManager.listStreams(pravegaConfig.getScope()).hasNext();
-            } catch (Throwable t) {
-                // peel exception from Future
-                if (t instanceof CompletionException) t = t.getCause();
-
+            } catch (Exception e) {
                 // does the scope not exist?
-                if (t instanceof NoSuchScopeException) {
+                if (e instanceof NoSuchScopeException) {
                     // scope doesn't exist, and we can't create it
-                    if (!pravegaConfig.isCreateScope()) throw (NoSuchScopeException) t;
-
-                    // scope doesn't exist, but we are supposed to create it - this is ok
+                    if (!pravegaConfig.isCreateScope()) throw (NoSuchScopeException) e;
 
                 } else {
-                    // some other problem
-                    if (t instanceof RuntimeException) throw (RuntimeException) t;
-                    else throw new RuntimeException(t);
+                    throw new RuntimeException(e);
                 }
             }
         }

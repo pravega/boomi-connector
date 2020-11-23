@@ -95,10 +95,10 @@ public class PravegaPollingOperationConnection extends BaseConnection<OperationC
                 clientFactory = PravegaUtil.createClientFactory(readerConfig);
             if (reader == null)
                 reader = PravegaUtil.createReader(readerConfig, clientFactory);
-        } catch (Throwable t) {
+        } catch (Exception e) {
             close();
-            logger.log(Level.SEVERE, String.format("Error reading from %s/%s", readerConfig.getScope(), readerConfig.getStream()), t);
-            throw new RuntimeException(t);
+            logger.log(Level.SEVERE, String.format("Error reading from %s/%s", readerConfig.getScope(), readerConfig.getStream()), e);
+            throw new RuntimeException(e);
         }
     }
 
@@ -112,8 +112,8 @@ public class PravegaPollingOperationConnection extends BaseConnection<OperationC
         if (clientFactory != null) try {
             clientFactory.close();
             clientFactory = null;
-        } catch (Throwable t) {
-            logger.log(Level.WARNING, "Could not close Pravega clientFactory", t);
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "Could not close Pravega clientFactory", e);
         }
     }
 
@@ -121,8 +121,8 @@ public class PravegaPollingOperationConnection extends BaseConnection<OperationC
         if (reader != null) try {
             reader.close();
             reader = null;
-        } catch (Throwable t) {
-            logger.log(Level.WARNING, "Could not close Pravega reader", t);
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "Could not close Pravega reader", e);
         }
     }
 
