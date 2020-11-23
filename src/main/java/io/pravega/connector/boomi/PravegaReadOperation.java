@@ -104,8 +104,8 @@ public class PravegaReadOperation extends BaseQueryOperation {
             if (clientFactory != null) {
                 try {
                     clientFactory.close();
-                } catch (Throwable t) {
-                    logger.log(Level.WARNING, "Could not close Pravega client factory", t);
+                } catch (Exception e) {
+                    logger.log(Level.WARNING, "Could not close Pravega client factory", e);
                 }
             }
         }
@@ -115,8 +115,8 @@ public class PravegaReadOperation extends BaseQueryOperation {
     private void close(EventStreamReader<?> reader) {
         if (reader != null) try {
             reader.close();
-        } catch (Throwable t) {
-            logger.log(Level.WARNING, "Could not close Pravega reader", t);
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "Could not close Pravega reader", e);
         }
     }
 }

@@ -11,7 +11,7 @@
 package io.pravega.connector.boomi;
 
 import com.boomi.connector.api.*;
-import com.boomi.connector.util.BaseUpdateOperation;
+import com.boomi.connector.util.SizeLimitedUpdateOperation;
 import com.boomi.util.ByteUnit;
 import com.jayway.jsonpath.JsonPath;
 import io.pravega.client.EventStreamClientFactory;
@@ -32,7 +32,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class PravegaWriteOperation extends BaseUpdateOperation {
+public class PravegaWriteOperation extends SizeLimitedUpdateOperation {
     private static final Logger logger = Logger.getLogger(PravegaWriteOperation.class.getName());
     private WriterConfig writerConfig;
 
@@ -59,7 +59,7 @@ public class PravegaWriteOperation extends BaseUpdateOperation {
      * after every execution (we have no other choice).
      */
     @Override
-    protected void executeUpdate(UpdateRequest request, OperationResponse response) {
+    protected void executeSizeLimitedUpdate(UpdateRequest request, OperationResponse response) {
         Logger logger = response.getLogger();
 
         try (EventStreamClientFactory clientFactory = PravegaUtil.createClientFactory(writerConfig);
@@ -76,7 +76,7 @@ public class PravegaWriteOperation extends BaseUpdateOperation {
                     response.addResult(input, OperationStatus.APPLICATION_ERROR, STATUS_CODE, STATUS_MESSAGE, null);
                 } else {
                     //Pravega only support to write event as a string. So we have to convert input stream to string
-                    String message = inputStreamToUtf8String(input.getData());
+                    String message = inputToUtf8String(input);
                     String routingKey = getRoutingKey(message, logger);
                     logger.log(Level.FINE, String.format("Writing message size: '%d' with routing-key: '%s' to stream '%s / %s'",
                             dataSize, routingKey, writerConfig.getScope(), writerConfig.getStream()));
@@ -127,8 +127,8 @@ public class PravegaWriteOperation extends BaseUpdateOperation {
         }
     }
 
-    private static String inputStreamToUtf8String(InputStream is) {
-        try (InputStream dataStream = is) {
+    private static String inputToUtf8String(ObjectData input) {
+        try (InputStream dataStream = input.getData()) {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             byte[] buffer = new byte[16 * 1024];
             int c;
@@ -179,8 +179,8 @@ public class PravegaWriteOperation extends BaseUpdateOperation {
             try {
                 wrapped.get();
                 return value;
-            } catch (Throwable t) {
-                throw new ResultException(value, t);
+            } catch (Exception e) {
+                throw new ResultException(value, e);
             }
         }
 
@@ -189,8 +189,8 @@ public class PravegaWriteOperation extends BaseUpdateOperation {
             try {
                 wrapped.get(timeout, unit);
                 return value;
-            } catch (Throwable t) {
-                throw new ResultException(value, t);
+            } catch (Exception e) {
+                throw new ResultException(value, e);
             }
         }
     }

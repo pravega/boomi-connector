@@ -52,6 +52,8 @@ distributions {
             into('lib') {
                 from configurations.runtime
                 from jar
+                exclude("**/common-sdk-${boomiCommonSdkVersion}.jar")
+                exclude("**/connector-sdk-api-${boomiConnectorVersion}.jar")
             }
             into '/'
         }

@@ -33,8 +33,8 @@ public class PravegaBrowser extends BaseBrowser implements ConnectionTester {
     public void testConnection() {
         try {
             PravegaUtil.testConnection(getContext(), PravegaUtil.getKeycloakCredentialsString(getContext()));
-        } catch (Throwable t) {
-            throw new ConnectorException("Could not initialize connection to Pravega", t);
+        } catch (Exception e) {
+            throw new ConnectorException("Could not initialize connection to Pravega", e);
         }
     }
 
