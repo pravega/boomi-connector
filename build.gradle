@@ -1,16 +1,11 @@
-import com.github.jk1.license.render.*
 plugins {
-    id 'distribution'
     id 'java'
+    id 'distribution'
     id 'com.github.jk1.dependency-license-report' version '1.13'
 }
 
 repositories {
-
     mavenCentral()
-    maven {
-        url "https://oss.jfrog.org/jfrog-dependencies"
-    }
     maven {
         name = "Connector SDK Repository"
         url = "https://boomisdk.s3.amazonaws.com/releases"
@@ -18,47 +13,50 @@ repositories {
 }
 
 group = "io.pravega"
+description = "Boomi Pravega Connector"
 version = releaseVersion
 
-description = "Boomi Pravega Connector"
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 dependencies {
-    compile("io.pravega:pravega-client:${pravegaVersion}")
-    compile "io.pravega:pravega-keycloak-client:${pravegaKeycloakVersion}"
-    compile "com.jayway.jsonpath:json-path:${jsonPathVersion}"
-    compile "com.boomi.connsdk:connector-sdk-util:${boomiConnectorVersion}"
     compileOnly "com.boomi.commonsdk:common-sdk:${boomiCommonSdkVersion}"
     compileOnly "com.boomi.connsdk:connector-sdk-api:${boomiConnectorVersion}"
+    compileOnly "com.boomi.util:boomi-util:${boomiUtilVersion}"
+    implementation "io.pravega:pravega-client:${pravegaVersion}"
+    implementation "io.pravega:pravega-keycloak-client:${pravegaKeycloakVersion}"
+    implementation "com.jayway.jsonpath:json-path:${jsonPathVersion}"
+    implementation("com.boomi.connsdk:connector-sdk-util:${boomiConnectorVersion}") {
+        // must exclude these from the distribution
+        exclude group: 'com.boomi.commonsdk', module: 'common-sdk'
+        exclude group: 'com.boomi.connsdk', module: 'connector-sdk-api'
+        exclude group: 'com.boomi.util', module: 'boomi-util'
+    }
     testImplementation "org.junit.jupiter:junit-jupiter:5.5.2"
-    testCompile "io.pravega:pravega-standalone:${pravegaVersion}"
-    compile "com.boomi.util:boomi-util:${boomiUtilVersion}"
-    testCompile "com.boomi.commonsdk:common-sdk:${boomiCommonSdkVersion}"
-    testCompile "com.boomi.connsdk:connector-sdk-api:${boomiConnectorVersion}"
-    testCompile "com.boomi.connsdk:connector-sdk-test-util:${boomiConnectorVersion}"
-    testCompile "org.slf4j:slf4j-api:1.7.9"
-    testCompile "ch.qos.logback:logback-core:1.2.3"
-    testRuntime "ch.qos.logback:logback-classic:1.2.3"
+    testImplementation "io.pravega:pravega-standalone:${pravegaVersion}"
+    testImplementation "com.boomi.connsdk:connector-sdk-test-util:${boomiConnectorVersion}"
+    testImplementation "org.slf4j:slf4j-api:1.7.9"
+    testImplementation "ch.qos.logback:logback-core:1.2.3"
+    testRuntimeOnly "ch.qos.logback:logback-classic:1.2.3"
 }
 
 distributions {
     main {
-        baseName = archivesBaseName
         contents {
             into('META-INF') {
                 from(project.file('src/main/resources/connector-config.xml'))
             }
             into('lib') {
-                from configurations.runtime
+                from configurations.runtimeClasspath
                 from jar
-                exclude("**/common-sdk-${boomiCommonSdkVersion}.jar")
-                exclude("**/connector-sdk-api-${boomiConnectorVersion}.jar")
             }
             into '/'
         }
     }
 }
+
+
+import com.github.jk1.license.render.InventoryHtmlReportRenderer
 
 licenseReport {
     // Set output directory for the report data.
