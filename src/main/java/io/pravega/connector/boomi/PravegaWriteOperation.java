@@ -68,8 +68,11 @@ public class PravegaWriteOperation extends SizeLimitedUpdateOperation {
             for (ObjectData input : request) {
                 long dataSize = getDataSize(input);
                 /**
-                 * Note: We have a fixed size limit. There is no way to override the size limit in code(it must be a user defined parameter)and, we can't use SizeLimitedUpdateOperation. So we filter the events that has exceeds
-                 * the size.
+                 * Note: We have a fixed size limit which is 8MB. There is no way to override the size limit in code(it must be a user defined parameter)and.
+                 * So we filter the events that has exceeds the size of 8MB and marked as an application error.
+                 * We are using SizeLimitedUpdateOperation, the default size limit is 1MB.
+                 * Atom owners has to be set container property: MAX_SIZE_CONTAINER_PROP_KEY to overwritten this default value.
+                 * So if Atom owners set this container property the acceptable size is 8MB, otherwise the acceptable size will be 1MB.
                  */
                 if (dataSize > PRAVEGA_MAX_EVENTSIZE) {
                     logger.log(Level.WARNING, String.format("Input data size limit (%d) exceeded, input size is: %d", PRAVEGA_MAX_EVENTSIZE, dataSize));

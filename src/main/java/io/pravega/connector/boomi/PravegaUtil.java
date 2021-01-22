@@ -91,13 +91,17 @@ final class PravegaUtil {
             try {
                 streamManager.listStreams(pravegaConfig.getScope()).hasNext();
             } catch (Exception e) {
+                // peel exception from Future
+                if (e instanceof CompletionException) e = (Exception) e.getCause();
                 // does the scope not exist?
                 if (e instanceof NoSuchScopeException) {
                     // scope doesn't exist, and we can't create it
                     if (!pravegaConfig.isCreateScope()) throw (NoSuchScopeException) e;
-
+                    // scope doesn't exist, but we are supposed to create it - this is ok
                 } else {
-                    throw new RuntimeException(e);
+                    // some other problem
+                    if (e instanceof RuntimeException) throw (RuntimeException) e;
+                    else throw new RuntimeException(e);
                 }
             }
         }
