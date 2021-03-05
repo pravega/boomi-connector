@@ -395,6 +395,7 @@ public class PravegaOperationTest {
         }
     }
 
+    @Test
     public void testMaxReadPerExecution() throws Exception {
         String stream = "connector-test-max-read-time";
         long maxReadTime = 4L; // seconds
