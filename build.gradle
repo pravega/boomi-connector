@@ -32,12 +32,13 @@ dependencies {
         exclude group: 'com.boomi.connsdk', module: 'connector-sdk-api'
         exclude group: 'com.boomi.util', module: 'boomi-util'
     }
-    testImplementation "org.junit.jupiter:junit-jupiter:5.5.2"
+    testImplementation "org.junit.jupiter:junit-jupiter:5.6.2"
     testImplementation "io.pravega:pravega-standalone:${pravegaVersion}"
     testImplementation "com.boomi.connsdk:connector-sdk-test-util:${boomiConnectorVersion}"
     testImplementation "org.slf4j:slf4j-api:1.7.9"
     testImplementation "ch.qos.logback:logback-core:1.2.3"
     testRuntimeOnly "ch.qos.logback:logback-classic:1.2.3"
+    testRuntimeOnly "com.google.guava:guava:31.1-jre"
 }
 
 distributions {
@@ -50,6 +51,11 @@ distributions {
                 from configurations.runtimeClasspath
                 from jar
             }
+
+            // Exclude the jars that are available in the atom or those that are required for testing
+            exclude("bcprov-ext-jdk15on-1.70.jar")
+            exclude("guava-*.jar")
+            exclude("slf4j*.jar")
             into '/'
         }
     }
@@ -74,4 +80,8 @@ licenseReport {
 test {
     useJUnitPlatform()
     systemProperties 'singlenode.configurationFile': project.file('src/test/resources/standalone-config.properties')
+
+    // Adjust heap size for running local pravega emulator during testing
+    minHeapSize = "512m" // initial heap size
+    maxHeapSize = "16384m" // maximum heap size
 }

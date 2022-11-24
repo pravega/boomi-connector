@@ -144,7 +144,6 @@ public class PravegaBrowserTest {
         1. Must have access to an SDP cluster
         2. The expected scope must be created on the cluster
         3. The Pravega endpoint, scope, stream and keyclaok.json file path must be set in a properties file
-        4. Must have a valid Keycloak JWT in your home directory
      */
     @Test
     public void testTestNautilusConnector() throws Exception {
