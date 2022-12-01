@@ -205,8 +205,8 @@ public class PravegaOperationTest {
     }
 
     @Test
-    public void test2MBWriteOperation() {
-        String json = TestUtils.generate2MBmessage();
+    public void test1MBWriteOperation() {
+        String json = TestUtils.generate1MBmessage();
         PravegaConnector connector = new PravegaConnector();
         ConnectorTester tester = new ConnectorTester(connector);
 

@@ -114,8 +114,8 @@ final class TestUtils {
         return "{\"name\":\"foo\",\"message\":\"" + randomMessage + "\"}";
     }
 
-    static String generate2MBmessage() {
-        char[] chars = new char[2000000];
+    static String generate1MBmessage() {
+        char[] chars = new char[1000000];
         Arrays.fill(chars, 'a');
         String randomMessage = new String(chars);
         return "{\"name\":\"foo\",\"message\":\"" + randomMessage + "\"}";
