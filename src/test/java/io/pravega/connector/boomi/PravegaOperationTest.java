@@ -223,7 +223,9 @@ public class PravegaOperationTest {
 
         // send the test message through the connector
         List<SimpleOperationResult> actual = tester.executeCreateOperation(inputs);
-        assertEquals("OK", actual.get(0).getStatusCode());
+        assertEquals("413", actual.get(0).getStatusCode());
+        assertEquals(OperationStatus.APPLICATION_ERROR, actual.get(0).getStatus());
+        logger.log(Level.INFO, String.format(actual.get(0).getStatusCode()));
 
         // read from stream and verify event data
         EventRead<String> event;
@@ -232,8 +234,7 @@ public class PravegaOperationTest {
         } while (event.isCheckpoint());
 
         // validate message data
-        assertNotNull(event.getEvent());
-        assertEquals(json, event.getEvent());
+        assertEquals(null, event.getEvent());
     }
 
     @Test
